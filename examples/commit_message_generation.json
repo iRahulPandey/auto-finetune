@@ -1,0 +1,802 @@
+[
+  {
+    "input": "Removed deprecated login redirect Related to code review comment.",
+    "output": "chore(migrations): remove deprecated login redirect\n\nPart of the accessibility audit."
+  },
+  {
+    "input": "Removed deprecated file upload progress Related to customer feedback.",
+    "output": "chore(deps): remove deprecated file upload progress\n\nResolves issue #4527."
+  },
+  {
+    "input": "Added webhook retry logic to the onboarding wizard The previous implementation was brittle.",
+    "output": "feat(email): add webhook retry logic to onboarding wizard\n\nPart of the accessibility audit."
+  },
+  {
+    "input": "Implemented version history with Prisma ORM This change reduces code duplication significantly.",
+    "output": "feat(settings): implement version history using Prisma ORM\n\nPart of the security hardening sprint."
+  },
+  {
+    "input": "Introduced password reset with OTP for admin users Related to customer feedback.",
+    "output": "feat(chat): add password reset with OTP for admin users\n\nAffects all users."
+  },
+  {
+    "input": "Upgraded Docker from 14.0.0 to 18.2.0 Updated the unit tests accordingly.",
+    "output": "chore(config): upgrade Docker 14.0.0 -> 18.2.0\n\nTested with unit tests."
+  },
+  {
+    "input": "Cleaned up unused imports across the codebase Updated the documentation accordingly.",
+    "output": "chore(scripts): clean up unused imports\n\nPart of the security hardening sprint."
+  },
+  {
+    "input": "Extracted timezone display into a dedicated utility module Related to customer feedback.",
+    "output": "refactor(utils): extract timezone display into utility module\n\nThis improves performance."
+  },
+  {
+    "input": "Reduced bandwidth usage by extracting shared utilities Also fixed a minor lint warning found during the change. Also fixed a minor lint warning found during the change.",
+    "output": "perf(rendering): reduce bandwidth usage\n\nPart of the accessibility audit."
+  },
+  {
+    "input": "Added caching for form validation reducing load time by 60% The previous implementation was hard to maintain. Updated the unit tests accordingly.",
+    "output": "perf(queries): add caching for form validation\n\nPart of the security hardening sprint."
+  },
+  {
+    "input": "Removed deprecated currency formatting Also fixed a minor type error found during the change.",
+    "output": "chore(config): remove deprecated currency formatting\n\nAffects API consumers."
+  },
+  {
+    "input": "Refactored onboarding wizard to use decorator pattern Related to support ticket. Updated the integration tests accordingly.",
+    "output": "refactor(middleware): migrate onboarding wizard to decorator pattern\n\nTested with unit tests."
+  },
+  {
+    "input": "Added E2E tests for OAuth login flow using pytest Verified with load tests. Updated the documentation accordingly.",
+    "output": "test(utils): add E2E tests for OAuth login flow\n\nResolves issue #6709."
+  },
+  {
+    "input": "Implemented role-based access control with Redis pub/sub Updated the unit tests accordingly. This change reduces code duplication significantly.",
+    "output": "feat(dashboard): implement role-based access control using Redis pub/sub\n\nPart of the performance initiative."
+  },
+  {
+    "input": "Reorganized settings page for reduced coupling Updated the unit tests accordingly. The previous implementation was causing flaky tests.",
+    "output": "refactor(logging): reorganize settings page for reduced coupling\n\nThis improves maintainability."
+  },
+  {
+    "input": "Created new dashboard that manages user sessions Verified with staging deployment. Also fixed a minor typo found during the change.",
+    "output": "feat(payments): add dashboard for automated testing\n\nPart of the accessibility audit."
+  },
+  {
+    "input": "Removed deprecated file upload progress Updated the unit tests accordingly.",
+    "output": "chore(migrations): remove deprecated file upload progress\n\nTested with E2E tests."
+  },
+  {
+    "input": "Increased test coverage for payments from 28% to 88% Also fixed a minor typo found during the change. This change reduces error rate significantly.",
+    "output": "test(services): improve payments test coverage 28% -> 88%\n\nThis improves user experience."
+  },
+  {
+    "input": "Reduced database connections usage by using composition Verified with local testing.",
+    "output": "perf(api): reduce database connections usage\n\nThis improves maintainability."
+  },
+  {
+    "input": "Added documentation for undo/redo support Related to monitoring alert. This change reduces code duplication significantly.",
+    "output": "docs(api): document undo/redo support\n\nResolves issue #3064."
+  },
+  {
+    "input": "Configured Docker multi-stage builds with caching Also fixed a minor lint warning found during the change. This change reduces complexity significantly.",
+    "output": "ci(build): configure Docker multi-stage builds\n\nPart of the performance initiative."
+  },
+  {
+    "input": "Cleaned up console.log statements across the codebase Related to customer feedback. Related to customer feedback.",
+    "output": "chore(deps): clean up console.log statements\n\nAffects enterprise accounts."
+  },
+  {
+    "input": "Resolved race condition causing data loss Verified with local testing. Related to customer feedback.",
+    "output": "fix(auth): fix race condition that caused data loss\n\nResolves issue #3754."
+  },
+  {
+    "input": "Refactored user profile to use dependency injection Also fixed a minor typo found during the change. Updated the documentation accordingly.",
+    "output": "refactor(errors): migrate user profile to dependency injection\n\nAffects admin users."
+  },
+  {
+    "input": "Reorganized admin panel for improved readability Related to support ticket.",
+    "output": "refactor(services): reorganize admin panel for improved readability\n\nResolves issue #3526."
+  },
+  {
+    "input": "Added caching for PDF generation reducing load time by 75% Related to support ticket. Verified with canary release.",
+    "output": "perf(queries): add caching for PDF generation\n\nPart of the security hardening sprint."
+  },
+  {
+    "input": "Rewrote README to reflect Docker Compose setup The previous implementation was not scalable. Related to support ticket.",
+    "output": "docs(contributing): rewrite README for Docker Compose setup\n\nTested with integration tests."
+  },
+  {
+    "input": "Rewrote README to reflect troubleshooting section Related to customer feedback.",
+    "output": "docs(setup): rewrite README for troubleshooting section\n\nTested with E2E tests."
+  },
+  {
+    "input": "Removed deprecated form validation Verified with staging deployment.",
+    "output": "chore(deps): remove deprecated form validation\n\nPart of the security hardening sprint."
+  },
+  {
+    "input": "Added documentation for role-based access control Verified with load tests.",
+    "output": "docs(contributing): document role-based access control\n\nThis improves security."
+  },
+  {
+    "input": "Configured Docker multi-stage builds with caching Related to customer feedback.",
+    "output": "ci(build): configure Docker multi-stage builds\n\nTested with E2E tests."
+  },
+  {
+    "input": "Reduced disk I/O usage by extracting shared utilities Also fixed a minor lint warning found during the change. Also fixed a minor lint warning found during the change.",
+    "output": "perf(cache): reduce disk I/O usage\n\nAffects mobile users."
+  },
+  {
+    "input": "Added documentation for commenting system Related to monitoring alert. This change reduces load time significantly.",
+    "output": "docs(deployment): document commenting system\n\nResolves issue #2143."
+  },
+  {
+    "input": "Configured Docker multi-stage builds with caching Updated the documentation accordingly. This change reduces complexity significantly.",
+    "output": "ci(lint): configure Docker multi-stage builds\n\nThis improves performance."
+  },
+  {
+    "input": "Rewrote contributing guide to reflect environment variables Also fixed a minor lint warning found during the change.",
+    "output": "docs(deployment): rewrite contributing guide for environment variables\n\nAffects all users."
+  },
+  {
+    "input": "Simplified user profile by extracting shared utilities The previous implementation was causing flaky tests.",
+    "output": "refactor(config): simplify user profile by extracting shared utilities\n\nAffects enterprise accounts."
+  },
+  {
+    "input": "Reduced database connections usage by extracting shared utilities Related to code review comment. This change reduces code duplication significantly.",
+    "output": "perf(search): reduce database connections usage\n\nResolves issue #8946."
+  },
+  {
+    "input": "Extracted notification count into a dedicated service class The previous implementation was causing flaky tests.",
+    "output": "refactor(routes): extract notification count into service class\n\nPart of the Q1 roadmap."
+  },
+  {
+    "input": "Reduced disk I/O usage by removing dead code Related to customer feedback. Verified with local testing.",
+    "output": "perf(db): reduce disk I/O usage\n\nPart of the performance initiative."
+  },
+  {
+    "input": "Added documentation for bulk import Updated the integration tests accordingly.",
+    "output": "docs(readme): document bulk import\n\nPart of the accessibility audit."
+  },
+  {
+    "input": "Built data visualization charts supporting pagination The previous implementation was causing flaky tests. This change reduces load time significantly.",
+    "output": "feat(billing): add data visualization charts with pagination support\n\nAffects enterprise accounts."
+  },
+  {
+    "input": "Extracted date picker into a dedicated context provider Related to customer feedback. Related to customer feedback.",
+    "output": "refactor(services): extract date picker into context provider\n\nPart of the accessibility audit."
+  },
+  {
+    "input": "Added E2E tests for OAuth login flow using Mocha Updated the documentation accordingly.",
+    "output": "test(auth): add E2E tests for OAuth login flow\n\nAffects enterprise accounts."
+  },
+  {
+    "input": "Fixed a bug where currency formatting was failing silently when the refresh token was expired Related to customer feedback.",
+    "output": "fix(validation): resolve currency formatting failing silently\n\nTested with unit tests."
+  },
+  {
+    "input": "Reduced memory usage by removing dead code Updated the unit tests accordingly.",
+    "output": "perf(api): reduce memory usage\n\nThis improves user experience."
+  },
+  {
+    "input": "Optimized shopping cart total that was taking 8 seconds to load Verified with local testing. Updated the documentation accordingly.",
+    "output": "perf(cache): optimize shopping cart total\n\nPart of the security hardening sprint."
+  },
+  {
+    "input": "Replaced hardcoded config with Redux Toolkit in checkout flow This change reduces code duplication significantly. Updated the documentation accordingly.",
+    "output": "refactor(types): replace hardcoded config with Redux Toolkit\n\nResolves issue #4456."
+  },
+  {
+    "input": "Set up Docker multi-stage builds for deployment Also fixed a minor typo found during the change.",
+    "output": "ci(build): add Docker multi-stage builds for deployment\n\nTested with integration tests."
+  },
+  {
+    "input": "Added file upload with drag-and-drop to the dashboard The previous implementation was hard to maintain.",
+    "output": "feat(webhooks): add file upload with drag-and-drop to dashboard\n\nAffects all users."
+  },
+  {
+    "input": "Resolved memory leak causing slow page loads Related to monitoring alert.",
+    "output": "fix(db): fix memory leak that caused slow page loads\n\nResolves issue #9199."
+  },
+  {
+    "input": "Replaced string concatenation for HTML with Axios interceptors in file manager This change reduces complexity significantly.",
+    "output": "refactor(errors): replace string concatenation for HTML with Axios interceptors\n\nThis improves reliability."
+  },
+  {
+    "input": "Added lint check to the CI pipeline Updated the unit tests accordingly. Also fixed a minor type error found during the change.",
+    "output": "ci(build): add lint check to CI\n\nResolves issue #9356."
+  },
+  {
+    "input": "Set up Terraform for security scanning Related to support ticket.",
+    "output": "ci(deploy): add Terraform for security scanning\n\nTested with integration tests."
+  },
+  {
+    "input": "Simplified error handling middleware by consolidating duplicate logic This change reduces load time significantly. Verified with canary release.",
+    "output": "refactor(db): simplify error handling middleware by consolidating duplicate logic\n\nThis improves user experience."
+  },
+  {
+    "input": "Set up GitHub Actions for linting The previous implementation was brittle.",
+    "output": "ci(lint): add GitHub Actions for linting\n\nTested with unit tests."
+  },
+  {
+    "input": "Created new billing page that manages user sessions Verified with load tests.",
+    "output": "feat(chat): add billing page for automated testing\n\nTested with E2E tests."
+  },
+  {
+    "input": "Built commenting system supporting sorting The previous implementation was hard to maintain. Verified with load tests.",
+    "output": "feat(webhooks): add commenting system with sorting support\n\nAffects admin users."
+  },
+  {
+    "input": "Added caching for currency formatting reducing load time by 50% This change reduces complexity significantly. The previous implementation was not scalable.",
+    "output": "perf(db): add caching for currency formatting\n\nThis improves security."
+  },
+  {
+    "input": "Set up CodeQL scanning for automated testing Related to support ticket.",
+    "output": "ci(docker): add CodeQL scanning for automated testing\n\nPart of the Q1 roadmap."
+  },
+  {
+    "input": "Reduced memory usage by removing dead code Related to code review comment.",
+    "output": "perf(rendering): reduce memory usage\n\nAffects enterprise accounts."
+  },
+  {
+    "input": "Updated changelog with security policies The previous implementation was hard to maintain. Also fixed a minor lint warning found during the change.",
+    "output": "docs(setup): update changelog with security policies\n\nThis improves security."
+  },
+  {
+    "input": "Corrected session expiry that showing $0.00 when items had fractional quantities This change reduces code duplication significantly.",
+    "output": "fix(upload): correct session expiry showing $0.00\n\nResolves issue #4960."
+  },
+  {
+    "input": "Set up semantic-release for linting Also fixed a minor lint warning found during the change. The previous implementation was causing flaky tests.",
+    "output": "ci(build): add semantic-release for linting\n\nPart of the Q1 roadmap."
+  },
+  {
+    "input": "Cleaned up dead code across the codebase Also fixed a minor type error found during the change.",
+    "output": "chore(cleanup): clean up dead code\n\nResolves issue #2255."
+  },
+  {
+    "input": "Removed deprecated currency formatting Updated the documentation accordingly.",
+    "output": "chore(config): remove deprecated currency formatting\n\nPart of the tech debt reduction."
+  },
+  {
+    "input": "Set up semantic-release for deployment Also fixed a minor typo found during the change. Verified with load tests.",
+    "output": "ci(lint): add semantic-release for deployment\n\nPart of the performance initiative."
+  },
+  {
+    "input": "Resolved race condition causing intermittent 500 errors Also fixed a minor type error found during the change. Verified with load tests.",
+    "output": "fix(queue): fix race condition that caused intermittent 500 errors\n\nResolves issue #4288."
+  },
+  {
+    "input": "Reorganized file manager for clearer separation of concerns The previous implementation was hard to maintain.",
+    "output": "refactor(config): reorganize file manager for clearer separation of concerns\n\nTested with E2E tests."
+  },
+  {
+    "input": "Upgraded Express from 4.2.1 to 5.0.0 Related to monitoring alert. Related to monitoring alert.",
+    "output": "chore(cleanup): upgrade Express 4.2.1 -> 5.0.0\n\nResolves issue #465."
+  },
+  {
+    "input": "Fixed a bug where PDF generation was showing $0.00 when items had fractional quantities Also fixed a minor typo found during the change.",
+    "output": "fix(db): resolve PDF generation showing $0.00\n\nThis improves user experience."
+  },
+  {
+    "input": "Added caching for email template rendering reducing load time by 75% Also fixed a minor typo found during the change. This change reduces load time significantly.",
+    "output": "perf(api): add caching for email template rendering\n\nResolves issue #3026."
+  },
+  {
+    "input": "Rewrote changelog to reflect Docker Compose setup Also fixed a minor type error found during the change.",
+    "output": "docs(api): rewrite changelog for Docker Compose setup\n\nAffects enterprise accounts."
+  },
+  {
+    "input": "Created new file manager that handles file uploads Updated the unit tests accordingly.",
+    "output": "feat(mobile): add file manager for deployment\n\nTested with manual QA."
+  },
+  {
+    "input": "Updated migration guide with security policies The previous implementation was hard to maintain.",
+    "output": "docs(setup): update migration guide with security policies\n\nResolves issue #4560."
+  },
+  {
+    "input": "Extracted email template rendering into a dedicated hook Verified with load tests. Also fixed a minor type error found during the change.",
+    "output": "refactor(config): extract email template rendering into hook\n\nTested with integration tests."
+  },
+  {
+    "input": "Configured Terraform with parallel jobs Also fixed a minor lint warning found during the change. Related to monitoring alert.",
+    "output": "ci(github-actions): configure Terraform\n\nThis improves performance."
+  },
+  {
+    "input": "Reorganized settings page for clearer separation of concerns The previous implementation was brittle. Updated the unit tests accordingly.",
+    "output": "refactor(db): reorganize settings page for clearer separation of concerns\n\nAffects enterprise accounts."
+  },
+  {
+    "input": "Introduced collaborative editing for free-tier users Updated the integration tests accordingly.",
+    "output": "feat(auth): add collaborative editing for free-tier users\n\nTested with E2E tests."
+  },
+  {
+    "input": "Created new API documentation portal that manages user sessions Also fixed a minor typo found during the change.",
+    "output": "feat(onboarding): add API documentation portal for linting\n\nPart of the performance initiative."
+  },
+  {
+    "input": "Patched CSRF bypass in user profile Updated the integration tests accordingly.",
+    "output": "fix(upload): patch CSRF bypass in user profile\n\nAffects all users."
+  },
+  {
+    "input": "Removed deprecated image cropping Updated the unit tests accordingly. Related to customer feedback.",
+    "output": "chore(migrations): remove deprecated image cropping\n\nTested with E2E tests."
+  },
+  {
+    "input": "Optimized session expiry that was taking 12 seconds to load The previous implementation was not scalable.",
+    "output": "perf(cache): optimize session expiry\n\nThis improves maintainability."
+  },
+  {
+    "input": "Added caching for PDF generation reducing load time by 90% Updated the documentation accordingly.",
+    "output": "perf(rendering): add caching for PDF generation\n\nResolves issue #3361."
+  },
+  {
+    "input": "Set up semantic-release for automated testing Verified with load tests.",
+    "output": "ci(lint): add semantic-release for automated testing\n\nAffects API consumers."
+  },
+  {
+    "input": "Implemented approval workflow with Server-Sent Events Related to monitoring alert. Updated the unit tests accordingly.",
+    "output": "feat(notifications): implement approval workflow using Server-Sent Events\n\nAffects all users."
+  },
+  {
+    "input": "Corrected file upload progress that showing UTC instead of user's local timezone Related to customer feedback. This change reduces complexity significantly.",
+    "output": "fix(db): correct file upload progress showing UTC instead of user's local time\n\nThis improves maintainability."
+  },
+  {
+    "input": "Extracted file upload progress into a dedicated service class Also fixed a minor type error found during the change.",
+    "output": "refactor(errors): extract file upload progress into service class\n\nThis improves reliability."
+  },
+  {
+    "input": "Introduced bulk import for mobile users Related to support ticket.",
+    "output": "feat(search): add bulk import for mobile users\n\nAffects admin users."
+  },
+  {
+    "input": "Cleaned up legacy comments across all modules Also fixed a minor typo found during the change.",
+    "output": "chore(deps): clean up legacy comments\n\nPart of the Q1 roadmap."
+  },
+  {
+    "input": "Added integration tests for data export workflow Related to support ticket.",
+    "output": "test(auth): add integration tests for data export workflow\n\nTested with manual QA."
+  },
+  {
+    "input": "Cleaned up unused imports across 15 files Related to customer feedback.",
+    "output": "chore(config): clean up unused imports\n\nResolves issue #962."
+  },
+  {
+    "input": "Reduced bandwidth usage by consolidating duplicate logic Related to code review comment. The previous implementation was not scalable.",
+    "output": "perf(search): reduce bandwidth usage\n\nTested with unit tests."
+  },
+  {
+    "input": "Extracted session expiry into a dedicated utility module Verified with local testing.",
+    "output": "refactor(db): extract session expiry into utility module\n\nAffects all users."
+  },
+  {
+    "input": "Reorganized billing page for reduced coupling Also fixed a minor type error found during the change. The previous implementation was brittle.",
+    "output": "refactor(config): reorganize billing page for reduced coupling\n\nTested with integration tests."
+  },
+  {
+    "input": "Built password reset with OTP supporting sorting Also fixed a minor lint warning found during the change.",
+    "output": "feat(admin): add password reset with OTP with sorting support\n\nAffects admin users."
+  },
+  {
+    "input": "Added build verification to the CI pipeline Related to code review comment. Updated the documentation accordingly.",
+    "output": "ci(deploy): add build verification to CI\n\nThis improves reliability."
+  },
+  {
+    "input": "Added E2E tests for file upload pipeline using Vitest Related to customer feedback.",
+    "output": "test(services): add E2E tests for file upload pipeline\n\nResolves issue #1400."
+  },
+  {
+    "input": "Cleaned up unused imports across test files Updated the unit tests accordingly. The previous implementation was not scalable.",
+    "output": "chore(migrations): clean up unused imports\n\nAffects all users."
+  },
+  {
+    "input": "Introduced custom report builder for admin users Also fixed a minor typo found during the change. Related to support ticket.",
+    "output": "feat(mobile): add custom report builder for admin users\n\nTested with manual QA."
+  },
+  {
+    "input": "Increased test coverage for orders from 32% to 95% Verified with canary release.",
+    "output": "test(services): improve orders test coverage 32% -> 95%\n\nResolves issue #6464."
+  },
+  {
+    "input": "Corrected form validation that dropping decimal places for Japanese Yen amounts This change reduces complexity significantly.",
+    "output": "fix(export): correct form validation dropping decimal places for Japanese Yen\n\nThis improves reliability."
+  },
+  {
+    "input": "Cleaned up legacy comments across the codebase Updated the integration tests accordingly.",
+    "output": "chore(config): clean up legacy comments\n\nPart of the accessibility audit."
+  },
+  {
+    "input": "Set up CodeQL scanning for deployment Updated the integration tests accordingly. Updated the integration tests accordingly.",
+    "output": "ci(github-actions): add CodeQL scanning for deployment\n\nAffects enterprise accounts."
+  },
+  {
+    "input": "Fixed race condition in notification center where two workers pick up the same job Verified with local testing. The previous implementation was hard to maintain.",
+    "output": "fix(cache): resolve race condition in notification center\n\nTested with E2E tests."
+  },
+  {
+    "input": "Added E2E tests for payment processing using Cypress Verified with staging deployment. This change reduces load time significantly.",
+    "output": "test(api): add E2E tests for payment processing\n\nThis improves user experience."
+  },
+  {
+    "input": "Fixed race condition in settings page where two workers pick up the same job Related to monitoring alert.",
+    "output": "fix(ui): resolve race condition in settings page\n\nResolves issue #218."
+  },
+  {
+    "input": "Removed deprecated file upload progress Updated the integration tests accordingly. Also fixed a minor type error found during the change.",
+    "output": "chore(cleanup): remove deprecated file upload progress\n\nThis improves reliability."
+  },
+  {
+    "input": "Added integration tests for file upload pipeline Also fixed a minor type error found during the change.",
+    "output": "test(models): add integration tests for file upload pipeline\n\nResolves issue #6664."
+  },
+  {
+    "input": "Created new onboarding wizard that handles file uploads This change reduces error rate significantly.",
+    "output": "feat(chat): add onboarding wizard for automated testing\n\nTested with unit tests."
+  },
+  {
+    "input": "Upgraded TypeScript from 7.4.1 to 5.0.0 Related to support ticket. This change reduces code duplication significantly.",
+    "output": "chore(deps): upgrade TypeScript 7.4.1 -> 5.0.0\n\nPart of the Q1 roadmap."
+  },
+  {
+    "input": "Rewrote setup instructions to reflect testing instructions Also fixed a minor lint warning found during the change.",
+    "output": "docs(api): rewrite setup instructions for testing instructions\n\nPart of the accessibility audit."
+  },
+  {
+    "input": "Simplified notification center by consolidating duplicate logic Updated the documentation accordingly.",
+    "output": "refactor(api): simplify notification center by consolidating duplicate logic\n\nAffects all users."
+  },
+  {
+    "input": "Rewrote changelog to reflect testing instructions Also fixed a minor typo found during the change. Verified with staging deployment.",
+    "output": "docs(api): rewrite changelog for testing instructions\n\nThis improves user experience."
+  },
+  {
+    "input": "Refactored onboarding wizard to use strategy pattern This change reduces complexity significantly.",
+    "output": "refactor(config): migrate onboarding wizard to strategy pattern\n\nThis improves user experience."
+  },
+  {
+    "input": "Added documentation for scheduled exports Verified with staging deployment.",
+    "output": "docs(deployment): document scheduled exports\n\nPart of the accessibility audit."
+  },
+  {
+    "input": "Updated deployment guide with testing instructions Related to monitoring alert.",
+    "output": "docs(deployment): update deployment guide with testing instructions\n\nAffects all users."
+  },
+  {
+    "input": "Configured CodeQL scanning with strict mode The previous implementation was causing flaky tests. This change reduces load time significantly.",
+    "output": "ci(github-actions): configure CodeQL scanning\n\nAffects mobile users."
+  },
+  {
+    "input": "Reorganized dashboard for clearer separation of concerns Updated the documentation accordingly.",
+    "output": "refactor(auth): reorganize dashboard for clearer separation of concerns\n\nResolves issue #7626."
+  },
+  {
+    "input": "Added type check to the CI pipeline This change reduces load time significantly. Also fixed a minor lint warning found during the change.",
+    "output": "ci(build): add type check to CI\n\nAffects all users."
+  },
+  {
+    "input": "Reorganized API documentation portal for better testability This change reduces code duplication significantly.",
+    "output": "refactor(logging): reorganize API documentation portal for better testability\n\nTested with unit tests."
+  },
+  {
+    "input": "Removed deprecated session expiry This change reduces code duplication significantly.",
+    "output": "chore(config): remove deprecated session expiry\n\nPart of the Q1 roadmap."
+  },
+  {
+    "input": "Extracted PDF generation into a dedicated utility module Related to monitoring alert.",
+    "output": "refactor(api): extract PDF generation into utility module\n\nThis improves user experience."
+  },
+  {
+    "input": "Set up Docker multi-stage builds for security scanning The previous implementation was not scalable. Also fixed a minor lint warning found during the change.",
+    "output": "ci(lint): add Docker multi-stage builds for security scanning\n\nTested with manual QA."
+  },
+  {
+    "input": "Upgraded ESLint from 8.5.0 to 5.0.0 Updated the unit tests accordingly. Updated the unit tests accordingly.",
+    "output": "chore(config): upgrade ESLint 8.5.0 -> 5.0.0\n\nThis improves reliability."
+  },
+  {
+    "input": "Reduced memory usage by consolidating duplicate logic The previous implementation was causing flaky tests.",
+    "output": "perf(queries): reduce memory usage\n\nAffects API consumers."
+  },
+  {
+    "input": "Set up Terraform for security scanning Related to customer feedback.",
+    "output": "ci(lint): add Terraform for security scanning\n\nThis improves security."
+  },
+  {
+    "input": "Added security scan to the CI pipeline The previous implementation was hard to maintain.",
+    "output": "ci(lint): add security scan to CI\n\nTested with manual QA."
+  },
+  {
+    "input": "Increased test coverage for search from 45% to 88% Verified with load tests. Related to monitoring alert.",
+    "output": "test(e2e): improve search test coverage 45% -> 88%\n\nAffects API consumers."
+  },
+  {
+    "input": "Fixed race condition in report generator where concurrent writes corrupt the cache Also fixed a minor typo found during the change. The previous implementation was not scalable.",
+    "output": "fix(ui): resolve race condition in report generator\n\nTested with unit tests."
+  },
+  {
+    "input": "Set up Docker multi-stage builds for deployment Verified with staging deployment. This change reduces error rate significantly.",
+    "output": "ci(deploy): add Docker multi-stage builds for deployment\n\nTested with manual QA."
+  },
+  {
+    "input": "Refactored checkout flow to use factory pattern This change reduces error rate significantly.",
+    "output": "refactor(services): migrate checkout flow to factory pattern\n\nTested with manual QA."
+  },
+  {
+    "input": "Reduced disk I/O usage by using composition Updated the unit tests accordingly. Updated the unit tests accordingly.",
+    "output": "perf(cache): reduce disk I/O usage\n\nResolves issue #4354."
+  },
+  {
+    "input": "Rewrote README to reflect testing instructions This change reduces code duplication significantly.",
+    "output": "docs(contributing): rewrite README for testing instructions\n\nPart of the security hardening sprint."
+  },
+  {
+    "input": "Resolved race condition causing UI freeze Also fixed a minor typo found during the change.",
+    "output": "fix(queue): fix race condition that caused UI freeze\n\nPart of the performance initiative."
+  },
+  {
+    "input": "Refactored user management to use middleware chain Verified with staging deployment.",
+    "output": "refactor(utils): migrate user management to middleware chain\n\nResolves issue #9417."
+  },
+  {
+    "input": "Added integration tests for search and filtering Also fixed a minor typo found during the change. This change reduces complexity significantly.",
+    "output": "test(models): add integration tests for search and filtering\n\nTested with manual QA."
+  },
+  {
+    "input": "Reduced CPU usage by consolidating duplicate logic Verified with canary release.",
+    "output": "perf(api): reduce CPU usage\n\nThis improves security."
+  },
+  {
+    "input": "Simplified search results page by extracting shared utilities Also fixed a minor typo found during the change.",
+    "output": "refactor(errors): simplify search results page by extracting shared utilities\n\nPart of the Q1 roadmap."
+  },
+  {
+    "input": "Made changes to the admin panel involving password reset with OTP The previous implementation was hard to maintain.",
+    "output": "test(e2e): add admin panel unit tests\n\nTested with unit tests."
+  },
+  {
+    "input": "Implemented pagination with cursor with tRPC Related to customer feedback.",
+    "output": "feat(onboarding): implement pagination with cursor using tRPC\n\nResolves issue #5347."
+  },
+  {
+    "input": "Added E2E tests for OAuth login flow using Playwright Updated the documentation accordingly. Related to support ticket.",
+    "output": "test(e2e): add E2E tests for OAuth login flow\n\nAffects mobile users."
+  },
+  {
+    "input": "Simplified file manager by consolidating duplicate logic Verified with local testing.",
+    "output": "refactor(types): simplify file manager by consolidating duplicate logic\n\nThis improves user experience."
+  },
+  {
+    "input": "Created new user profile that supports real-time updates Updated the documentation accordingly. Also fixed a minor lint warning found during the change.",
+    "output": "feat(import): add user profile for automated testing\n\nPart of the tech debt reduction."
+  },
+  {
+    "input": "Set up CodeQL scanning for automated testing The previous implementation was hard to maintain.",
+    "output": "ci(deploy): add CodeQL scanning for automated testing\n\nResolves issue #7070."
+  },
+  {
+    "input": "Created new dashboard that manages user sessions Updated the unit tests accordingly. This change reduces error rate significantly.",
+    "output": "feat(billing): add dashboard for linting\n\nAffects admin users."
+  },
+  {
+    "input": "Removed deprecated file upload progress The previous implementation was hard to maintain.",
+    "output": "chore(config): remove deprecated file upload progress\n\nPart of the performance initiative."
+  },
+  {
+    "input": "Added E2E tests for admin user management using Playwright Verified with canary release.",
+    "output": "test(auth): add E2E tests for admin user management\n\nTested with E2E tests."
+  },
+  {
+    "input": "Refactored file manager to use observer pattern The previous implementation was not scalable.",
+    "output": "refactor(services): migrate file manager to observer pattern\n\nThis improves maintainability."
+  },
+  {
+    "input": "Added type check to the CI pipeline This change reduces complexity significantly.",
+    "output": "ci(docker): add type check to CI\n\nThis improves reliability."
+  },
+  {
+    "input": "Introduced offline mode support for mobile users The previous implementation was causing flaky tests.",
+    "output": "feat(ui): add offline mode support for mobile users\n\nThis improves user experience."
+  },
+  {
+    "input": "Built file upload with drag-and-drop supporting real-time sync Verified with canary release. Verified with canary release.",
+    "output": "feat(onboarding): add file upload with drag-and-drop with real-time sync support\n\nAffects all users."
+  },
+  {
+    "input": "Upgraded Next.js from 4.6.0 to 24.0 Verified with canary release.",
+    "output": "chore(cleanup): upgrade Next.js 4.6.0 -> 24.0\n\nThis improves security."
+  },
+  {
+    "input": "Added E2E tests for file upload pipeline using Jest Updated the integration tests accordingly.",
+    "output": "test(api): add E2E tests for file upload pipeline\n\nTested with manual QA."
+  },
+  {
+    "input": "Configured Docker multi-stage builds with strict mode Verified with staging deployment.",
+    "output": "ci(docker): configure Docker multi-stage builds\n\nPart of the Q1 roadmap."
+  },
+  {
+    "input": "Cleaned up legacy comments across test files Verified with canary release.",
+    "output": "chore(cleanup): clean up legacy comments\n\nPart of the security hardening sprint."
+  },
+  {
+    "input": "Introduced audit logging for free-tier users Verified with staging deployment.",
+    "output": "feat(auth): add audit logging for free-tier users\n\nTested with integration tests."
+  },
+  {
+    "input": "Cleaned up console.log statements across 15 files Updated the documentation accordingly. Related to monitoring alert.",
+    "output": "chore(deps): clean up console.log statements\n\nTested with E2E tests."
+  },
+  {
+    "input": "Extracted timezone display into a dedicated hook Related to support ticket. Verified with load tests.",
+    "output": "refactor(api): extract timezone display into hook\n\nThis improves performance."
+  },
+  {
+    "input": "Implemented approval workflow with Prisma ORM The previous implementation was brittle. Verified with local testing.",
+    "output": "feat(auth): implement approval workflow using Prisma ORM\n\nAffects enterprise accounts."
+  },
+  {
+    "input": "Created new dashboard that supports real-time updates The previous implementation was causing flaky tests.",
+    "output": "feat(onboarding): add dashboard for deployment\n\nTested with unit tests."
+  },
+  {
+    "input": "Configured Terraform with auto-fix rules Related to code review comment.",
+    "output": "ci(build): configure Terraform\n\nAffects enterprise accounts."
+  },
+  {
+    "input": "Fixed a bug where date picker was returning duplicate results for paginated queries Also fixed a minor type error found during the change. Also fixed a minor type error found during the change.",
+    "output": "fix(search): resolve date picker returning duplicate results for paginate\n\nAffects admin users."
+  },
+  {
+    "input": "Added E2E tests for data export workflow using Vitest The previous implementation was causing flaky tests. Also fixed a minor type error found during the change.",
+    "output": "test(e2e): add E2E tests for data export workflow\n\nPart of the performance initiative."
+  },
+  {
+    "input": "Cleaned up legacy comments across 15 files Updated the unit tests accordingly.",
+    "output": "chore(cleanup): clean up legacy comments\n\nResolves issue #5863."
+  },
+  {
+    "input": "Upgraded Next.js from 4.6.0 to 24.0 Related to customer feedback. Also fixed a minor typo found during the change.",
+    "output": "chore(config): upgrade Next.js 4.6.0 -> 24.0\n\nTested with E2E tests."
+  },
+  {
+    "input": "Rewrote changelog to reflect security policies This change reduces load time significantly.",
+    "output": "docs(contributing): rewrite changelog for security policies\n\nPart of the tech debt reduction."
+  },
+  {
+    "input": "Resolved memory leak causing slow page loads Also fixed a minor typo found during the change.",
+    "output": "fix(queue): fix memory leak that caused slow page loads\n\nAffects API consumers."
+  },
+  {
+    "input": "Refactored search results page to use observer pattern Updated the integration tests accordingly. Verified with load tests.",
+    "output": "refactor(tests): migrate search results page to observer pattern\n\nTested with manual QA."
+  },
+  {
+    "input": "Reduced bandwidth usage by using composition The previous implementation was not scalable.",
+    "output": "perf(db): reduce bandwidth usage\n\nResolves issue #4044."
+  },
+  {
+    "input": "Added documentation for audit logging Updated the documentation accordingly.",
+    "output": "docs(setup): document audit logging\n\nThis improves user experience."
+  },
+  {
+    "input": "Added caching for search results reducing load time by 50% Also fixed a minor typo found during the change.",
+    "output": "perf(search): add caching for search results\n\nThis improves user experience."
+  },
+  {
+    "input": "Replaced string concatenation for HTML with streaming API in notification center Updated the documentation accordingly. This change reduces code duplication significantly.",
+    "output": "refactor(utils): replace string concatenation for HTML with streaming API\n\nTested with integration tests."
+  },
+  {
+    "input": "Upgraded PostgreSQL driver from 8.34.0 to 5.7.0 This change reduces code duplication significantly. This change reduces code duplication significantly.",
+    "output": "chore(deps): upgrade PostgreSQL driver 8.34.0 -> 5.7.0\n\nPart of the performance initiative."
+  },
+  {
+    "input": "Optimized token refresh that was taking 12 seconds to load Verified with local testing. Related to customer feedback.",
+    "output": "perf(cache): optimize token refresh\n\nTested with unit tests."
+  },
+  {
+    "input": "Updated README with environment variables Related to code review comment.",
+    "output": "docs(contributing): update README with environment variables\n\nPart of the accessibility audit."
+  },
+  {
+    "input": "Set up semantic-release for linting The previous implementation was brittle. Also fixed a minor typo found during the change.",
+    "output": "ci(deploy): add semantic-release for linting\n\nPart of the accessibility audit."
+  },
+  {
+    "input": "Resolved null pointer causing data loss This change reduces complexity significantly.",
+    "output": "fix(cors): fix null pointer that caused data loss\n\nPart of the Q1 roadmap."
+  },
+  {
+    "input": "Added integration tests for admin user management Related to code review comment. Verified with canary release.",
+    "output": "test(validation): add integration tests for admin user management\n\nResolves issue #5713."
+  },
+  {
+    "input": "Rewrote changelog to reflect security policies The previous implementation was not scalable. Also fixed a minor type error found during the change.",
+    "output": "docs(setup): rewrite changelog for security policies\n\nPart of the accessibility audit."
+  },
+  {
+    "input": "Fixed race condition in user profile where concurrent writes corrupt the cache The previous implementation was brittle.",
+    "output": "fix(queue): resolve race condition in user profile\n\nResolves issue #3640."
+  },
+  {
+    "input": "Reorganized error handling middleware for reduced coupling Updated the documentation accordingly.",
+    "output": "refactor(errors): reorganize error handling middleware for reduced coupling\n\nPart of the security hardening sprint."
+  },
+  {
+    "input": "Created new file manager that supports real-time updates The previous implementation was not scalable.",
+    "output": "feat(notifications): add file manager for linting\n\nPart of the security hardening sprint."
+  },
+  {
+    "input": "Reorganized checkout flow for better testability Updated the integration tests accordingly. Verified with canary release.",
+    "output": "refactor(logging): reorganize checkout flow for better testability\n\nPart of the Q1 roadmap."
+  },
+  {
+    "input": "Introduced real-time notifications for enterprise users This change reduces error rate significantly. Verified with staging deployment.",
+    "output": "feat(mobile): add real-time notifications for enterprise users\n\nAffects mobile users."
+  },
+  {
+    "input": "Updated setup instructions with environment variables Also fixed a minor type error found during the change. Updated the unit tests accordingly.",
+    "output": "docs(setup): update setup instructions with environment variables\n\nPart of the tech debt reduction."
+  },
+  {
+    "input": "Made changes to the API documentation portal involving activity feed The previous implementation was causing flaky tests.",
+    "output": "test(integration): add API documentation portal unit tests\n\nTested with manual QA."
+  },
+  {
+    "input": "Added E2E tests for admin user management using Mocha Related to monitoring alert.",
+    "output": "test(services): add E2E tests for admin user management\n\nThis improves performance."
+  },
+  {
+    "input": "Removed deprecated image cropping Verified with canary release.",
+    "output": "chore(scripts): remove deprecated image cropping\n\nAffects API consumers."
+  },
+  {
+    "input": "Extracted session expiry into a dedicated hook This change reduces error rate significantly.",
+    "output": "refactor(models): extract session expiry into hook\n\nThis improves user experience."
+  },
+  {
+    "input": "Implemented batch operations with WebSockets Updated the integration tests accordingly. This change reduces error rate significantly.",
+    "output": "feat(dashboard): implement batch operations using WebSockets\n\nResolves issue #9462."
+  },
+  {
+    "input": "Increased test coverage for users from 51% to 95% Also fixed a minor typo found during the change.",
+    "output": "test(payments): improve users test coverage 51% -> 95%\n\nAffects API consumers."
+  },
+  {
+    "input": "Implemented keyboard shortcuts with Socket.IO Also fixed a minor lint warning found during the change.",
+    "output": "feat(onboarding): implement keyboard shortcuts using Socket.IO\n\nAffects API consumers."
+  },
+  {
+    "input": "Cleaned up dead code across the codebase Related to support ticket.",
+    "output": "chore(deps): clean up dead code\n\nResolves issue #9706."
+  },
+  {
+    "input": "Implemented webhook retry logic with React Hook Form This change reduces complexity significantly.",
+    "output": "feat(email): implement webhook retry logic using React Hook Form\n\nTested with unit tests."
+  },
+  {
+    "input": "Created new settings page that supports real-time updates Related to monitoring alert.",
+    "output": "feat(api): add settings page for automated testing\n\nThis improves maintainability."
+  },
+  {
+    "input": "Optimized currency formatting that was taking 12 seconds to load Related to monitoring alert.",
+    "output": "perf(search): optimize currency formatting\n\nTested with unit tests."
+  },
+  {
+    "input": "Increased test coverage for search from 32% to 95% Also fixed a minor type error found during the change.",
+    "output": "test(api): improve search test coverage 32% -> 95%\n\nPart of the Q1 roadmap."
+  },
+  {
+    "input": "Simplified onboarding wizard by consolidating duplicate logic The previous implementation was not scalable. Related to monitoring alert.",
+    "output": "refactor(db): simplify onboarding wizard by consolidating duplicate logic\n\nTested with unit tests."
+  },
+  {
+    "input": "Corrected shopping cart total that returning duplicate results for paginated queries Related to monitoring alert.",
+    "output": "fix(payments): correct shopping cart total returning duplicate results for paginate\n\nResolves issue #4093."
+  },
+  {
+    "input": "Built version history supporting real-time sync Related to monitoring alert. Verified with local testing.",
+    "output": "feat(auth): add version history with real-time sync support\n\nTested with integration tests."
+  }
+]
