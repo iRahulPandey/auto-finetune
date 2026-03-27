@@ -200,14 +200,7 @@ AGENT_CONFIG = {
     "claude_model": "claude-sonnet-4-20250514",
     "max_tokens": 4096,
     "temperature": 0.3,  # Low temp: decisions should follow the data, not be creative
-    "stagnation_threshold": 5,  # trigger escape after 5 consecutive no-improvement runs
-    # Phase boundaries (fraction of max_iterations)
-    "phase1_end_frac": 0.30,   # exploration  → 0-30%
-    "phase2_end_frac": 0.70,   # exploitation → 30-70%
-    # phase3: refinement        → 70-100%
-    # For unlimited runs (max_iterations=9999) use these fixed boundaries instead
-    "unlimited_phase1_end": 12,
-    "unlimited_phase2_end": 35,
+    "stagnation_threshold": 5,  # warn agent after 5 consecutive no-improvement runs
 }
 
 
