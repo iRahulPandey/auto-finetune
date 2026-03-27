@@ -77,6 +77,7 @@ def log_run(
     use_case: str = "",
     base_model_id: str = "",
     extra_metrics: Optional[dict] = None,
+    diagnosis: Optional[str] = None,
 ) -> str:
     """
     Log a single iteration to MLflow. Always re-sets tracking URI + experiment
@@ -101,6 +102,8 @@ def log_run(
         mlflow.set_tag("use_case", use_case[:200])
         mlflow.set_tag("base_model_id", base_model_id)
         mlflow.set_tag("timestamp", str(int(time.time())))
+        if diagnosis:
+            mlflow.set_tag("failure_diagnosis", diagnosis[:500])
 
         # ── Params ────────────────────────────────────────────────────────────
         mlflow.log_param("lora_r", lora_config.get("r"))
@@ -322,6 +325,7 @@ def get_run_history(
             "base_model_id": tags.get("base_model_id", ""),
             "session_id": tags.get("session_id", ""),
             "timestamp": int(tags.get("timestamp", 0)),
+            "diagnosis": tags.get("failure_diagnosis", ""),
             "metrics": dict(run.data.metrics),
             "params": dict(run.data.params),
         })
@@ -549,7 +553,7 @@ def compute_parameter_insights(history: list[dict], metric_name: str) -> str:
     return "\n".join(lines)
 
 
-def generate_config_table(max_iterations: int) -> list[dict]:
+def generate_config_table(max_iterations: int, task_type: str = "classification") -> list[dict]:
     """Generate a diverse, pre-planned configuration table for systematic search.
 
     Uses stratified sampling to ensure all important parameter values are covered.
@@ -558,20 +562,25 @@ def generate_config_table(max_iterations: int) -> list[dict]:
       - Every batch_size value is tried at least once
       - Every target_modules combo is tried at least once
       - Every rank value is tried
+      - The task-recommended module set appears 3x more in early coverage configs
       - Configs are diverse — no two share more than 3 identical params
 
     Returns a list of config dicts, each with lora_config + training_args.
     """
-    import itertools
     import random
 
-    from .config import SEARCH_SPACE
+    from .config import SEARCH_SPACE, LAYER_RATIONALE
 
     lrs = SEARCH_SPACE["learning_rate"]
     ranks = SEARCH_SPACE["lora_rank"]
     epochs_list = SEARCH_SPACE["num_train_epochs"]
     schedulers = SEARCH_SPACE["lr_scheduler_type"]
     modules = SEARCH_SPACE["target_modules"]
+
+    # Weight recommended modules 3x higher in the random pool so the agent
+    # sees task-appropriate layers explored early rather than by chance
+    recommended = LAYER_RATIONALE.get(task_type, LAYER_RATIONALE["classification"])["recommended"]
+    weighted_modules = modules + [recommended, recommended, recommended]
     dropouts = SEARCH_SPACE["lora_dropout"]
     warmups = SEARCH_SPACE["warmup_ratio"]
     batch_sizes = SEARCH_SPACE["per_device_train_batch_size"]
@@ -637,7 +646,7 @@ def generate_config_table(max_iterations: int) -> list[dict]:
             "r": random.choice(ranks),
             "num_train_epochs": random.choice(epochs_list),
             "lr_scheduler_type": random.choice(schedulers),
-            "target_modules": random.choice(modules),
+            "target_modules": random.choice(weighted_modules),
             "lora_dropout": random.choice(dropouts),
             "warmup_ratio": random.choice(warmups),
             "per_device_train_batch_size": random.choice(batch_sizes),
@@ -900,6 +909,8 @@ def format_history_for_agent(history: list[dict], metric_name: str) -> str:
         for run in by_metric[:5]:
             lines.append(_row(run))
             lines.append(f"    hypothesis: {run['hypothesis'][:100]}")
+            if run.get("diagnosis"):
+                lines.append(f"    diagnosis: {run['diagnosis'][:150]}")
     else:
         lines.append("  (none yet)")
     lines.append("")
@@ -910,6 +921,8 @@ def format_history_for_agent(history: list[dict], metric_name: str) -> str:
         for run in by_loss[:3]:
             lines.append(_row(run))
             lines.append(f"    hypothesis: {run['hypothesis'][:100]}")
+            if run.get("diagnosis"):
+                lines.append(f"    diagnosis: {run['diagnosis'][:150]}")
     else:
         lines.append("  (none yet)")
     lines.append("")

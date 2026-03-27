@@ -49,6 +49,24 @@ from .mlflow_utils import (
 # to avoid loading the model twice per iteration
 
 
+_DIAGNOSIS_PROMPT_TEMPLATE = """\
+You are an ML debugging assistant. A fine-tuning iteration just completed with a low {metric_name} of {metric_value:.4f}.
+
+## Config used
+LoRA: r={lora_r}, alpha={lora_alpha}, dropout={lora_dropout}, modules={target_modules}
+Training: lr={learning_rate}, epochs={num_epochs}, sched={scheduler}, bs={batch_size}×ga={grad_acc}
+
+## Sample prediction mismatches ({n_mismatches} total)
+{mismatch_block}
+
+## Task type: {task_type}
+
+Diagnose the most likely failure mode in 1-2 sentences. Be specific and actionable.
+Focus on: underfitting vs overfitting, learning rate too high/low, wrong target modules,
+insufficient epochs, label format errors, or model collapse.
+Do NOT say "try more experiments". Give a concrete hypothesis about what went wrong."""
+
+
 @dataclass
 class IterationResult:
     """Result of a single iteration."""
@@ -62,6 +80,7 @@ class IterationResult:
     adapter_path: Optional[str]
     run_id: str
     error: Optional[str] = None
+    diagnosis: Optional[str] = None
 
 
 def _read_finetune_py() -> str:
@@ -231,6 +250,7 @@ def _build_agent_prompt(
     max_iterations: int,
     stagnation_count: int,
     last_per_class: str = "",
+    last_diagnosis: Optional[str] = None,
 ) -> str:
     """Build the prompt for the Claude API agent.
 
@@ -283,6 +303,7 @@ Your job is to:
 {"- NOTE: FINAL ITERATION — summarise what was learned in your hypothesis." if is_final else ""}
 {f"- Last run per-class accuracy: {last_per_class}" if last_per_class else ""}
 {"- WARNING: If per-class accuracy shows 0/N for any class, the model is COLLAPSING to a single label. Focus on configs that achieve non-zero accuracy on ALL classes." if last_per_class and "0/" in last_per_class else ""}
+{f"- Last run failure diagnosis: {last_diagnosis}" if last_diagnosis else ""}
 
 ## Phase Instructions
 {phase_block}
@@ -514,6 +535,63 @@ def _mutate_config(proposed: dict) -> dict:
     return proposed
 
 
+def _diagnose_failure(
+    mismatches: list[dict],
+    metric_value: float,
+    metric_name: str,
+    lora_config: dict,
+    training_args: dict,
+    task_type: str,
+) -> Optional[str]:
+    """Call the LLM to diagnose why a run underperformed.
+
+    Only called when metric_value is below 50% of expected range to avoid
+    burning tokens on successful or near-successful runs.
+    Returns a short diagnosis string, or None if the call fails.
+    """
+    if not mismatches:
+        return None
+
+    mismatch_lines = []
+    for mm in mismatches[:5]:
+        exp = mm.get("expected", "")[:80]
+        got = mm.get("predicted", "")[:80]
+        mismatch_lines.append(f"  expected: {exp!r}")
+        mismatch_lines.append(f"  got:      {got!r}")
+        mismatch_lines.append("")
+    mismatch_block = "\n".join(mismatch_lines).rstrip()
+
+    prompt = _DIAGNOSIS_PROMPT_TEMPLATE.format(
+        metric_name=metric_name,
+        metric_value=metric_value,
+        lora_r=lora_config.get("r", "?"),
+        lora_alpha=lora_config.get("lora_alpha", "?"),
+        lora_dropout=lora_config.get("lora_dropout", "?"),
+        target_modules=lora_config.get("target_modules", []),
+        learning_rate=training_args.get("learning_rate", "?"),
+        num_epochs=training_args.get("num_train_epochs", "?"),
+        scheduler=training_args.get("lr_scheduler_type", "?"),
+        batch_size=training_args.get("per_device_train_batch_size", "?"),
+        grad_acc=training_args.get("gradient_accumulation_steps", "?"),
+        task_type=task_type,
+        n_mismatches=len(mismatches),
+        mismatch_block=mismatch_block,
+    )
+
+    try:
+        diagnosis = llm_client.generate(
+            prompt=prompt,
+            stage=llm_client.STAGE_AGENT,
+            model_hint="smart",
+            max_tokens=256,
+            temperature=0.2,
+        )
+        return diagnosis.strip()[:500]
+    except Exception as e:
+        print(f"  [diagnosis] LLM call failed: {e}")
+        return None
+
+
 def _validate_proposed_config(proposed: dict) -> list[str]:
     """Validate that the proposed config respects constraints."""
     errors = []
@@ -602,6 +680,7 @@ def run_agent_loop(
     results = []
     tried_fingerprints: set[str] = set()  # dedup: prevent exact config repeats
     last_per_class: str = ""  # per-class accuracy from last iteration
+    last_diagnosis: Optional[str] = None  # failure diagnosis from last iteration
 
     eval_path = str(PROJECT_ROOT / "data" / session_id / "eval.jsonl")
 
@@ -615,7 +694,7 @@ def run_agent_loop(
                 f"{sum(1 for c in config_table if c['status'] == 'pending')} pending")
     else:
         _status(f"Generating pre-planned config table ({run_config.max_iterations} configs)...")
-        config_table = generate_config_table(run_config.max_iterations)
+        config_table = generate_config_table(run_config.max_iterations, task_type=run_config.task_type)
         config_table_path.parent.mkdir(parents=True, exist_ok=True)
         with open(config_table_path, "w") as f:
             json.dump(config_table, f, indent=2)
@@ -676,6 +755,7 @@ def run_agent_loop(
                 max_iterations=run_config.max_iterations,
                 stagnation_count=stagnation_count,
                 last_per_class=last_per_class,
+                last_diagnosis=last_diagnosis,
             )
 
             # Call Claude API for next config
@@ -786,6 +866,23 @@ def run_agent_loop(
                     else:
                         _status(f"  expected: {exp[:100]}")
                         _status(f"  got:      {got[:100]}")
+
+            # Diagnose failure when metric is poor and we have mismatch data
+            iteration_diagnosis: Optional[str] = None
+            if mismatches and metric_value < 0.5:
+                _status(f"[{iteration}] Running failure diagnosis...")
+                iteration_diagnosis = _diagnose_failure(
+                    mismatches=mismatches,
+                    metric_value=metric_value,
+                    metric_name=run_config.metric_name,
+                    lora_config=proposed["lora_config"],
+                    training_args=proposed["training_args"],
+                    task_type=run_config.task_type,
+                )
+                if iteration_diagnosis:
+                    _status(f"[{iteration}] Diagnosis: {iteration_diagnosis}")
+                    last_diagnosis = iteration_diagnosis
+
             is_improvement = metric_value > best_metric_value
 
             if is_improvement:
@@ -820,6 +917,7 @@ def run_agent_loop(
                 session_id=session_id,
                 use_case=run_config.use_case,
                 base_model_id=run_config.hf_model_id,
+                diagnosis=iteration_diagnosis,
             )
 
             if is_improvement:
@@ -835,6 +933,7 @@ def run_agent_loop(
                 training_args=proposed["training_args"],
                 adapter_path=adapter_path,
                 run_id=run_id,
+                diagnosis=iteration_diagnosis,
             )
             results.append(iter_result)
 
