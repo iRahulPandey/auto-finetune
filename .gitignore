@@ -1,0 +1,28 @@
+# Secrets — never commit
+.env
+
+# Generated at runtime
+data/
+adapters/
+mlruns/
+program.md
+
+# Python / uv
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+.python-version
+uv.lock
+
+# macOS
+.DS_Store
+
+# IDEs
+.idea/
+.vscode/
+*.swp
