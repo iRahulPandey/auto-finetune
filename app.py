@@ -8,12 +8,10 @@ Tab 2 — Inference Lab: browse all completed runs, pick any combination of
 
 import json
 import os
-import subprocess
 import time
 from pathlib import Path
 from typing import Optional
 
-import requests
 import streamlit as st
 
 from _core.config import (
@@ -86,10 +84,6 @@ defaults = {
     "infer_expected": "",     # expected output from eval set (if applicable)
     "infer_batch_results": [],  # batch eval results
     "infer_generation_count": 0,  # incremented on every Generate click to bust widget key cache
-    # MLflow setup
-    "mlflow_configured": False,
-    "mlflow_uri": None,
-    "mlflow_server_pid": None,
     # Data augmentation (off by default — example datasets are pre-balanced)
     "enable_augmentation": False,
     # LLM provider per stage
@@ -104,105 +98,12 @@ for k, v in defaults.items():
         st.session_state[k] = v
 
 
-# ── MLflow setup gate ─────────────────────────────────────────────────────────
+# ── MLflow tracking URI ───────────────────────────────────────────────────────
+# Use MLFLOW_TRACKING_URI from .env if set, otherwise default to local mlruns.
+# To use a remote server: set MLFLOW_TRACKING_URI=http://your-server:5000 in .env
 
-def _start_mlflow_server(port: int = 5000) -> subprocess.Popen:
-    """Spawn a local MLflow server as a background process."""
-    backend = str(PROJECT_ROOT / "mlruns")
-    cmd = [
-        "mlflow", "server",
-        "--backend-store-uri", backend,
-        "--default-artifact-root", backend,
-        "--host", "127.0.0.1",
-        "--port", str(port),
-    ]
-    return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-
-def _wait_for_server(uri: str, timeout: int = 20) -> bool:
-    """Return True once the server responds at /health, or after timeout."""
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        try:
-            if requests.get(f"{uri}/health", timeout=2).status_code == 200:
-                return True
-        except Exception:
-            pass
-        time.sleep(1)
-    return False
-
-
-if not st.session_state.mlflow_configured:
-    st.title("auto-finetune")
-    st.write("Describe your task. Upload examples. The agent finds the best LoRA configuration — automatically.")
-    st.divider()
-    st.subheader("Experiment tracking")
-    st.write("Choose where to store training runs. You can change this by restarting the app.")
-
-    mode = st.radio(
-        "Tracking backend",
-        [
-            "Local file storage — no server needed (recommended)",
-            "Auto-start a local MLflow server (enables the MLflow web UI)",
-            "Connect to an existing MLflow server",
-        ],
-        index=0,
-        label_visibility="collapsed",
-    )
-
-    custom_uri = ""
-    if mode.startswith("Connect"):
-        custom_uri = st.text_input(
-            "Server URI",
-            value="http://127.0.0.1:5000",
-            placeholder="http://127.0.0.1:5000",
-        )
-
-    if st.button("Continue →", type="primary"):
-        if mode.startswith("Local file"):
-            uri = f"file://{PROJECT_ROOT / 'mlruns'}"
-            os.environ["MLFLOW_TRACKING_URI"] = uri
-            st.session_state.mlflow_uri = uri
-            st.session_state.mlflow_configured = True
-            st.rerun()
-
-        elif mode.startswith("Auto-start"):
-            with st.spinner("Starting MLflow server on http://127.0.0.1:5000 …"):
-                proc = _start_mlflow_server(5000)
-                ok = _wait_for_server("http://127.0.0.1:5000", timeout=20)
-            if ok:
-                uri = "http://127.0.0.1:5000"
-                os.environ["MLFLOW_TRACKING_URI"] = uri
-                st.session_state.mlflow_uri = uri
-                st.session_state.mlflow_server_pid = proc.pid
-                st.session_state.mlflow_configured = True
-                st.rerun()
-            else:
-                st.error(
-                    "MLflow server did not respond in time. "
-                    "Try **Local file storage** instead, or start the server "
-                    "manually with `mlflow server --port 5000` and use "
-                    "**Connect to an existing server**."
-                )
-
-        else:  # Connect to existing
-            uri = custom_uri.strip()
-            if not uri:
-                st.warning("Enter the server URI first.")
-            else:
-                os.environ["MLFLOW_TRACKING_URI"] = uri
-                st.session_state.mlflow_uri = uri
-                st.session_state.mlflow_configured = True
-                st.rerun()
-
-    with st.sidebar:
-        st.write("**auto-finetune**")
-        st.caption("Set up experiment tracking to get started.")
-
-    st.stop()
-
-# MLflow is configured — apply the chosen URI for this process
-os.environ["MLFLOW_TRACKING_URI"] = st.session_state.mlflow_uri
+_mlflow_uri = os.environ.get("MLFLOW_TRACKING_URI") or f"file://{PROJECT_ROOT / 'mlruns'}"
+os.environ["MLFLOW_TRACKING_URI"] = _mlflow_uri
 
 # ── Apply per-stage LLM config ────────────────────────────────────────────────
 
@@ -221,11 +122,10 @@ with st.sidebar:
     st.write("**auto-finetune**")
     st.divider()
 
-    uri_display = st.session_state.mlflow_uri
-    if uri_display.startswith("file://"):
+    if _mlflow_uri.startswith("file://"):
         st.caption("MLflow: local file storage")
     else:
-        st.caption(f"MLflow: [{uri_display}]({uri_display})")
+        st.caption(f"MLflow: [{_mlflow_uri}]({_mlflow_uri})")
 
     _badge_parts = []
     for sk, sl in [("data_prep", "Prep"), ("agent", "Agent"), ("evaluator", "Eval")]:
