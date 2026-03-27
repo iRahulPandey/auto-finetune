@@ -1,0 +1,802 @@
+[
+  {
+    "input": "Invoice #PRO-6000 from NordicTech Solutions AB, Level 3, 200 George St, Sydney NSW 2000. Bill to: TimberLine Cabins, 830 Penn Ave, Pittsburgh PA 15219. Date: May 4, 2024. Items: IP Filing Preparation: $2,012.00. Contract Review: $2,358.00. Market Research Report: $6,926.00. Consulting (Strategic): $19,940.00. Discount (5%): -$1,561.80. Subtotal: $31,236.00. MwSt (19%): $5,638.10. Total Due: $35,312.30. Payment terms: 50% upfront, 50% Net 30.",
+    "output": "{\"invoice_number\": \"PRO-6000\", \"vendor\": \"NordicTech Solutions AB\", \"customer\": \"TimberLine Cabins\", \"date\": \"2024-05-04\", \"total\": 35312.3, \"due_date\": \"2024-06-03\", \"items\": [\"IP Filing Preparation\", \"Contract Review\", \"Market Research Report\", \"Consulting (Strategic)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: VeloCraft Bicycles, 300 Park Avenue Suite 1200, New York NY 10022\nTo: OpenSpace Coworking, 500 Tech Blvd, San Jose CA 95112\nInvoice No: 2024-63511 | Date: 14/05/2024\nLine items: Contract Review: $2,224.02. Board Presentation Prep: $5,162.45. IP Filing Preparation: $1,946.00. Brand Strategy Workshop: $8,384.95. Financial Modeling: $11,533.21.\nTotal: $29,250.63\nTerms: Payment due on completion",
+    "output": "{\"invoice_number\": \"2024-63511\", \"vendor\": \"VeloCraft Bicycles\", \"customer\": \"OpenSpace Coworking\", \"date\": \"2024-05-14\", \"total\": 29250.63, \"due_date\": \"2024-05-14\", \"items\": [\"Contract Review\", \"Board Presentation Prep\", \"IP Filing Preparation\", \"Brand Strategy Workshop\", \"Financial Modeling\"]}"
+  },
+  {
+    "input": "Invoice #PRO-99850 from MavenBuild Software, 333 Data Drive, Denver CO 80202. Bill to: UnityWorks Nonprofit, 400 Lake Shore Dr, Chicago IL 60611. Date: September 2, 2024. Items: Ergonomic Chairs: $3,021.00. Cleaning Services (Monthly): $1,087.00. Server Hardware: $11,851.51. Subtotal: $15,959.51. MwSt (19%): $3,032.31. Total Due: $18,991.82. Payment terms: Net 30.",
+    "output": "{\"invoice_number\": \"PRO-99850\", \"vendor\": \"MavenBuild Software\", \"customer\": \"UnityWorks Nonprofit\", \"date\": \"2024-09-02\", \"total\": 18991.82, \"due_date\": \"2024-10-02\", \"items\": [\"Ergonomic Chairs\", \"Cleaning Services (Monthly)\", \"Server Hardware\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: TidalWave Media, 450 Market St, San Francisco CA 94105\nTo: BlueSky Airlines, 400 Lake Shore Dr, Chicago IL 60611\nInvoice No: PO-66668 | Date: 13/04/2024\nLine items: Server Hardware: $19,460.89. Cleaning Services (Monthly): $850.06.\nGST (10%): $2,031.10\nTotal: $22,342.05\nTerms: Net 60",
+    "output": "{\"invoice_number\": \"PO-66668\", \"vendor\": \"TidalWave Media\", \"customer\": \"BlueSky Airlines\", \"date\": \"2024-04-13\", \"total\": 22342.05, \"due_date\": \"2024-06-12\", \"items\": [\"Server Hardware\", \"Cleaning Services (Monthly)\"]}"
+  },
+  {
+    "input": "Please find attached invoice SI-26320 from DeepSea Mining Corp dated January 5, 2024. This invoice is for services provided to AnchorPoint Marine. The services include: Monitoring & Alerting Setup: $2,001.42. CI/CD Pipeline Setup: $6,572.24. Code Review (40 hours): $4,331.62. Compliance Audit (SOC2): $25,915.00. Discount (15%): -$5,823.04. The total amount is $32,997.24. Payment is due due within 7 business days.",
+    "output": "{\"invoice_number\": \"SI-26320\", \"vendor\": \"DeepSea Mining Corp\", \"customer\": \"AnchorPoint Marine\", \"date\": \"2024-01-05\", \"total\": 32997.24, \"due_date\": \"2024-01-12\", \"items\": [\"Monitoring & Alerting Setup\", \"CI/CD Pipeline Setup\", \"Code Review (40 hours)\", \"Compliance Audit (SOC2)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: JetStream Networks, 610 Startup Ave, Miami FL 33101\nTo: DataFlow Analytics, 1100 Main St, Kansas City MO 64105\nInvoice No: INV-84771 | Date: 12/07/2024\nLine items: HVAC Service Visit: $423.00. Ergonomic Chairs: $2,470.26. Standing Desks: $3,400.11. Discount (15%): -$944.01.\nTotal: $5,349.36\nTerms: Net 14",
+    "output": "{\"invoice_number\": \"INV-84771\", \"vendor\": \"JetStream Networks\", \"customer\": \"DataFlow Analytics\", \"date\": \"2024-07-12\", \"total\": 5349.36, \"due_date\": \"2024-07-26\", \"items\": [\"HVAC Service Visit\", \"Ergonomic Chairs\", \"Standing Desks\"]}"
+  },
+  {
+    "input": "Please find attached invoice FI-22863 from ClearView Optics dated September 4, 2024. This invoice is for services provided to Meridian Financial Group. The services include: HVAC Service Visit: $212.37. Office Supplies Bundle: $790.76. Standing Desks: $7,977.18. Network Equipment: $2,716.04. Printer Maintenance: $163.00. The total amount is $11,859.35. Payment is due annual prepay.",
+    "output": "{\"invoice_number\": \"FI-22863\", \"vendor\": \"ClearView Optics\", \"customer\": \"Meridian Financial Group\", \"date\": \"2024-09-04\", \"total\": 11859.35, \"due_date\": \"2024-09-04\", \"items\": [\"HVAC Service Visit\", \"Office Supplies Bundle\", \"Standing Desks\", \"Network Equipment\", \"Printer Maintenance\"]}"
+  },
+  {
+    "input": "LunarTech Space | Invoice REF-13170 | 2024-04-19 | Customer: FreshCo Imports. Services: Financial Modeling: $8,379.87. IP Filing Preparation: $1,241.00. Board Presentation Prep: $3,197.00. Tax (8.5%): $1,089.52. Total: $13,907.39. Net 15.",
+    "output": "{\"invoice_number\": \"REF-13170\", \"vendor\": \"LunarTech Space\", \"customer\": \"FreshCo Imports\", \"date\": \"2024-04-19\", \"total\": 13907.39, \"due_date\": \"2024-05-04\", \"items\": [\"Financial Modeling\", \"IP Filing Preparation\", \"Board Presentation Prep\"]}"
+  },
+  {
+    "input": "Invoice #PO-18493 from Pacific Rim Logistics, 1200 Tech Park Dr, Raleigh NC 27601. Bill to: QuickMart Retail, PO Box 4481, Melbourne VIC 3000. Date: June 18, 2024. Items: Cleaning Services (Monthly): $1,665.00. Equipment Rental: $1,715.72. HVAC Service Visit: $492.00. Subtotal: $3,872.72. VAT (20%): $774.54. Total Due: $4,647.26. Payment terms: Annual prepay.",
+    "output": "{\"invoice_number\": \"PO-18493\", \"vendor\": \"Pacific Rim Logistics\", \"customer\": \"QuickMart Retail\", \"date\": \"2024-06-18\", \"total\": 4647.26, \"due_date\": \"2024-06-18\", \"items\": [\"Cleaning Services (Monthly)\", \"Equipment Rental\", \"HVAC Service Visit\"]}"
+  },
+  {
+    "input": "RedOak Furniture | Invoice INV-2024-91606 | 2024-12-19 | Customer: QuickMart Retail. Services: Technical Training (2 days): $3,076.01. Monitoring & Alerting Setup: $3,372.13. Code Review (40 hours): $7,282.00. Database Administration: $5,909.00. HST (13%): $2,553.09. Total: $22,192.23. Due within 7 business days.",
+    "output": "{\"invoice_number\": \"INV-2024-91606\", \"vendor\": \"RedOak Furniture\", \"customer\": \"QuickMart Retail\", \"date\": \"2024-12-19\", \"total\": 22192.23, \"due_date\": \"2024-12-26\", \"items\": [\"Technical Training (2 days)\", \"Monitoring & Alerting Setup\", \"Code Review (40 hours)\", \"Database Administration\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: OptiFlow Hydraulics, 42 Innovation Lane, Boston MA 02210\nTo: CrystalClear Windows, PO Box 4481, Melbourne VIC 3000\nInvoice No: STM-35788 | Date: 4/05/2024\nLine items: Office Supplies Bundle: $511.00. HVAC Service Visit: $544.12. Equipment Rental: $851.98. Server Hardware: $8,988.71.\nTax (6%): $653.75\nTotal: $11,549.56\nTerms: Due on receipt",
+    "output": "{\"invoice_number\": \"STM-35788\", \"vendor\": \"OptiFlow Hydraulics\", \"customer\": \"CrystalClear Windows\", \"date\": \"2024-05-04\", \"total\": 11549.56, \"due_date\": \"2024-05-04\", \"items\": [\"Office Supplies Bundle\", \"HVAC Service Visit\", \"Equipment Rental\", \"Server Hardware\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: LunarTech Space, Friedrichstrasse 100, 10117 Berlin\nTo: OakHeart Brewery, 1100 Main St, Kansas City MO 64105\nInvoice No: INV-2024-3609 | Date: 6/01/2024\nLine items: Market Research Report: $4,273.97. Recruitment Services: $18,373.00. Contract Review: $4,523.79. Financial Modeling: $13,895.41. Board Presentation Prep: $6,646.00.\nTax (6%): $2,862.73\nTotal: $50,574.90\nTerms: Net 30",
+    "output": "{\"invoice_number\": \"INV-2024-3609\", \"vendor\": \"LunarTech Space\", \"customer\": \"OakHeart Brewery\", \"date\": \"2024-01-06\", \"total\": 50574.9, \"due_date\": \"2024-02-05\", \"items\": [\"Market Research Report\", \"Recruitment Services\", \"Contract Review\", \"Financial Modeling\", \"Board Presentation Prep\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: BrightWave Marketing, Level 3, 200 George St, Sydney NSW 2000\nTo: WestWind Energy, Industriepark 5, 80339 Munich\nInvoice No: BILL-47874 | Date: 6/05/2024\nLine items: Executive Coaching (Monthly): $3,987.00. Contract Review: $1,663.17.\nTotal: $5,650.17\nTerms: Net 15",
+    "output": "{\"invoice_number\": \"BILL-47874\", \"vendor\": \"BrightWave Marketing\", \"customer\": \"WestWind Energy\", \"date\": \"2024-05-06\", \"total\": 5650.17, \"due_date\": \"2024-05-21\", \"items\": [\"Executive Coaching (Monthly)\", \"Contract Review\"]}"
+  },
+  {
+    "input": "BrightWave Marketing | Invoice 2024-72429 | 2024-02-15 | Customer: OceanBreeze Resorts. Services: Network Equipment: $4,757.57. Catering (Event): $4,166.00. Ergonomic Chairs: $5,420.05. Printer Maintenance: $274.00. Sales Tax (7%): $1,023.23. Total: $15,640.85. Net 60.",
+    "output": "{\"invoice_number\": \"2024-72429\", \"vendor\": \"BrightWave Marketing\", \"customer\": \"OceanBreeze Resorts\", \"date\": \"2024-02-15\", \"total\": 15640.85, \"due_date\": \"2024-04-15\", \"items\": [\"Network Equipment\", \"Catering (Event)\", \"Ergonomic Chairs\", \"Printer Maintenance\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: TerraFirm Construction, 800 Wilshire Blvd, Los Angeles CA 90017\nTo: DataFlow Analytics, 220 5th Ave, New York NY 10001\nInvoice No: STM-4389 | Date: 13/02/2024\nLine items: Database Administration: $4,923.08. Compliance Audit (SOC2): $18,713.00. Cloud Hosting (12 months): $10,975.00. API Integration Package: $11,709.50. Priority Support (Annual): $3,272.00.\nMwSt (19%): $9,422.59\nTotal: $59,015.17\nTerms: Net 60",
+    "output": "{\"invoice_number\": \"STM-4389\", \"vendor\": \"TerraFirm Construction\", \"customer\": \"DataFlow Analytics\", \"date\": \"2024-02-13\", \"total\": 59015.17, \"due_date\": \"2024-04-13\", \"items\": [\"Database Administration\", \"Compliance Audit (SOC2)\", \"Cloud Hosting (12 months)\", \"API Integration Package\", \"Priority Support (Annual)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: BrightWave Marketing, 333 Data Drive, Denver CO 80202\nTo: KeyStone Real Estate, 255 Harbor View, Seattle WA 98101\nInvoice No: BILL-11101 | Date: 7/09/2024\nLine items: Board Presentation Prep: $4,853.87. Market Research Report: $3,962.00.\nMwSt (19%): $1,675.02\nTotal: $10,490.89\nTerms: Annual prepay",
+    "output": "{\"invoice_number\": \"BILL-11101\", \"vendor\": \"BrightWave Marketing\", \"customer\": \"KeyStone Real Estate\", \"date\": \"2024-09-07\", \"total\": 10490.89, \"due_date\": \"2024-09-07\", \"items\": [\"Board Presentation Prep\", \"Market Research Report\"]}"
+  },
+  {
+    "input": "MavenBuild Software | Invoice STM-7191 | 2024-04-13 | Customer: NorthStar Logistics. Services: Mobile App Development (Phase 1): $40,764.78. Database Administration: $2,824.00. HST (13%): $5,666.54. Total: $49,255.32. Net 60.",
+    "output": "{\"invoice_number\": \"STM-7191\", \"vendor\": \"MavenBuild Software\", \"customer\": \"NorthStar Logistics\", \"date\": \"2024-04-13\", \"total\": 49255.32, \"due_date\": \"2024-06-12\", \"items\": [\"Mobile App Development (Phase 1)\", \"Database Administration\"]}"
+  },
+  {
+    "input": "Please find attached invoice #29714 from Acme Corp dated January 4, 2024. This invoice is for services provided to NextGen Robotics Inc. The services include: Financial Modeling: $5,258.25. Tax Advisory Services: $2,806.00. Contract Review: $3,038.16. Recruitment Services: $8,095.00. Consulting (Strategic): $24,619.00. The total amount including gst (10%) of $4,381.64 is $48,198.05. Payment is due net 45.",
+    "output": "{\"invoice_number\": \"29714\", \"vendor\": \"Acme Corp\", \"customer\": \"NextGen Robotics Inc\", \"date\": \"2024-01-04\", \"total\": 48198.05, \"due_date\": \"2024-02-18\", \"items\": [\"Financial Modeling\", \"Tax Advisory Services\", \"Contract Review\", \"Recruitment Services\", \"Consulting (Strategic)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: SwiftCode Consulting, 789 Commerce Blvd, Chicago IL 60601\nTo: UnityWorks Nonprofit, 400 Lake Shore Dr, Chicago IL 60611\nInvoice No: INV-8596 | Date: 27/04/2024\nLine items: Ergonomic Chairs: $3,728.00. Network Equipment: $4,170.49.\nTax (6%): $473.91\nTotal: $8,372.40\nTerms: Annual prepay",
+    "output": "{\"invoice_number\": \"INV-8596\", \"vendor\": \"SwiftCode Consulting\", \"customer\": \"UnityWorks Nonprofit\", \"date\": \"2024-04-27\", \"total\": 8372.4, \"due_date\": \"2024-04-27\", \"items\": [\"Ergonomic Chairs\", \"Network Equipment\"]}"
+  },
+  {
+    "input": "Please find attached invoice 2024-38922 from OptiFlow Hydraulics dated July 2, 2024. This invoice is for services provided to BlueSky Airlines. The services include: Contract Review: $2,529.00. IP Filing Preparation: $1,551.00. Executive Coaching (Monthly): $5,440.43. Brand Strategy Workshop: $9,695.94. The total amount including hst (13%) of $2,498.13 is $21,714.50. Payment is due net 45.",
+    "output": "{\"invoice_number\": \"2024-38922\", \"vendor\": \"OptiFlow Hydraulics\", \"customer\": \"BlueSky Airlines\", \"date\": \"2024-07-02\", \"total\": 21714.5, \"due_date\": \"2024-08-16\", \"items\": [\"Contract Review\", \"IP Filing Preparation\", \"Executive Coaching (Monthly)\", \"Brand Strategy Workshop\"]}"
+  },
+  {
+    "input": "Please find attached invoice PO-22411 from GoldenGate Imports dated November 18, 2024. This invoice is for services provided to BrightStar Education. The services include: Board Presentation Prep: $6,586.24. Contract Review: $3,853.63. Discount (5%): -$521.99. The total amount including mwst (19%) of $1,884.40 is $11,802.28. Payment is due net 60.",
+    "output": "{\"invoice_number\": \"PO-22411\", \"vendor\": \"GoldenGate Imports\", \"customer\": \"BrightStar Education\", \"date\": \"2024-11-18\", \"total\": 11802.28, \"due_date\": \"2025-01-17\", \"items\": [\"Board Presentation Prep\", \"Contract Review\"]}"
+  },
+  {
+    "input": "Please find attached invoice #34039 from RapidScale Inc dated May 12, 2024. This invoice is for services provided to BrightPath Consulting Ltd. The services include: Executive Coaching (Monthly): $4,077.68. Board Presentation Prep: $2,716.27. The total amount including mwst (19%) of $1,290.85 is $8,084.80. Payment is due net 14.",
+    "output": "{\"invoice_number\": \"34039\", \"vendor\": \"RapidScale Inc\", \"customer\": \"BrightPath Consulting Ltd\", \"date\": \"2024-05-12\", \"total\": 8084.8, \"due_date\": \"2024-05-26\", \"items\": [\"Executive Coaching (Monthly)\", \"Board Presentation Prep\"]}"
+  },
+  {
+    "input": "Invoice #INV-2024-58795 from HarborLight Shipping, 450 Market St, San Francisco CA 94105. Bill to: NovaStar Entertainment, PO Box 4481, Melbourne VIC 3000. Date: February 20, 2024. Items: Market Research Report: $6,738.00. Executive Coaching (Monthly): $2,017.09. Tax Advisory Services: $6,818.00. Contract Review: $3,376.45. Discount (5%): -$947.48. Subtotal: $18,949.54. HST (13%): $2,340.27. Total Due: $20,342.33. Payment terms: Net 14.",
+    "output": "{\"invoice_number\": \"INV-2024-58795\", \"vendor\": \"HarborLight Shipping\", \"customer\": \"NovaStar Entertainment\", \"date\": \"2024-02-20\", \"total\": 20342.33, \"due_date\": \"2024-03-05\", \"items\": [\"Market Research Report\", \"Executive Coaching (Monthly)\", \"Tax Advisory Services\", \"Contract Review\"]}"
+  },
+  {
+    "input": "PrimeVault Storage | Invoice FI-72250 | 2024-01-21 | Customer: DawnBreaker Bakery. Services: Server Hardware: $19,895.99. Equipment Rental: $823.79. Printer Maintenance: $180.00. Discount (10%): -$2,089.98. Tax (8.5%): $1,598.83. Total: $20,408.63. Due within 7 business days.",
+    "output": "{\"invoice_number\": \"FI-72250\", \"vendor\": \"PrimeVault Storage\", \"customer\": \"DawnBreaker Bakery\", \"date\": \"2024-01-21\", \"total\": 20408.63, \"due_date\": \"2024-01-28\", \"items\": [\"Server Hardware\", \"Equipment Rental\", \"Printer Maintenance\"]}"
+  },
+  {
+    "input": "Please find attached invoice 2024-25880 from VeloCraft Bicycles dated February 15, 2024. This invoice is for services provided to Bloom Digital Agency. The services include: Brand Strategy Workshop: $3,628.00. IP Filing Preparation: $2,605.00. Consulting (Strategic): $5,780.88. Tax Advisory Services: $2,937.11. Recruitment Services: $6,479.17. The total amount including hst (13%) of $2,785.92 is $24,216.08. Payment is due 50% upfront, 50% net 30.",
+    "output": "{\"invoice_number\": \"2024-25880\", \"vendor\": \"VeloCraft Bicycles\", \"customer\": \"Bloom Digital Agency\", \"date\": \"2024-02-15\", \"total\": 24216.08, \"due_date\": \"2024-03-16\", \"items\": [\"Brand Strategy Workshop\", \"IP Filing Preparation\", \"Consulting (Strategic)\", \"Tax Advisory Services\", \"Recruitment Services\"]}"
+  },
+  {
+    "input": "VeloCraft Bicycles | Invoice INV-2024-12443 | 2024-11-22 | Customer: Pinnacle Health Systems. Services: Security Audit: $6,918.33. UI/UX Design Sprint: $7,631.94. Performance Optimization: $5,472.23. Discount (5%): -$1,001.12. Total: $19,021.38. Annual prepay.",
+    "output": "{\"invoice_number\": \"INV-2024-12443\", \"vendor\": \"VeloCraft Bicycles\", \"customer\": \"Pinnacle Health Systems\", \"date\": \"2024-11-22\", \"total\": 19021.38, \"due_date\": \"2024-11-22\", \"items\": [\"Security Audit\", \"UI/UX Design Sprint\", \"Performance Optimization\"]}"
+  },
+  {
+    "input": "MavenBuild Software | Invoice STM-86884 | 2024-02-15 | Customer: AnchorPoint Marine. Services: Cloud Hosting (12 months): $18,366.00. Monitoring & Alerting Setup: $4,154.02. Performance Optimization: $8,692.01. Technical Training (2 days): $3,016.00. Mobile App Development (Phase 1): $28,121.29. Sales Tax (7%): $4,364.45. Total: $66,713.77. Due on receipt.",
+    "output": "{\"invoice_number\": \"STM-86884\", \"vendor\": \"MavenBuild Software\", \"customer\": \"AnchorPoint Marine\", \"date\": \"2024-02-15\", \"total\": 66713.77, \"due_date\": \"2024-02-15\", \"items\": [\"Cloud Hosting (12 months)\", \"Monitoring & Alerting Setup\", \"Performance Optimization\", \"Technical Training (2 days)\", \"Mobile App Development (Phase 1)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: Pixel Perfect Design Studio, 920 Maple Street, Minneapolis MN 55401\nTo: UnityWorks Nonprofit, PO Box 4481, Melbourne VIC 3000\nInvoice No: BILL-18799 | Date: 19/04/2024\nLine items: Cleaning Services (Monthly): $1,633.93. Catering (Event): $4,182.83.\nMwSt (19%): $1,105.18\nTotal: $6,921.94\nTerms: Payment due on completion",
+    "output": "{\"invoice_number\": \"BILL-18799\", \"vendor\": \"Pixel Perfect Design Studio\", \"customer\": \"UnityWorks Nonprofit\", \"date\": \"2024-04-19\", \"total\": 6921.94, \"due_date\": \"2024-04-19\", \"items\": [\"Cleaning Services (Monthly)\", \"Catering (Event)\"]}"
+  },
+  {
+    "input": "BridgePort Engineering | Invoice #31838 | 2024-11-16 | Customer: ThunderBolt Electric. Services: Load Testing Suite: $4,845.00. Security Audit: $5,177.36. Total: $10,022.36. Due within 7 business days.",
+    "output": "{\"invoice_number\": \"31838\", \"vendor\": \"BridgePort Engineering\", \"customer\": \"ThunderBolt Electric\", \"date\": \"2024-11-16\", \"total\": 10022.36, \"due_date\": \"2024-11-23\", \"items\": [\"Load Testing Suite\", \"Security Audit\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: CrestLine Financial, 800 Wilshire Blvd, Los Angeles CA 90017\nTo: NorthPole Expeditions, 600 Congress Ave, Austin TX 78701\nInvoice No: SVC-64688 | Date: 6/11/2024\nLine items: Cleaning Services (Monthly): $915.04. Standing Desks: $6,534.50.\nTax (9.25%): $689.08\nTotal: $8,138.62\nTerms: Due within 7 business days",
+    "output": "{\"invoice_number\": \"SVC-64688\", \"vendor\": \"CrestLine Financial\", \"customer\": \"NorthPole Expeditions\", \"date\": \"2024-11-06\", \"total\": 8138.62, \"due_date\": \"2024-11-13\", \"items\": [\"Cleaning Services (Monthly)\", \"Standing Desks\"]}"
+  },
+  {
+    "input": "EagleSoft Solutions | Invoice INV-2024-43901 | 2024-07-23 | Customer: MapleSyrup Productions. Services: Contract Review: $2,777.98. Consulting (Strategic): $29,265.64. Executive Coaching (Monthly): $4,693.46. IP Filing Preparation: $3,188.47. Market Research Report: $9,256.69. Discount (20%): -$9,836.45. Tax (8.5%): $3,344.39. Total: $42,690.18. Net 60.",
+    "output": "{\"invoice_number\": \"INV-2024-43901\", \"vendor\": \"EagleSoft Solutions\", \"customer\": \"MapleSyrup Productions\", \"date\": \"2024-07-23\", \"total\": 42690.18, \"due_date\": \"2024-09-21\", \"items\": [\"Contract Review\", \"Consulting (Strategic)\", \"Executive Coaching (Monthly)\", \"IP Filing Preparation\", \"Market Research Report\"]}"
+  },
+  {
+    "input": "WildRoots Landscaping | Invoice STM-17388 | 2024-06-21 | Customer: IvoryTower University. Services: Brand Strategy Workshop: $4,441.00. Board Presentation Prep: $5,350.44. Consulting (Strategic): $5,251.31. Market Research Report: $6,783.91. Tax (9.25%): $2,018.97. Total: $23,845.63. Net 15.",
+    "output": "{\"invoice_number\": \"STM-17388\", \"vendor\": \"WildRoots Landscaping\", \"customer\": \"IvoryTower University\", \"date\": \"2024-06-21\", \"total\": 23845.63, \"due_date\": \"2024-07-06\", \"items\": [\"Brand Strategy Workshop\", \"Board Presentation Prep\", \"Consulting (Strategic)\", \"Market Research Report\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: AlphaData Systems, 333 Data Drive, Denver CO 80202\nTo: WestWind Energy, 125 University Ave, Palo Alto CA 94301\nInvoice No: INV-2024-48064 | Date: 13/02/2024\nLine items: Ergonomic Chairs: $2,726.00. Network Equipment: $1,330.00. Server Hardware: $17,271.75. Office Supplies Bundle: $558.80. Printer Maintenance: $479.81. Discount (15%): -$3,354.95.\nHST (13%): $2,471.48\nTotal: $21,482.89\nTerms: Net 30",
+    "output": "{\"invoice_number\": \"INV-2024-48064\", \"vendor\": \"AlphaData Systems\", \"customer\": \"WestWind Energy\", \"date\": \"2024-02-13\", \"total\": 21482.89, \"due_date\": \"2024-03-14\", \"items\": [\"Ergonomic Chairs\", \"Network Equipment\", \"Server Hardware\", \"Office Supplies Bundle\", \"Printer Maintenance\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: DeepSea Mining Corp, 1200 Tech Park Dr, Raleigh NC 27601\nTo: YearRound Gardening, 400 Lake Shore Dr, Chicago IL 60611\nInvoice No: REF-80389 | Date: 3/06/2024\nLine items: Cloud Hosting (12 months): $14,269.00. Technical Training (2 days): $4,475.69.\nMwSt (19%): $3,561.49\nTotal: $22,306.18\nTerms: Net 14",
+    "output": "{\"invoice_number\": \"REF-80389\", \"vendor\": \"DeepSea Mining Corp\", \"customer\": \"YearRound Gardening\", \"date\": \"2024-06-03\", \"total\": 22306.18, \"due_date\": \"2024-06-17\", \"items\": [\"Cloud Hosting (12 months)\", \"Technical Training (2 days)\"]}"
+  },
+  {
+    "input": "Please find attached invoice PRO-21410 from ClearView Optics dated October 16, 2024. This invoice is for services provided to SteelBridge Construction. The services include: Priority Support (Annual): $7,092.88. Disaster Recovery Setup: $6,626.60. Compliance Audit (SOC2): $25,777.94. UI/UX Design Sprint: $9,469.27. The total amount including vat (25%) of $12,241.67 is $61,208.36. Payment is due due within 7 business days.",
+    "output": "{\"invoice_number\": \"PRO-21410\", \"vendor\": \"ClearView Optics\", \"customer\": \"SteelBridge Construction\", \"date\": \"2024-10-16\", \"total\": 61208.36, \"due_date\": \"2024-10-23\", \"items\": [\"Priority Support (Annual)\", \"Disaster Recovery Setup\", \"Compliance Audit (SOC2)\", \"UI/UX Design Sprint\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: Pacific Rim Logistics, 789 Commerce Blvd, Chicago IL 60601\nTo: ThunderBolt Electric, 77 Harbour Square, Toronto ON M5J 2S2\nInvoice No: 2024-43218 | Date: 28/02/2024\nLine items: Financial Modeling: $11,657.79. Contract Review: $3,054.51. Market Research Report: $8,466.58.\nGST (10%): $2,317.89\nTotal: $25,496.77\nTerms: Annual prepay",
+    "output": "{\"invoice_number\": \"2024-43218\", \"vendor\": \"Pacific Rim Logistics\", \"customer\": \"ThunderBolt Electric\", \"date\": \"2024-02-28\", \"total\": 25496.77, \"due_date\": \"2024-02-28\", \"items\": [\"Financial Modeling\", \"Contract Review\", \"Market Research Report\"]}"
+  },
+  {
+    "input": "Invoice #REF-62051 from Aurora Digital Agency, 175 Digital Pkwy, Atlanta GA 30301. Bill to: GreenLeaf Organics, 255 Harbor View, Seattle WA 98101. Date: September 3, 2024. Items: Standing Desks: $3,978.14. Printer Maintenance: $222.00. Equipment Rental: $1,072.11. Subtotal: $5,272.25. Tax (6%): $316.33. Total Due: $5,588.58. Payment terms: Net 15.",
+    "output": "{\"invoice_number\": \"REF-62051\", \"vendor\": \"Aurora Digital Agency\", \"customer\": \"GreenLeaf Organics\", \"date\": \"2024-09-03\", \"total\": 5588.58, \"due_date\": \"2024-09-18\", \"items\": [\"Standing Desks\", \"Printer Maintenance\", \"Equipment Rental\"]}"
+  },
+  {
+    "input": "Invoice ##21769 from BridgePort Engineering, 55 Creative Way, Austin TX 78701. Bill to: UrbanEdge Properties, 1450 Larimer St, Denver CO 80202. Date: August 1, 2024. Items: IP Filing Preparation: $1,730.00. Contract Review: $1,792.49. Consulting (Strategic): $15,878.00. Discount (10%): -$1,940.05. Subtotal: $19,400.49. Total Due: $17,460.44. Payment terms: Annual prepay.",
+    "output": "{\"invoice_number\": \"21769\", \"vendor\": \"BridgePort Engineering\", \"customer\": \"UrbanEdge Properties\", \"date\": \"2024-08-01\", \"total\": 17460.44, \"due_date\": \"2024-08-01\", \"items\": [\"IP Filing Preparation\", \"Contract Review\", \"Consulting (Strategic)\"]}"
+  },
+  {
+    "input": "FrostByte Computing | Invoice SVC-17757 | 2024-03-15 | Customer: OpenSpace Coworking. Services: HVAC Service Visit: $459.92. Office Supplies Bundle: $327.78. Cleaning Services (Monthly): $789.00. Standing Desks: $7,704.17. GST (10%): $928.09. Total: $10,208.96. Payment due on completion.",
+    "output": "{\"invoice_number\": \"SVC-17757\", \"vendor\": \"FrostByte Computing\", \"customer\": \"OpenSpace Coworking\", \"date\": \"2024-03-15\", \"total\": 10208.96, \"due_date\": \"2024-03-15\", \"items\": [\"HVAC Service Visit\", \"Office Supplies Bundle\", \"Cleaning Services (Monthly)\", \"Standing Desks\"]}"
+  },
+  {
+    "input": "Please find attached invoice INV-2024-13379 from Elara Strategy Partners dated August 24, 2024. This invoice is for services provided to LightHouse Insurance. The services include: Contract Review: $2,309.56. Recruitment Services: $8,476.10. Tax Advisory Services: $7,517.62. The total amount including tax (9.25%) of $1,693.05 is $19,996.33. Payment is due net 14.",
+    "output": "{\"invoice_number\": \"INV-2024-13379\", \"vendor\": \"Elara Strategy Partners\", \"customer\": \"LightHouse Insurance\", \"date\": \"2024-08-24\", \"total\": 19996.33, \"due_date\": \"2024-09-07\", \"items\": [\"Contract Review\", \"Recruitment Services\", \"Tax Advisory Services\"]}"
+  },
+  {
+    "input": "Invoice #INV-87529 from SkyHigh Aviation Parts, 300 Park Avenue Suite 1200, New York NY 10022. Bill to: NovaStar Entertainment, 1450 Larimer St, Denver CO 80202. Date: April 7, 2024. Items: HVAC Service Visit: $381.50. Catering (Event): $1,742.00. Subtotal: $2,123.50. Tax (9.25%): $196.42. Total Due: $2,319.92. Payment terms: Due within 7 business days.",
+    "output": "{\"invoice_number\": \"INV-87529\", \"vendor\": \"SkyHigh Aviation Parts\", \"customer\": \"NovaStar Entertainment\", \"date\": \"2024-04-07\", \"total\": 2319.92, \"due_date\": \"2024-04-14\", \"items\": [\"HVAC Service Visit\", \"Catering (Event)\"]}"
+  },
+  {
+    "input": "BridgePort Engineering | Invoice #58809 | 2024-05-11 | Customer: GemStone Jewelry. Services: Server Hardware: $10,591.00. Ergonomic Chairs: $7,847.15. Cleaning Services (Monthly): $1,553.00. Network Equipment: $3,108.00. Standing Desks: $7,507.00. Sales Tax (7%): $2,142.43. Total: $32,748.58. 50% upfront, 50% Net 30.",
+    "output": "{\"invoice_number\": \"58809\", \"vendor\": \"BridgePort Engineering\", \"customer\": \"GemStone Jewelry\", \"date\": \"2024-05-11\", \"total\": 32748.58, \"due_date\": \"2024-06-10\", \"items\": [\"Server Hardware\", \"Ergonomic Chairs\", \"Cleaning Services (Monthly)\", \"Network Equipment\", \"Standing Desks\"]}"
+  },
+  {
+    "input": "TerraFirm Construction | Invoice SVC-19827 | 2024-12-15 | Customer: Pinnacle Health Systems. Services: HVAC Service Visit: $296.59. Printer Maintenance: $246.49. Equipment Rental: $1,605.41. HST (13%): $279.30. Total: $2,427.79. Net 30.",
+    "output": "{\"invoice_number\": \"SVC-19827\", \"vendor\": \"TerraFirm Construction\", \"customer\": \"Pinnacle Health Systems\", \"date\": \"2024-12-15\", \"total\": 2427.79, \"due_date\": \"2025-01-14\", \"items\": [\"HVAC Service Visit\", \"Printer Maintenance\", \"Equipment Rental\"]}"
+  },
+  {
+    "input": "JetStream Networks | Invoice REF-59301 | 2024-03-20 | Customer: SteelBridge Construction. Services: Office Supplies Bundle: $986.00. Cleaning Services (Monthly): $534.00. Printer Maintenance: $208.35. Network Equipment: $3,678.90. GST (10%): $540.73. Total: $5,947.98. Net 15.",
+    "output": "{\"invoice_number\": \"REF-59301\", \"vendor\": \"JetStream Networks\", \"customer\": \"SteelBridge Construction\", \"date\": \"2024-03-20\", \"total\": 5947.98, \"due_date\": \"2024-04-04\", \"items\": [\"Office Supplies Bundle\", \"Cleaning Services (Monthly)\", \"Printer Maintenance\", \"Network Equipment\"]}"
+  },
+  {
+    "input": "Invoice #BILL-74830 from UltraFit Gym Equipment, 789 Commerce Blvd, Chicago IL 60601. Bill to: TimberLine Cabins, 1000 Peachtree St, Atlanta GA 30309. Date: August 2, 2024. Items: IP Filing Preparation: $3,221.74. Market Research Report: $8,842.59. Consulting (Strategic): $27,714.00. Recruitment Services: $11,261.74. Subtotal: $51,040.07. Sales Tax (7%): $3,572.80. Total Due: $54,612.87. Payment terms: Annual prepay.",
+    "output": "{\"invoice_number\": \"BILL-74830\", \"vendor\": \"UltraFit Gym Equipment\", \"customer\": \"TimberLine Cabins\", \"date\": \"2024-08-02\", \"total\": 54612.87, \"due_date\": \"2024-08-02\", \"items\": [\"IP Filing Preparation\", \"Market Research Report\", \"Consulting (Strategic)\", \"Recruitment Services\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: NordicTech Solutions AB, 300 Park Avenue Suite 1200, New York NY 10022\nTo: NovaStar Entertainment, 77 Harbour Square, Toronto ON M5J 2S2\nInvoice No: INV-2024-68842 | Date: 8/07/2024\nLine items: Executive Coaching (Monthly): $5,907.00. IP Filing Preparation: $1,579.00.\nTax (9.25%): $692.46\nTotal: $8,178.46\nTerms: Net 45",
+    "output": "{\"invoice_number\": \"INV-2024-68842\", \"vendor\": \"NordicTech Solutions AB\", \"customer\": \"NovaStar Entertainment\", \"date\": \"2024-07-08\", \"total\": 8178.46, \"due_date\": \"2024-08-22\", \"items\": [\"Executive Coaching (Monthly)\", \"IP Filing Preparation\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: NetPulse Telecom, 88 Cloud Way, Portland OR 97201\nTo: SandDune Tours, 2800 Campus Dr, San Mateo CA 94403\nInvoice No: REF-52417 | Date: 7/11/2024\nLine items: Catering (Event): $1,139.65. Network Equipment: $4,526.83. Equipment Rental: $808.83.\nVAT (25%): $1,618.83\nTotal: $8,094.14\nTerms: Net 60",
+    "output": "{\"invoice_number\": \"REF-52417\", \"vendor\": \"NetPulse Telecom\", \"customer\": \"SandDune Tours\", \"date\": \"2024-11-07\", \"total\": 8094.14, \"due_date\": \"2025-01-06\", \"items\": [\"Catering (Event)\", \"Network Equipment\", \"Equipment Rental\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: SwiftCode Consulting, 800 Wilshire Blvd, Los Angeles CA 90017\nTo: Meridian Financial Group, 3200 Innovation Drive, Palo Alto CA 94304\nInvoice No: FI-31490 | Date: 12/02/2024\nLine items: Executive Coaching (Monthly): $5,417.39. Recruitment Services: $5,310.22.\nTax (6%): $643.66\nTotal: $11,371.27\nTerms: Net 30",
+    "output": "{\"invoice_number\": \"FI-31490\", \"vendor\": \"SwiftCode Consulting\", \"customer\": \"Meridian Financial Group\", \"date\": \"2024-02-12\", \"total\": 11371.27, \"due_date\": \"2024-03-13\", \"items\": [\"Executive Coaching (Monthly)\", \"Recruitment Services\"]}"
+  },
+  {
+    "input": "Invoice #INV#40733 from ZenithPeak Consulting, 1200 Tech Park Dr, Raleigh NC 27601. Bill to: BrightStar Education, 1 Wall Street Floor 32, New York NY 10005. Date: March 21, 2024. Items: Network Equipment: $2,322.30. Cleaning Services (Monthly): $1,375.27. Server Hardware: $8,816.71. Ergonomic Chairs: $4,214.64. Catering (Event): $1,632.82. Discount (20%): -$3,672.35. Subtotal: $18,361.74. Tax (9.25%): $1,358.77. Total Due: $16,048.16. Payment terms: Net 60.",
+    "output": "{\"invoice_number\": \"INV#40733\", \"vendor\": \"ZenithPeak Consulting\", \"customer\": \"BrightStar Education\", \"date\": \"2024-03-21\", \"total\": 16048.16, \"due_date\": \"2024-05-20\", \"items\": [\"Network Equipment\", \"Cleaning Services (Monthly)\", \"Server Hardware\", \"Ergonomic Chairs\", \"Catering (Event)\"]}"
+  },
+  {
+    "input": "VeloCraft Bicycles | Invoice INV#44062 | 2024-11-07 | Customer: BlueSky Airlines. Services: Priority Support (Annual): $3,572.58. Data Migration Services: $14,186.22. Security Audit: $7,028.00. Tax (8.5%): $2,106.88. Total: $26,893.68. Net 45.",
+    "output": "{\"invoice_number\": \"INV#44062\", \"vendor\": \"VeloCraft Bicycles\", \"customer\": \"BlueSky Airlines\", \"date\": \"2024-11-07\", \"total\": 26893.68, \"due_date\": \"2024-12-22\", \"items\": [\"Priority Support (Annual)\", \"Data Migration Services\", \"Security Audit\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: VeloCraft Bicycles, 800 Wilshire Blvd, Los Angeles CA 90017\nTo: NextGen Robotics Inc, 78 Farm Road, Burlington VT 05401\nInvoice No: REF-27708 | Date: 11/08/2024\nLine items: HVAC Service Visit: $589.00. Catering (Event): $4,811.00. Ergonomic Chairs: $5,457.00. Server Hardware: $8,381.85. Standing Desks: $7,087.79.\nGST (10%): $2,632.66\nTotal: $28,959.30\nTerms: Due within 7 business days",
+    "output": "{\"invoice_number\": \"REF-27708\", \"vendor\": \"VeloCraft Bicycles\", \"customer\": \"NextGen Robotics Inc\", \"date\": \"2024-08-11\", \"total\": 28959.3, \"due_date\": \"2024-08-18\", \"items\": [\"HVAC Service Visit\", \"Catering (Event)\", \"Ergonomic Chairs\", \"Server Hardware\", \"Standing Desks\"]}"
+  },
+  {
+    "input": "YieldMax Agriculture | Invoice STM-92091 | 2024-01-20 | Customer: HealthFirst Clinics. Services: Custom Dashboard Development: $15,768.98. Data Migration Services: $7,420.42. Kubernetes Cluster Management: $5,212.00. Security Audit: $8,054.97. Database Administration: $4,210.63. Sales Tax (7%): $2,846.69. Total: $43,513.69. 50% upfront, 50% Net 30.",
+    "output": "{\"invoice_number\": \"STM-92091\", \"vendor\": \"YieldMax Agriculture\", \"customer\": \"HealthFirst Clinics\", \"date\": \"2024-01-20\", \"total\": 43513.69, \"due_date\": \"2024-02-19\", \"items\": [\"Custom Dashboard Development\", \"Data Migration Services\", \"Kubernetes Cluster Management\", \"Security Audit\", \"Database Administration\"]}"
+  },
+  {
+    "input": "Please find attached invoice QI-47008 from RapidScale Inc dated February 22, 2024. This invoice is for services provided to FairWind Sailing Co. The services include: Standing Desks: $7,091.00. Cleaning Services (Monthly): $1,334.00. Discount (15%): -$1,263.75. The total amount including vat (20%) of $1,432.25 is $8,593.50. Payment is due net 60.",
+    "output": "{\"invoice_number\": \"QI-47008\", \"vendor\": \"RapidScale Inc\", \"customer\": \"FairWind Sailing Co\", \"date\": \"2024-02-22\", \"total\": 8593.5, \"due_date\": \"2024-04-22\", \"items\": [\"Standing Desks\", \"Cleaning Services (Monthly)\"]}"
+  },
+  {
+    "input": "Please find attached invoice REF-48555 from Pixel Perfect Design Studio dated November 9, 2024. This invoice is for services provided to NovaStar Entertainment. The services include: Load Testing Suite: $7,018.00. Performance Optimization: $9,668.00. Cloud Hosting (12 months): $18,727.54. The total amount is $35,413.54. Payment is due due within 7 business days.",
+    "output": "{\"invoice_number\": \"REF-48555\", \"vendor\": \"Pixel Perfect Design Studio\", \"customer\": \"NovaStar Entertainment\", \"date\": \"2024-11-09\", \"total\": 35413.54, \"due_date\": \"2024-11-16\", \"items\": [\"Load Testing Suite\", \"Performance Optimization\", \"Cloud Hosting (12 months)\"]}"
+  },
+  {
+    "input": "IronClad Security | Invoice INV-10678 | 2024-07-16 | Customer: RainForest Conservation. Services: Kubernetes Cluster Management: $4,953.75. Disaster Recovery Setup: $11,993.94. Tax (8.5%): $1,440.55. Total: $18,388.24. Annual prepay.",
+    "output": "{\"invoice_number\": \"INV-10678\", \"vendor\": \"IronClad Security\", \"customer\": \"RainForest Conservation\", \"date\": \"2024-07-16\", \"total\": 18388.24, \"due_date\": \"2024-07-16\", \"items\": [\"Kubernetes Cluster Management\", \"Disaster Recovery Setup\"]}"
+  },
+  {
+    "input": "Please find attached invoice STM-75324 from BetaLabs Research dated December 28, 2024. This invoice is for services provided to YearRound Gardening. The services include: CI/CD Pipeline Setup: $9,057.00. Custom Dashboard Development: $14,017.00. Technical Training (2 days): $3,997.18. Cloud Hosting (12 months): $15,410.00. The total amount including sales tax (7%) of $2,973.68 is $45,454.86. Payment is due net 60.",
+    "output": "{\"invoice_number\": \"STM-75324\", \"vendor\": \"BetaLabs Research\", \"customer\": \"YearRound Gardening\", \"date\": \"2024-12-28\", \"total\": 45454.86, \"due_date\": \"2025-02-26\", \"items\": [\"CI/CD Pipeline Setup\", \"Custom Dashboard Development\", \"Technical Training (2 days)\", \"Cloud Hosting (12 months)\"]}"
+  },
+  {
+    "input": "Please find attached invoice FI-76396 from NetPulse Telecom dated August 21, 2024. This invoice is for services provided to ZephyrAir HVAC. The services include: Financial Modeling: $7,461.00. Executive Coaching (Monthly): $5,501.00. Recruitment Services: $10,926.86. The total amount including vat (25%) of $5,972.22 is $29,861.08. Payment is due due on receipt.",
+    "output": "{\"invoice_number\": \"FI-76396\", \"vendor\": \"NetPulse Telecom\", \"customer\": \"ZephyrAir HVAC\", \"date\": \"2024-08-21\", \"total\": 29861.08, \"due_date\": \"2024-08-21\", \"items\": [\"Financial Modeling\", \"Executive Coaching (Monthly)\", \"Recruitment Services\"]}"
+  },
+  {
+    "input": "Please find attached invoice QI-70166 from VeloCraft Bicycles dated December 1, 2024. This invoice is for services provided to NorthPole Expeditions. The services include: Security Audit: $11,735.21. UI/UX Design Sprint: $12,227.00. Disaster Recovery Setup: $13,765.00. Code Review (40 hours): $4,992.00. Mobile App Development (Phase 1): $48,697.74. Discount (20%): -$18,283.39. The total amount including vat (25%) of $18,283.39 is $91,416.95. Payment is due due on receipt.",
+    "output": "{\"invoice_number\": \"QI-70166\", \"vendor\": \"VeloCraft Bicycles\", \"customer\": \"NorthPole Expeditions\", \"date\": \"2024-12-01\", \"total\": 91416.95, \"due_date\": \"2024-12-01\", \"items\": [\"Security Audit\", \"UI/UX Design Sprint\", \"Disaster Recovery Setup\", \"Code Review (40 hours)\", \"Mobile App Development (Phase 1)\"]}"
+  },
+  {
+    "input": "Please find attached invoice REF-56747 from Pacific Rim Logistics dated September 13, 2024. This invoice is for services provided to NovaStar Entertainment. The services include: Server Hardware: $9,409.32. Network Equipment: $1,861.00. The total amount including vat (20%) of $2,254.06 is $13,524.38. Payment is due net 60.",
+    "output": "{\"invoice_number\": \"REF-56747\", \"vendor\": \"Pacific Rim Logistics\", \"customer\": \"NovaStar Entertainment\", \"date\": \"2024-09-13\", \"total\": 13524.38, \"due_date\": \"2024-11-12\", \"items\": [\"Server Hardware\", \"Network Equipment\"]}"
+  },
+  {
+    "input": "Please find attached invoice REF-31853 from DataVault GmbH dated February 13, 2024. This invoice is for services provided to MapleSyrup Productions. The services include: Market Research Report: $3,069.36. Contract Review: $3,033.00. Board Presentation Prep: $3,777.00. Recruitment Services: $19,317.00. Tax Advisory Services: $7,367.54. Discount (5%): -$1,828.19. The total amount including sales tax (7%) of $2,431.50 is $37,167.21. Payment is due net 15.",
+    "output": "{\"invoice_number\": \"REF-31853\", \"vendor\": \"DataVault GmbH\", \"customer\": \"MapleSyrup Productions\", \"date\": \"2024-02-13\", \"total\": 37167.21, \"due_date\": \"2024-02-28\", \"items\": [\"Market Research Report\", \"Contract Review\", \"Board Presentation Prep\", \"Recruitment Services\", \"Tax Advisory Services\"]}"
+  },
+  {
+    "input": "GreenField Organic Farms | Invoice SVC-61256 | 2024-02-07 | Customer: OpenSpace Coworking. Services: Compliance Audit (SOC2): $12,459.00. Security Audit: $10,280.18. Discount (5%): -$1,136.96. Total: $21,602.22. Annual prepay.",
+    "output": "{\"invoice_number\": \"SVC-61256\", \"vendor\": \"GreenField Organic Farms\", \"customer\": \"OpenSpace Coworking\", \"date\": \"2024-02-07\", \"total\": 21602.22, \"due_date\": \"2024-02-07\", \"items\": [\"Compliance Audit (SOC2)\", \"Security Audit\"]}"
+  },
+  {
+    "input": "IronClad Security | Invoice QI-56269 | 2024-06-06 | Customer: IvoryTower University. Services: Contract Review: $2,243.83. Board Presentation Prep: $5,603.00. Discount (10%): -$784.68. Total: $7,062.15. Payment due on completion.",
+    "output": "{\"invoice_number\": \"QI-56269\", \"vendor\": \"IronClad Security\", \"customer\": \"IvoryTower University\", \"date\": \"2024-06-06\", \"total\": 7062.15, \"due_date\": \"2024-06-06\", \"items\": [\"Contract Review\", \"Board Presentation Prep\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: PlumbRight Services LLC, 1500 Harbor Way, Long Beach CA 90802\nTo: OceanBreeze Resorts, 125 University Ave, Palo Alto CA 94301\nInvoice No: PRO-19249 | Date: 13/01/2024\nLine items: Brand Strategy Workshop: $8,617.59. Recruitment Services: $17,037.62. Board Presentation Prep: $3,952.00. Tax Advisory Services: $3,228.20. Consulting (Strategic): $5,575.00. Discount (20%): -$7,682.08.\nTotal: $30,728.33\nTerms: Due within 7 business days",
+    "output": "{\"invoice_number\": \"PRO-19249\", \"vendor\": \"PlumbRight Services LLC\", \"customer\": \"OceanBreeze Resorts\", \"date\": \"2024-01-13\", \"total\": 30728.33, \"due_date\": \"2024-01-20\", \"items\": [\"Brand Strategy Workshop\", \"Recruitment Services\", \"Board Presentation Prep\", \"Tax Advisory Services\", \"Consulting (Strategic)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: BrightWave Marketing, 789 Commerce Blvd, Chicago IL 60601\nTo: Coastal Bank & Trust, 1 Wall Street Floor 32, New York NY 10005\nInvoice No: 2024-50358 | Date: 18/10/2024\nLine items: Financial Modeling: $4,484.71. Executive Coaching (Monthly): $5,317.29.\nTotal: $9,802.00\nTerms: Net 15",
+    "output": "{\"invoice_number\": \"2024-50358\", \"vendor\": \"BrightWave Marketing\", \"customer\": \"Coastal Bank & Trust\", \"date\": \"2024-10-18\", \"total\": 9802.0, \"due_date\": \"2024-11-02\", \"items\": [\"Financial Modeling\", \"Executive Coaching (Monthly)\"]}"
+  },
+  {
+    "input": "Invoice #74309 from GreenField Organic Farms, 1500 Harbor Way, Long Beach CA 90802. Bill to: AnchorPoint Marine, 350 Royal St, New Orleans LA 70130. Date: February 1, 2024. Items: Consulting (Strategic): $15,172.00. Contract Review: $3,774.71. IP Filing Preparation: $2,705.29. Recruitment Services: $19,817.70. Financial Modeling: $8,266.79. Subtotal: $49,736.49. GST (10%): $4,973.65. Total Due: $54,710.14. Payment terms: Net 45.",
+    "output": "{\"invoice_number\": \"74309\", \"vendor\": \"GreenField Organic Farms\", \"customer\": \"AnchorPoint Marine\", \"date\": \"2024-02-01\", \"total\": 54710.14, \"due_date\": \"2024-03-17\", \"items\": [\"Consulting (Strategic)\", \"Contract Review\", \"IP Filing Preparation\", \"Recruitment Services\", \"Financial Modeling\"]}"
+  },
+  {
+    "input": "Invoice #2024-86449 from ClearView Optics, 120 Industrial Blvd, Austin TX 78701. Bill to: Coastal Bank & Trust, 500 Tech Blvd, San Jose CA 95112. Date: July 6, 2024. Items: Performance Optimization: $8,568.00. Monitoring & Alerting Setup: $2,674.74. CI/CD Pipeline Setup: $8,984.00. Subtotal: $20,226.74. VAT (25%): $5,056.68. Total Due: $25,283.42. Payment terms: Net 14.",
+    "output": "{\"invoice_number\": \"2024-86449\", \"vendor\": \"ClearView Optics\", \"customer\": \"Coastal Bank & Trust\", \"date\": \"2024-07-06\", \"total\": 25283.42, \"due_date\": \"2024-07-20\", \"items\": [\"Performance Optimization\", \"Monitoring & Alerting Setup\", \"CI/CD Pipeline Setup\"]}"
+  },
+  {
+    "input": "Invoice #PO-29494 from NetPulse Telecom, 42 Innovation Lane, Boston MA 02210. Bill to: Bloom Digital Agency, PO Box 4481, Melbourne VIC 3000. Date: May 3, 2024. Items: Load Testing Suite: $7,418.97. API Integration Package: $7,724.00. Security Audit: $5,523.34. Performance Optimization: $11,475.90. CI/CD Pipeline Setup: $5,872.00. Subtotal: $38,014.21. VAT (25%): $9,503.55. Total Due: $47,517.76. Payment terms: Due within 7 business days.",
+    "output": "{\"invoice_number\": \"PO-29494\", \"vendor\": \"NetPulse Telecom\", \"customer\": \"Bloom Digital Agency\", \"date\": \"2024-05-03\", \"total\": 47517.76, \"due_date\": \"2024-05-10\", \"items\": [\"Load Testing Suite\", \"API Integration Package\", \"Security Audit\", \"Performance Optimization\", \"CI/CD Pipeline Setup\"]}"
+  },
+  {
+    "input": "AlphaData Systems | Invoice #83543 | 2024-04-16 | Customer: OceanBreeze Resorts. Services: IP Filing Preparation: $2,795.14. Executive Coaching (Monthly): $2,463.43. Brand Strategy Workshop: $9,331.00. Tax Advisory Services: $7,862.00. Total: $22,451.57. Due on receipt.",
+    "output": "{\"invoice_number\": \"83543\", \"vendor\": \"AlphaData Systems\", \"customer\": \"OceanBreeze Resorts\", \"date\": \"2024-04-16\", \"total\": 22451.57, \"due_date\": \"2024-04-16\", \"items\": [\"IP Filing Preparation\", \"Executive Coaching (Monthly)\", \"Brand Strategy Workshop\", \"Tax Advisory Services\"]}"
+  },
+  {
+    "input": "Invoice #PRO-43402 from JetStream Networks, 610 Startup Ave, Miami FL 33101. Bill to: OceanBreeze Resorts, 1000 Peachtree St, Atlanta GA 30309. Date: October 8, 2024. Items: Equipment Rental: $1,588.40. Printer Maintenance: $122.54. HVAC Service Visit: $261.00. Catering (Event): $1,560.57. Standing Desks: $9,700.39. Subtotal: $13,232.90. Tax (9.25%): $1,224.04. Total Due: $14,456.94. Payment terms: Net 14.",
+    "output": "{\"invoice_number\": \"PRO-43402\", \"vendor\": \"JetStream Networks\", \"customer\": \"OceanBreeze Resorts\", \"date\": \"2024-10-08\", \"total\": 14456.94, \"due_date\": \"2024-10-22\", \"items\": [\"Equipment Rental\", \"Printer Maintenance\", \"HVAC Service Visit\", \"Catering (Event)\", \"Standing Desks\"]}"
+  },
+  {
+    "input": "CodeGuard Security | Invoice REF-93334 | 2024-11-21 | Customer: JadeGarden Restaurant. Services: Monitoring & Alerting Setup: $2,442.94. Custom Dashboard Development: $15,845.00. Code Review (40 hours): $5,759.68. Discount (10%): -$2,404.76. Total: $21,642.86. Net 15.",
+    "output": "{\"invoice_number\": \"REF-93334\", \"vendor\": \"CodeGuard Security\", \"customer\": \"JadeGarden Restaurant\", \"date\": \"2024-11-21\", \"total\": 21642.86, \"due_date\": \"2024-12-06\", \"items\": [\"Monitoring & Alerting Setup\", \"Custom Dashboard Development\", \"Code Review (40 hours)\"]}"
+  },
+  {
+    "input": "Invoice #INV-2024-33197 from CodeGuard Security, 450 Market St, San Francisco CA 94105. Bill to: DataFlow Analytics, 1000 Peachtree St, Atlanta GA 30309. Date: March 25, 2024. Items: Brand Strategy Workshop: $6,347.00. Financial Modeling: $6,025.00. Subtotal: $12,372.00. HST (13%): $1,608.36. Total Due: $13,980.36. Payment terms: Net 15.",
+    "output": "{\"invoice_number\": \"INV-2024-33197\", \"vendor\": \"CodeGuard Security\", \"customer\": \"DataFlow Analytics\", \"date\": \"2024-03-25\", \"total\": 13980.36, \"due_date\": \"2024-04-09\", \"items\": [\"Brand Strategy Workshop\", \"Financial Modeling\"]}"
+  },
+  {
+    "input": "SkyHigh Aviation Parts | Invoice PO-96835 | 2024-02-01 | Customer: RainForest Conservation. Services: Printer Maintenance: $371.12. Standing Desks: $6,073.74. Discount (5%): -$322.24. Sales Tax (7%): $428.58. Total: $6,551.20. Net 30.",
+    "output": "{\"invoice_number\": \"PO-96835\", \"vendor\": \"SkyHigh Aviation Parts\", \"customer\": \"RainForest Conservation\", \"date\": \"2024-02-01\", \"total\": 6551.2, \"due_date\": \"2024-03-02\", \"items\": [\"Printer Maintenance\", \"Standing Desks\"]}"
+  },
+  {
+    "input": "Global Supply Co | Invoice PRO-11765 | 2024-09-25 | Customer: CrystalClear Windows. Services: Tax Advisory Services: $6,677.65. Recruitment Services: $12,261.11. GST (10%): $1,893.88. Total: $20,832.64. Due within 7 business days.",
+    "output": "{\"invoice_number\": \"PRO-11765\", \"vendor\": \"Global Supply Co\", \"customer\": \"CrystalClear Windows\", \"date\": \"2024-09-25\", \"total\": 20832.64, \"due_date\": \"2024-10-02\", \"items\": [\"Tax Advisory Services\", \"Recruitment Services\"]}"
+  },
+  {
+    "input": "Invoice #BILL-43833 from RapidScale Inc, 333 Data Drive, Denver CO 80202. Bill to: QuickMart Retail, 400 Lake Shore Dr, Chicago IL 60611. Date: September 7, 2024. Items: IP Filing Preparation: $3,261.32. Consulting (Strategic): $14,544.00. Contract Review: $3,316.61. Subtotal: $21,121.93. MwSt (19%): $4,013.17. Total Due: $25,135.10. Payment terms: 50% upfront, 50% Net 30.",
+    "output": "{\"invoice_number\": \"BILL-43833\", \"vendor\": \"RapidScale Inc\", \"customer\": \"QuickMart Retail\", \"date\": \"2024-09-07\", \"total\": 25135.1, \"due_date\": \"2024-10-07\", \"items\": [\"IP Filing Preparation\", \"Consulting (Strategic)\", \"Contract Review\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: OptiFlow Hydraulics, 450 Market St, San Francisco CA 94105\nTo: SunsetGlow Photography, 900 Medical Dr, Houston TX 77030\nInvoice No: QI-95557 | Date: 14/07/2024\nLine items: Brand Strategy Workshop: $9,405.02. Board Presentation Prep: $7,338.92. Executive Coaching (Monthly): $3,344.00. Tax Advisory Services: $3,656.00. Market Research Report: $9,924.78.\nTotal: $33,668.72\nTerms: Due on receipt",
+    "output": "{\"invoice_number\": \"QI-95557\", \"vendor\": \"OptiFlow Hydraulics\", \"customer\": \"SunsetGlow Photography\", \"date\": \"2024-07-14\", \"total\": 33668.72, \"due_date\": \"2024-07-14\", \"items\": [\"Brand Strategy Workshop\", \"Board Presentation Prep\", \"Executive Coaching (Monthly)\", \"Tax Advisory Services\", \"Market Research Report\"]}"
+  },
+  {
+    "input": "ZenithPeak Consulting | Invoice INV-1384 | 2024-08-11 | Customer: DataFlow Analytics. Services: Board Presentation Prep: $4,387.00. Consulting (Strategic): $9,604.00. GST (10%): $1,399.10. Total: $15,390.10. Net 45.",
+    "output": "{\"invoice_number\": \"INV-1384\", \"vendor\": \"ZenithPeak Consulting\", \"customer\": \"DataFlow Analytics\", \"date\": \"2024-08-11\", \"total\": 15390.1, \"due_date\": \"2024-09-25\", \"items\": [\"Board Presentation Prep\", \"Consulting (Strategic)\"]}"
+  },
+  {
+    "input": "Invoice #2024-81521 from PrimeVault Storage, 42 Innovation Lane, Boston MA 02210. Bill to: BrightPath Consulting Ltd, 1100 Main St, Kansas City MO 64105. Date: September 7, 2024. Items: Board Presentation Prep: $2,842.00. Financial Modeling: $6,991.43. Consulting (Strategic): $29,922.00. Market Research Report: $4,103.41. Tax Advisory Services: $6,850.00. Subtotal: $50,708.84. VAT (20%): $10,141.77. Total Due: $60,850.61. Payment terms: Net 60.",
+    "output": "{\"invoice_number\": \"2024-81521\", \"vendor\": \"PrimeVault Storage\", \"customer\": \"BrightPath Consulting Ltd\", \"date\": \"2024-09-07\", \"total\": 60850.61, \"due_date\": \"2024-11-06\", \"items\": [\"Board Presentation Prep\", \"Financial Modeling\", \"Consulting (Strategic)\", \"Market Research Report\", \"Tax Advisory Services\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: SwiftCode Consulting, Storgatan 45, Stockholm, Sweden\nTo: FairWind Sailing Co, 2800 Campus Dr, San Mateo CA 94403\nInvoice No: STM-90677 | Date: 1/01/2024\nLine items: Standing Desks: $8,059.00. Printer Maintenance: $235.56. Server Hardware: $9,012.00. Discount (15%): -$2,595.98.\nHST (13%): $1,912.38\nTotal: $16,622.96\nTerms: Net 14",
+    "output": "{\"invoice_number\": \"STM-90677\", \"vendor\": \"SwiftCode Consulting\", \"customer\": \"FairWind Sailing Co\", \"date\": \"2024-01-01\", \"total\": 16622.96, \"due_date\": \"2024-01-15\", \"items\": [\"Standing Desks\", \"Printer Maintenance\", \"Server Hardware\"]}"
+  },
+  {
+    "input": "Invoice ##23374 from Elara Strategy Partners, 1200 Tech Park Dr, Raleigh NC 27601. Bill to: SunsetGlow Photography, 255 Harbor View, Seattle WA 98101. Date: March 25, 2024. Items: Server Hardware: $12,923.55. Network Equipment: $3,223.56. HVAC Service Visit: $510.00. Catering (Event): $4,453.38. Discount (15%): -$3,166.57. Subtotal: $21,110.49. Total Due: $17,943.92. Payment terms: Net 15.",
+    "output": "{\"invoice_number\": \"23374\", \"vendor\": \"Elara Strategy Partners\", \"customer\": \"SunsetGlow Photography\", \"date\": \"2024-03-25\", \"total\": 17943.92, \"due_date\": \"2024-04-09\", \"items\": [\"Server Hardware\", \"Network Equipment\", \"HVAC Service Visit\", \"Catering (Event)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: CodeGuard Security, 120 Industrial Blvd, Austin TX 78701\nTo: Highland Scotch Distillery, 3200 Innovation Drive, Palo Alto CA 94304\nInvoice No: INV-2024-17410 | Date: 1/11/2024\nLine items: Technical Training (2 days): $4,426.17. Data Migration Services: $10,357.93. Kubernetes Cluster Management: $3,075.84.\nGST (10%): $1,785.99\nTotal: $19,645.93\nTerms: Net 60",
+    "output": "{\"invoice_number\": \"INV-2024-17410\", \"vendor\": \"CodeGuard Security\", \"customer\": \"Highland Scotch Distillery\", \"date\": \"2024-11-01\", \"total\": 19645.93, \"due_date\": \"2024-12-31\", \"items\": [\"Technical Training (2 days)\", \"Data Migration Services\", \"Kubernetes Cluster Management\"]}"
+  },
+  {
+    "input": "Please find attached invoice #5700 from WildRoots Landscaping dated April 16, 2024. This invoice is for services provided to PlatinumEdge Sports. The services include: Monitoring & Alerting Setup: $3,466.54. Priority Support (Annual): $2,357.00. Custom Dashboard Development: $18,569.91. Penetration Testing: $10,628.74. Code Review (40 hours): $5,928.00. The total amount including sales tax (7%) of $2,866.51 is $43,816.70. Payment is due payment due on completion.",
+    "output": "{\"invoice_number\": \"5700\", \"vendor\": \"WildRoots Landscaping\", \"customer\": \"PlatinumEdge Sports\", \"date\": \"2024-04-16\", \"total\": 43816.7, \"due_date\": \"2024-04-16\", \"items\": [\"Monitoring & Alerting Setup\", \"Priority Support (Annual)\", \"Custom Dashboard Development\", \"Penetration Testing\", \"Code Review (40 hours)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: WildRoots Landscaping, 450 Market St, San Francisco CA 94105\nTo: CrystalClear Windows, 1100 Main St, Kansas City MO 64105\nInvoice No: SI-35120 | Date: 8/06/2024\nLine items: Standing Desks: $3,146.00. Office Supplies Bundle: $894.00. HVAC Service Visit: $647.15. Printer Maintenance: $305.15.\nGST (10%): $499.23\nTotal: $5,491.53\nTerms: Due within 7 business days",
+    "output": "{\"invoice_number\": \"SI-35120\", \"vendor\": \"WildRoots Landscaping\", \"customer\": \"CrystalClear Windows\", \"date\": \"2024-06-08\", \"total\": 5491.53, \"due_date\": \"2024-06-15\", \"items\": [\"Standing Desks\", \"Office Supplies Bundle\", \"HVAC Service Visit\", \"Printer Maintenance\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: QuartzPoint Analytics, 42 Innovation Lane, Boston MA 02210\nTo: UnityWorks Nonprofit, 1450 Larimer St, Denver CO 80202\nInvoice No: REF-44891 | Date: 18/08/2024\nLine items: Brand Strategy Workshop: $4,923.37. IP Filing Preparation: $2,144.00. Executive Coaching (Monthly): $4,253.94. Board Presentation Prep: $2,176.93.\nTotal: $13,498.24\nTerms: Due on receipt",
+    "output": "{\"invoice_number\": \"REF-44891\", \"vendor\": \"QuartzPoint Analytics\", \"customer\": \"UnityWorks Nonprofit\", \"date\": \"2024-08-18\", \"total\": 13498.24, \"due_date\": \"2024-08-18\", \"items\": [\"Brand Strategy Workshop\", \"IP Filing Preparation\", \"Executive Coaching (Monthly)\", \"Board Presentation Prep\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: YieldMax Agriculture, Level 3, 200 George St, Sydney NSW 2000\nTo: TimberLine Cabins, 2800 Campus Dr, San Mateo CA 94403\nInvoice No: 2024-14519 | Date: 25/06/2024\nLine items: Brand Strategy Workshop: $3,032.00. Board Presentation Prep: $2,386.31. IP Filing Preparation: $2,062.63.\nTax (8.5%): $635.88\nTotal: $8,116.82\nTerms: Net 30",
+    "output": "{\"invoice_number\": \"2024-14519\", \"vendor\": \"YieldMax Agriculture\", \"customer\": \"TimberLine Cabins\", \"date\": \"2024-06-25\", \"total\": 8116.82, \"due_date\": \"2024-07-25\", \"items\": [\"Brand Strategy Workshop\", \"Board Presentation Prep\", \"IP Filing Preparation\"]}"
+  },
+  {
+    "input": "Please find attached invoice FI-18622 from VeloCraft Bicycles dated May 6, 2024. This invoice is for services provided to GreenLeaf Organics. The services include: Server Hardware: $15,417.33. Cleaning Services (Monthly): $1,809.71. Ergonomic Chairs: $3,947.17. The total amount including tax (6%) of $1,270.45 is $22,444.66. Payment is due 50% upfront, 50% net 30.",
+    "output": "{\"invoice_number\": \"FI-18622\", \"vendor\": \"VeloCraft Bicycles\", \"customer\": \"GreenLeaf Organics\", \"date\": \"2024-05-06\", \"total\": 22444.66, \"due_date\": \"2024-06-05\", \"items\": [\"Server Hardware\", \"Cleaning Services (Monthly)\", \"Ergonomic Chairs\"]}"
+  },
+  {
+    "input": "Invoice #BILL-54699 from TerraFirm Construction, Level 3, 200 George St, Sydney NSW 2000. Bill to: SunsetGlow Photography, 2800 Campus Dr, San Mateo CA 94403. Date: October 24, 2024. Items: Server Hardware: $10,587.37. Standing Desks: $4,918.52. Ergonomic Chairs: $7,869.00. Subtotal: $23,374.89. Tax (9.25%): $2,162.18. Total Due: $25,537.07. Payment terms: Net 60.",
+    "output": "{\"invoice_number\": \"BILL-54699\", \"vendor\": \"TerraFirm Construction\", \"customer\": \"SunsetGlow Photography\", \"date\": \"2024-10-24\", \"total\": 25537.07, \"due_date\": \"2024-12-23\", \"items\": [\"Server Hardware\", \"Standing Desks\", \"Ergonomic Chairs\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: MetalWorks Engineering, 120 Industrial Blvd, Austin TX 78701\nTo: OpenSpace Coworking, 350 Royal St, New Orleans LA 70130\nInvoice No: SI-13787 | Date: 3/07/2024\nLine items: Cleaning Services (Monthly): $609.07. HVAC Service Visit: $375.69. Ergonomic Chairs: $5,289.00.\nSales Tax (7%): $439.16\nTotal: $6,712.92\nTerms: 50% upfront, 50% Net 30",
+    "output": "{\"invoice_number\": \"SI-13787\", \"vendor\": \"MetalWorks Engineering\", \"customer\": \"OpenSpace Coworking\", \"date\": \"2024-07-03\", \"total\": 6712.92, \"due_date\": \"2024-08-02\", \"items\": [\"Cleaning Services (Monthly)\", \"HVAC Service Visit\", \"Ergonomic Chairs\"]}"
+  },
+  {
+    "input": "Please find attached invoice QI-52548 from BrightWave Marketing dated August 3, 2024. This invoice is for services provided to FairWind Sailing Co. The services include: Financial Modeling: $9,531.01. Market Research Report: $5,692.00. Recruitment Services: $12,966.39. IP Filing Preparation: $2,464.06. The total amount including tax (9.25%) of $2,835.45 is $33,488.91. Payment is due due on receipt.",
+    "output": "{\"invoice_number\": \"QI-52548\", \"vendor\": \"BrightWave Marketing\", \"customer\": \"FairWind Sailing Co\", \"date\": \"2024-08-03\", \"total\": 33488.91, \"due_date\": \"2024-08-03\", \"items\": [\"Financial Modeling\", \"Market Research Report\", \"Recruitment Services\", \"IP Filing Preparation\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: CloudMetrics Pty Ltd, 450 Market St, San Francisco CA 94105\nTo: Bloom Digital Agency, 1 Wall Street Floor 32, New York NY 10005\nInvoice No: INV#70776 | Date: 8/05/2024\nLine items: UI/UX Design Sprint: $12,098.42. Load Testing Suite: $4,016.53. API Integration Package: $5,860.00.\nTax (9.25%): $2,032.68\nTotal: $24,007.63\nTerms: Net 45",
+    "output": "{\"invoice_number\": \"INV#70776\", \"vendor\": \"CloudMetrics Pty Ltd\", \"customer\": \"Bloom Digital Agency\", \"date\": \"2024-05-08\", \"total\": 24007.63, \"due_date\": \"2024-06-22\", \"items\": [\"UI/UX Design Sprint\", \"Load Testing Suite\", \"API Integration Package\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: CodeGuard Security, Level 3, 200 George St, Sydney NSW 2000\nTo: BrightPath Consulting Ltd, 1600 Hillside Rd, Boulder CO 80302\nInvoice No: QI-45304 | Date: 2/12/2024\nLine items: Office Supplies Bundle: $354.00. Server Hardware: $12,458.42. Ergonomic Chairs: $2,645.64.\nMwSt (19%): $2,937.03\nTotal: $18,395.09\nTerms: Due within 7 business days",
+    "output": "{\"invoice_number\": \"QI-45304\", \"vendor\": \"CodeGuard Security\", \"customer\": \"BrightPath Consulting Ltd\", \"date\": \"2024-12-02\", \"total\": 18395.09, \"due_date\": \"2024-12-09\", \"items\": [\"Office Supplies Bundle\", \"Server Hardware\", \"Ergonomic Chairs\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: PlumbRight Services LLC, 14 Bean Street, Seattle WA 98101\nTo: GreenLeaf Organics, 1 Wall Street Floor 32, New York NY 10005\nInvoice No: INV#38263 | Date: 20/04/2024\nLine items: API Integration Package: $11,918.70. Code Review (40 hours): $7,709.00. Penetration Testing: $7,875.81.\nMwSt (19%): $5,225.67\nTotal: $32,729.18\nTerms: Payment due on completion",
+    "output": "{\"invoice_number\": \"INV#38263\", \"vendor\": \"PlumbRight Services LLC\", \"customer\": \"GreenLeaf Organics\", \"date\": \"2024-04-20\", \"total\": 32729.18, \"due_date\": \"2024-04-20\", \"items\": [\"API Integration Package\", \"Code Review (40 hours)\", \"Penetration Testing\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: CodeGuard Security, Friedrichstrasse 100, 10117 Berlin\nTo: Highland Scotch Distillery, 255 Harbor View, Seattle WA 98101\nInvoice No: INV-52295 | Date: 11/06/2024\nLine items: Board Presentation Prep: $2,702.00. Tax Advisory Services: $2,271.10. Market Research Report: $4,512.00. Consulting (Strategic): $10,693.00.\nSales Tax (7%): $1,412.47\nTotal: $21,590.57\nTerms: Net 14",
+    "output": "{\"invoice_number\": \"INV-52295\", \"vendor\": \"CodeGuard Security\", \"customer\": \"Highland Scotch Distillery\", \"date\": \"2024-06-11\", \"total\": 21590.57, \"due_date\": \"2024-06-25\", \"items\": [\"Board Presentation Prep\", \"Tax Advisory Services\", \"Market Research Report\", \"Consulting (Strategic)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: AlphaData Systems, 175 Digital Pkwy, Atlanta GA 30301\nTo: IvoryTower University, 1 Wall Street Floor 32, New York NY 10005\nInvoice No: PRO-16845 | Date: 20/05/2024\nLine items: Catering (Event): $3,319.00. Network Equipment: $1,920.57. Office Supplies Bundle: $259.42.\nSales Tax (7%): $384.93\nTotal: $5,883.92\nTerms: Net 30",
+    "output": "{\"invoice_number\": \"PRO-16845\", \"vendor\": \"AlphaData Systems\", \"customer\": \"IvoryTower University\", \"date\": \"2024-05-20\", \"total\": 5883.92, \"due_date\": \"2024-06-19\", \"items\": [\"Catering (Event)\", \"Network Equipment\", \"Office Supplies Bundle\"]}"
+  },
+  {
+    "input": "Please find attached invoice 72381 from ZenithPeak Consulting dated November 24, 2024. This invoice is for services provided to SandDune Tours. The services include: Monitoring & Alerting Setup: $3,649.95. Priority Support (Annual): $4,249.86. Database Administration: $4,311.00. Cloud Hosting (12 months): $17,827.00. Discount (20%): -$6,007.56. The total amount including vat (25%) of $6,007.56 is $30,037.81. Payment is due net 45.",
+    "output": "{\"invoice_number\": \"72381\", \"vendor\": \"ZenithPeak Consulting\", \"customer\": \"SandDune Tours\", \"date\": \"2024-11-24\", \"total\": 30037.81, \"due_date\": \"2025-01-08\", \"items\": [\"Monitoring & Alerting Setup\", \"Priority Support (Annual)\", \"Database Administration\", \"Cloud Hosting (12 months)\"]}"
+  },
+  {
+    "input": "Invoice #STM-95105 from Elara Strategy Partners, 800 Wilshire Blvd, Los Angeles CA 90017. Bill to: ThunderBolt Electric, 350 Royal St, New Orleans LA 70130. Date: April 21, 2024. Items: Executive Coaching (Monthly): $5,810.44. Contract Review: $3,882.00. Subtotal: $9,692.44. Tax (6%): $581.55. Total Due: $10,273.99. Payment terms: Due within 7 business days.",
+    "output": "{\"invoice_number\": \"STM-95105\", \"vendor\": \"Elara Strategy Partners\", \"customer\": \"ThunderBolt Electric\", \"date\": \"2024-04-21\", \"total\": 10273.99, \"due_date\": \"2024-04-28\", \"items\": [\"Executive Coaching (Monthly)\", \"Contract Review\"]}"
+  },
+  {
+    "input": "Please find attached invoice QI-88852 from Artisan Coffee Roasters dated March 18, 2024. This invoice is for services provided to GemStone Jewelry. The services include: HVAC Service Visit: $608.00. Network Equipment: $4,827.00. Equipment Rental: $1,889.82. Cleaning Services (Monthly): $1,741.00. The total amount including tax (9.25%) of $838.59 is $9,904.41. Payment is due net 30.",
+    "output": "{\"invoice_number\": \"QI-88852\", \"vendor\": \"Artisan Coffee Roasters\", \"customer\": \"GemStone Jewelry\", \"date\": \"2024-03-18\", \"total\": 9904.41, \"due_date\": \"2024-04-17\", \"items\": [\"HVAC Service Visit\", \"Network Equipment\", \"Equipment Rental\", \"Cleaning Services (Monthly)\"]}"
+  },
+  {
+    "input": "Please find attached invoice #87686 from RedOak Furniture dated February 21, 2024. This invoice is for services provided to TechStart Inc. The services include: Standing Desks: $9,514.00. HVAC Service Visit: $393.08. Server Hardware: $16,887.73. Cleaning Services (Monthly): $1,481.00. Ergonomic Chairs: $6,979.42. Discount (20%): -$7,051.05. The total amount including vat (20%) of $5,640.84 is $33,845.02. Payment is due net 14.",
+    "output": "{\"invoice_number\": \"87686\", \"vendor\": \"RedOak Furniture\", \"customer\": \"TechStart Inc\", \"date\": \"2024-02-21\", \"total\": 33845.02, \"due_date\": \"2024-03-06\", \"items\": [\"Standing Desks\", \"HVAC Service Visit\", \"Server Hardware\", \"Cleaning Services (Monthly)\", \"Ergonomic Chairs\"]}"
+  },
+  {
+    "input": "Please find attached invoice 2024-68751 from QuantumLeap Analytics dated December 25, 2024. This invoice is for services provided to PlatinumEdge Sports. The services include: Catering (Event): $2,716.96. Office Supplies Bundle: $591.00. Printer Maintenance: $372.00. Cleaning Services (Monthly): $1,468.00. Equipment Rental: $1,584.94. The total amount including gst (10%) of $673.29 is $7,406.19. Payment is due payment due on completion.",
+    "output": "{\"invoice_number\": \"2024-68751\", \"vendor\": \"QuantumLeap Analytics\", \"customer\": \"PlatinumEdge Sports\", \"date\": \"2024-12-25\", \"total\": 7406.19, \"due_date\": \"2024-12-25\", \"items\": [\"Catering (Event)\", \"Office Supplies Bundle\", \"Printer Maintenance\", \"Cleaning Services (Monthly)\", \"Equipment Rental\"]}"
+  },
+  {
+    "input": "TidalWave Media | Invoice SVC-3835 | 2024-05-08 | Customer: TimberLine Cabins. Services: Ergonomic Chairs: $7,695.07. Network Equipment: $2,230.00. Cleaning Services (Monthly): $788.38. Office Supplies Bundle: $710.92. HVAC Service Visit: $494.39. Tax (8.5%): $1,013.09. Total: $12,931.85. Annual prepay.",
+    "output": "{\"invoice_number\": \"SVC-3835\", \"vendor\": \"TidalWave Media\", \"customer\": \"TimberLine Cabins\", \"date\": \"2024-05-08\", \"total\": 12931.85, \"due_date\": \"2024-05-08\", \"items\": [\"Ergonomic Chairs\", \"Network Equipment\", \"Cleaning Services (Monthly)\", \"Office Supplies Bundle\", \"HVAC Service Visit\"]}"
+  },
+  {
+    "input": "Invoice #INV#82386 from QuantumLeap Analytics, 300 Park Avenue Suite 1200, New York NY 10022. Bill to: SteelBridge Construction, 350 Royal St, New Orleans LA 70130. Date: June 8, 2024. Items: API Integration Package: $11,977.81. UI/UX Design Sprint: $6,129.00. SSL Certificate (Wildcard): $208.00. Disaster Recovery Setup: $14,692.99. Subtotal: $33,007.80. Sales Tax (7%): $2,310.55. Total Due: $35,318.35. Payment terms: Due within 7 business days.",
+    "output": "{\"invoice_number\": \"INV#82386\", \"vendor\": \"QuantumLeap Analytics\", \"customer\": \"SteelBridge Construction\", \"date\": \"2024-06-08\", \"total\": 35318.35, \"due_date\": \"2024-06-15\", \"items\": [\"API Integration Package\", \"UI/UX Design Sprint\", \"SSL Certificate (Wildcard)\", \"Disaster Recovery Setup\"]}"
+  },
+  {
+    "input": "Please find attached invoice SVC-6832 from Global Supply Co dated July 4, 2024. This invoice is for services provided to IvoryTower University. The services include: Tax Advisory Services: $7,322.00. Market Research Report: $4,405.47. The total amount including hst (13%) of $1,524.57 is $13,252.04. Payment is due payment due on completion.",
+    "output": "{\"invoice_number\": \"SVC-6832\", \"vendor\": \"Global Supply Co\", \"customer\": \"IvoryTower University\", \"date\": \"2024-07-04\", \"total\": 13252.04, \"due_date\": \"2024-07-04\", \"items\": [\"Tax Advisory Services\", \"Market Research Report\"]}"
+  },
+  {
+    "input": "Invoice #INV#38727 from Summit Legal Services LLC, 175 Digital Pkwy, Atlanta GA 30301. Bill to: HealthFirst Clinics, 1100 Main St, Kansas City MO 64105. Date: August 4, 2024. Items: Market Research Report: $11,381.33. Consulting (Strategic): $15,745.00. Board Presentation Prep: $4,657.02. Subtotal: $31,783.35. Total Due: $31,783.35. Payment terms: Due within 7 business days.",
+    "output": "{\"invoice_number\": \"INV#38727\", \"vendor\": \"Summit Legal Services LLC\", \"customer\": \"HealthFirst Clinics\", \"date\": \"2024-08-04\", \"total\": 31783.35, \"due_date\": \"2024-08-11\", \"items\": [\"Market Research Report\", \"Consulting (Strategic)\", \"Board Presentation Prep\"]}"
+  },
+  {
+    "input": "Please find attached invoice BILL-8555 from IronClad Security dated April 4, 2024. This invoice is for services provided to Riverside Manufacturing. The services include: Ergonomic Chairs: $6,289.99. Network Equipment: $1,526.76. Standing Desks: $7,291.09. Equipment Rental: $527.00. The total amount is $15,634.84. Payment is due net 15.",
+    "output": "{\"invoice_number\": \"BILL-8555\", \"vendor\": \"IronClad Security\", \"customer\": \"Riverside Manufacturing\", \"date\": \"2024-04-04\", \"total\": 15634.84, \"due_date\": \"2024-04-19\", \"items\": [\"Ergonomic Chairs\", \"Network Equipment\", \"Standing Desks\", \"Equipment Rental\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: QuartzPoint Analytics, 300 Park Avenue Suite 1200, New York NY 10022\nTo: OakHeart Brewery, 500 Tech Blvd, San Jose CA 95112\nInvoice No: INV#28982 | Date: 4/03/2024\nLine items: Custom Dashboard Development: $13,369.94. API Integration Package: $10,027.37.\nTax (6%): $1,403.84\nTotal: $24,801.15\nTerms: 50% upfront, 50% Net 30",
+    "output": "{\"invoice_number\": \"INV#28982\", \"vendor\": \"QuartzPoint Analytics\", \"customer\": \"OakHeart Brewery\", \"date\": \"2024-03-04\", \"total\": 24801.15, \"due_date\": \"2024-04-03\", \"items\": [\"Custom Dashboard Development\", \"API Integration Package\"]}"
+  },
+  {
+    "input": "ZenithPeak Consulting | Invoice REF-48060 | 2024-01-03 | Customer: XpressShip Delivery. Services: Standing Desks: $6,817.00. Equipment Rental: $1,243.75. Catering (Event): $2,617.41. Network Equipment: $2,379.25. Office Supplies Bundle: $792.70. Tax (9.25%): $1,281.14. Total: $15,131.25. Annual prepay.",
+    "output": "{\"invoice_number\": \"REF-48060\", \"vendor\": \"ZenithPeak Consulting\", \"customer\": \"XpressShip Delivery\", \"date\": \"2024-01-03\", \"total\": 15131.25, \"due_date\": \"2024-01-03\", \"items\": [\"Standing Desks\", \"Equipment Rental\", \"Catering (Event)\", \"Network Equipment\", \"Office Supplies Bundle\"]}"
+  },
+  {
+    "input": "Please find attached invoice PRO-8621 from DeepSea Mining Corp dated July 11, 2024. This invoice is for services provided to UrbanEdge Properties. The services include: Server Hardware: $9,871.37. Equipment Rental: $1,123.00. Catering (Event): $1,149.43. The total amount including tax (8.5%) of $1,032.22 is $13,176.02. Payment is due net 45.",
+    "output": "{\"invoice_number\": \"PRO-8621\", \"vendor\": \"DeepSea Mining Corp\", \"customer\": \"UrbanEdge Properties\", \"date\": \"2024-07-11\", \"total\": 13176.02, \"due_date\": \"2024-08-25\", \"items\": [\"Server Hardware\", \"Equipment Rental\", \"Catering (Event)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: Pacific Rim Logistics, 300 Park Avenue Suite 1200, New York NY 10022\nTo: PlatinumEdge Sports, 600 Congress Ave, Austin TX 78701\nInvoice No: REF-46429 | Date: 5/02/2024\nLine items: SSL Certificate (Wildcard): $331.55. Disaster Recovery Setup: $14,760.46. Priority Support (Annual): $2,378.00. Performance Optimization: $4,809.52.\nGST (10%): $2,227.95\nTotal: $24,507.48\nTerms: Net 14",
+    "output": "{\"invoice_number\": \"REF-46429\", \"vendor\": \"Pacific Rim Logistics\", \"customer\": \"PlatinumEdge Sports\", \"date\": \"2024-02-05\", \"total\": 24507.48, \"due_date\": \"2024-02-19\", \"items\": [\"SSL Certificate (Wildcard)\", \"Disaster Recovery Setup\", \"Priority Support (Annual)\", \"Performance Optimization\"]}"
+  },
+  {
+    "input": "SkyHigh Aviation Parts | Invoice BILL-25216 | 2024-05-17 | Customer: EverGreen Parks Dept. Services: Code Review (40 hours): $7,830.20. Load Testing Suite: $5,445.82. Custom Dashboard Development: $11,819.22. API Integration Package: $13,255.00. Performance Optimization: $5,871.23. Discount (15%): -$6,633.22. Tax (8.5%): $3,195.00. Total: $40,783.25. Net 30.",
+    "output": "{\"invoice_number\": \"BILL-25216\", \"vendor\": \"SkyHigh Aviation Parts\", \"customer\": \"EverGreen Parks Dept\", \"date\": \"2024-05-17\", \"total\": 40783.25, \"due_date\": \"2024-06-16\", \"items\": [\"Code Review (40 hours)\", \"Load Testing Suite\", \"Custom Dashboard Development\", \"API Integration Package\", \"Performance Optimization\"]}"
+  },
+  {
+    "input": "Please find attached invoice PRO-48713 from NordicTech Solutions AB dated June 14, 2024. This invoice is for services provided to BrightStar Education. The services include: Brand Strategy Workshop: $4,643.00. Executive Coaching (Monthly): $4,488.00. Board Presentation Prep: $4,687.77. Contract Review: $1,517.00. Recruitment Services: $17,369.20. Discount (10%): -$3,270.50. The total amount is $29,434.47. Payment is due net 14.",
+    "output": "{\"invoice_number\": \"PRO-48713\", \"vendor\": \"NordicTech Solutions AB\", \"customer\": \"BrightStar Education\", \"date\": \"2024-06-14\", \"total\": 29434.47, \"due_date\": \"2024-06-28\", \"items\": [\"Brand Strategy Workshop\", \"Executive Coaching (Monthly)\", \"Board Presentation Prep\", \"Contract Review\", \"Recruitment Services\"]}"
+  },
+  {
+    "input": "Invoice #68201 from HarborLight Shipping, 610 Startup Ave, Miami FL 33101. Bill to: HealthFirst Clinics, 1450 Larimer St, Denver CO 80202. Date: July 14, 2024. Items: Office Supplies Bundle: $771.26. Printer Maintenance: $118.96. Discount (10%): -$89.02. Subtotal: $890.22. Tax (8.5%): $68.10. Total Due: $869.30. Payment terms: Net 14.",
+    "output": "{\"invoice_number\": \"68201\", \"vendor\": \"HarborLight Shipping\", \"customer\": \"HealthFirst Clinics\", \"date\": \"2024-07-14\", \"total\": 869.3, \"due_date\": \"2024-07-28\", \"items\": [\"Office Supplies Bundle\", \"Printer Maintenance\"]}"
+  },
+  {
+    "input": "CrestLine Financial | Invoice SI-37026 | 2024-03-25 | Customer: FairWind Sailing Co. Services: Office Supplies Bundle: $670.00. Server Hardware: $5,045.28. Cleaning Services (Monthly): $1,276.34. Standing Desks: $7,662.00. Network Equipment: $4,934.00. Tax (9.25%): $1,811.85. Total: $21,399.47. Net 14.",
+    "output": "{\"invoice_number\": \"SI-37026\", \"vendor\": \"CrestLine Financial\", \"customer\": \"FairWind Sailing Co\", \"date\": \"2024-03-25\", \"total\": 21399.47, \"due_date\": \"2024-04-08\", \"items\": [\"Office Supplies Bundle\", \"Server Hardware\", \"Cleaning Services (Monthly)\", \"Standing Desks\", \"Network Equipment\"]}"
+  },
+  {
+    "input": "Please find attached invoice BILL-26663 from EagleSoft Solutions dated June 4, 2024. This invoice is for services provided to FreshCo Imports. The services include: Market Research Report: $4,391.00. Brand Strategy Workshop: $5,676.27. Executive Coaching (Monthly): $4,228.47. The total amount including vat (20%) of $2,859.15 is $17,154.89. Payment is due net 45.",
+    "output": "{\"invoice_number\": \"BILL-26663\", \"vendor\": \"EagleSoft Solutions\", \"customer\": \"FreshCo Imports\", \"date\": \"2024-06-04\", \"total\": 17154.89, \"due_date\": \"2024-07-19\", \"items\": [\"Market Research Report\", \"Brand Strategy Workshop\", \"Executive Coaching (Monthly)\"]}"
+  },
+  {
+    "input": "Invoice #INV#41175 from CloudMetrics Pty Ltd, 300 Park Avenue Suite 1200, New York NY 10022. Bill to: HealthFirst Clinics, 2800 Campus Dr, San Mateo CA 94403. Date: November 7, 2024. Items: Catering (Event): $4,581.87. Server Hardware: $12,705.96. Office Supplies Bundle: $902.00. Printer Maintenance: $183.85. Subtotal: $18,373.68. Sales Tax (7%): $1,286.16. Total Due: $19,659.84. Payment terms: Annual prepay.",
+    "output": "{\"invoice_number\": \"INV#41175\", \"vendor\": \"CloudMetrics Pty Ltd\", \"customer\": \"HealthFirst Clinics\", \"date\": \"2024-11-07\", \"total\": 19659.84, \"due_date\": \"2024-11-07\", \"items\": [\"Catering (Event)\", \"Server Hardware\", \"Office Supplies Bundle\", \"Printer Maintenance\"]}"
+  },
+  {
+    "input": "Invoice #STM-51762 from WildRoots Landscaping, 450 Market St, San Francisco CA 94105. Bill to: WestWind Energy, 350 Royal St, New Orleans LA 70130. Date: June 9, 2024. Items: Ergonomic Chairs: $5,978.67. Equipment Rental: $438.00. Subtotal: $6,416.67. HST (13%): $834.17. Total Due: $7,250.84. Payment terms: Net 60.",
+    "output": "{\"invoice_number\": \"STM-51762\", \"vendor\": \"WildRoots Landscaping\", \"customer\": \"WestWind Energy\", \"date\": \"2024-06-09\", \"total\": 7250.84, \"due_date\": \"2024-08-08\", \"items\": [\"Ergonomic Chairs\", \"Equipment Rental\"]}"
+  },
+  {
+    "input": "Invoice #STM-61090 from NordicTech Solutions AB, Storgatan 45, Stockholm, Sweden. Bill to: JadeGarden Restaurant, Industriepark 5, 80339 Munich. Date: May 1, 2024. Items: Technical Training (2 days): $3,980.00. Penetration Testing: $5,903.37. Mobile App Development (Phase 1): $44,250.54. Cloud Hosting (12 months): $13,191.00. Code Review (40 hours): $5,338.00. Subtotal: $72,662.91. HST (13%): $9,446.18. Total Due: $82,109.09. Payment terms: Due on receipt.",
+    "output": "{\"invoice_number\": \"STM-61090\", \"vendor\": \"NordicTech Solutions AB\", \"customer\": \"JadeGarden Restaurant\", \"date\": \"2024-05-01\", \"total\": 82109.09, \"due_date\": \"2024-05-01\", \"items\": [\"Technical Training (2 days)\", \"Penetration Testing\", \"Mobile App Development (Phase 1)\", \"Cloud Hosting (12 months)\", \"Code Review (40 hours)\"]}"
+  },
+  {
+    "input": "Invoice #INV-72527 from Summit Legal Services LLC, 333 Data Drive, Denver CO 80202. Bill to: Riverside Manufacturing, 1600 Hillside Rd, Boulder CO 80302. Date: October 20, 2024. Items: HVAC Service Visit: $446.00. Office Supplies Bundle: $908.00. Subtotal: $1,354.00. Tax (9.25%): $125.25. Total Due: $1,479.25. Payment terms: Net 15.",
+    "output": "{\"invoice_number\": \"INV-72527\", \"vendor\": \"Summit Legal Services LLC\", \"customer\": \"Riverside Manufacturing\", \"date\": \"2024-10-20\", \"total\": 1479.25, \"due_date\": \"2024-11-04\", \"items\": [\"HVAC Service Visit\", \"Office Supplies Bundle\"]}"
+  },
+  {
+    "input": "Invoice #BILL-85875 from RapidScale Inc, 450 Market St, San Francisco CA 94105. Bill to: CrystalClear Windows, 1600 Hillside Rd, Boulder CO 80302. Date: April 9, 2024. Items: Recruitment Services: $10,994.35. Brand Strategy Workshop: $5,866.10. Financial Modeling: $10,602.62. Board Presentation Prep: $4,703.00. Subtotal: $32,166.07. GST (10%): $3,216.61. Total Due: $35,382.68. Payment terms: Net 30.",
+    "output": "{\"invoice_number\": \"BILL-85875\", \"vendor\": \"RapidScale Inc\", \"customer\": \"CrystalClear Windows\", \"date\": \"2024-04-09\", \"total\": 35382.68, \"due_date\": \"2024-05-09\", \"items\": [\"Recruitment Services\", \"Brand Strategy Workshop\", \"Financial Modeling\", \"Board Presentation Prep\"]}"
+  },
+  {
+    "input": "Invoice #INV-6894 from QuartzPoint Analytics, Friedrichstrasse 100, 10117 Berlin. Bill to: PeakView Hotels, 350 Royal St, New Orleans LA 70130. Date: October 27, 2024. Items: Ergonomic Chairs: $7,246.00. Network Equipment: $1,760.54. Equipment Rental: $1,719.00. Subtotal: $10,725.54. VAT (20%): $2,145.11. Total Due: $12,870.65. Payment terms: Due within 7 business days.",
+    "output": "{\"invoice_number\": \"INV-6894\", \"vendor\": \"QuartzPoint Analytics\", \"customer\": \"PeakView Hotels\", \"date\": \"2024-10-27\", \"total\": 12870.65, \"due_date\": \"2024-11-03\", \"items\": [\"Ergonomic Chairs\", \"Network Equipment\", \"Equipment Rental\"]}"
+  },
+  {
+    "input": "KiloWatt Energy | Invoice PRO-88406 | 2024-01-08 | Customer: NextGen Robotics Inc. Services: HVAC Service Visit: $602.00. Equipment Rental: $1,280.29. Cleaning Services (Monthly): $1,979.00. Total: $3,861.29. 50% upfront, 50% Net 30.",
+    "output": "{\"invoice_number\": \"PRO-88406\", \"vendor\": \"KiloWatt Energy\", \"customer\": \"NextGen Robotics Inc\", \"date\": \"2024-01-08\", \"total\": 3861.29, \"due_date\": \"2024-02-07\", \"items\": [\"HVAC Service Visit\", \"Equipment Rental\", \"Cleaning Services (Monthly)\"]}"
+  },
+  {
+    "input": "Please find attached invoice INV-63996 from GreenField Organic Farms dated March 19, 2024. This invoice is for services provided to Highland Scotch Distillery. The services include: Board Presentation Prep: $7,916.46. Executive Coaching (Monthly): $2,931.00. Recruitment Services: $16,279.00. Financial Modeling: $5,912.75. Contract Review: $2,933.00. The total amount is $35,972.21. Payment is due net 30.",
+    "output": "{\"invoice_number\": \"INV-63996\", \"vendor\": \"GreenField Organic Farms\", \"customer\": \"Highland Scotch Distillery\", \"date\": \"2024-03-19\", \"total\": 35972.21, \"due_date\": \"2024-04-18\", \"items\": [\"Board Presentation Prep\", \"Executive Coaching (Monthly)\", \"Recruitment Services\", \"Financial Modeling\", \"Contract Review\"]}"
+  },
+  {
+    "input": "Invoice #97523 from MavenBuild Software, 300 Park Avenue Suite 1200, New York NY 10022. Bill to: BlueSky Airlines, 78 Farm Road, Burlington VT 05401. Date: June 14, 2024. Items: Recruitment Services: $15,103.04. Consulting (Strategic): $8,155.65. Market Research Report: $6,236.00. Tax Advisory Services: $3,068.58. Subtotal: $32,563.27. Tax (8.5%): $2,767.88. Total Due: $35,331.15. Payment terms: Due within 7 business days.",
+    "output": "{\"invoice_number\": \"97523\", \"vendor\": \"MavenBuild Software\", \"customer\": \"BlueSky Airlines\", \"date\": \"2024-06-14\", \"total\": 35331.15, \"due_date\": \"2024-06-21\", \"items\": [\"Recruitment Services\", \"Consulting (Strategic)\", \"Market Research Report\", \"Tax Advisory Services\"]}"
+  },
+  {
+    "input": "Please find attached invoice REF-39283 from QuantumLeap Analytics dated April 27, 2024. This invoice is for services provided to BrightStar Education. The services include: Custom Dashboard Development: $9,633.00. Load Testing Suite: $3,445.98. Kubernetes Cluster Management: $7,936.38. Discount (20%): -$4,203.07. The total amount including gst (10%) of $1,681.23 is $18,493.52. Payment is due 50% upfront, 50% net 30.",
+    "output": "{\"invoice_number\": \"REF-39283\", \"vendor\": \"QuantumLeap Analytics\", \"customer\": \"BrightStar Education\", \"date\": \"2024-04-27\", \"total\": 18493.52, \"due_date\": \"2024-05-27\", \"items\": [\"Custom Dashboard Development\", \"Load Testing Suite\", \"Kubernetes Cluster Management\"]}"
+  },
+  {
+    "input": "Please find attached invoice SI-26439 from NordicTech Solutions AB dated January 18, 2024. This invoice is for services provided to WestWind Energy. The services include: Board Presentation Prep: $3,861.00. Brand Strategy Workshop: $9,925.00. Financial Modeling: $11,250.00. Recruitment Services: $19,255.00. The total amount including vat (25%) of $11,072.75 is $55,363.75. Payment is due due on receipt.",
+    "output": "{\"invoice_number\": \"SI-26439\", \"vendor\": \"NordicTech Solutions AB\", \"customer\": \"WestWind Energy\", \"date\": \"2024-01-18\", \"total\": 55363.75, \"due_date\": \"2024-01-18\", \"items\": [\"Board Presentation Prep\", \"Brand Strategy Workshop\", \"Financial Modeling\", \"Recruitment Services\"]}"
+  },
+  {
+    "input": "Invoice #FI-37989 from FrostByte Computing, 150 Queen Street, Toronto ON M5H 3K4. Bill to: BrightPath Consulting Ltd, 2800 Campus Dr, San Mateo CA 94403. Date: February 26, 2024. Items: Market Research Report: $3,393.10. Board Presentation Prep: $7,592.00. Subtotal: $10,985.10. Tax (6%): $659.11. Total Due: $11,644.21. Payment terms: Payment due on completion.",
+    "output": "{\"invoice_number\": \"FI-37989\", \"vendor\": \"FrostByte Computing\", \"customer\": \"BrightPath Consulting Ltd\", \"date\": \"2024-02-26\", \"total\": 11644.21, \"due_date\": \"2024-02-26\", \"items\": [\"Market Research Report\", \"Board Presentation Prep\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: Artisan Coffee Roasters, 800 Wilshire Blvd, Los Angeles CA 90017\nTo: LightHouse Insurance, 900 Medical Dr, Houston TX 77030\nInvoice No: INV-2024-96025 | Date: 3/12/2024\nLine items: Tax Advisory Services: $7,959.68. Market Research Report: $8,360.00. Consulting (Strategic): $26,922.62.\nTax (9.25%): $3,999.91\nTotal: $47,242.21\nTerms: Due within 7 business days",
+    "output": "{\"invoice_number\": \"INV-2024-96025\", \"vendor\": \"Artisan Coffee Roasters\", \"customer\": \"LightHouse Insurance\", \"date\": \"2024-12-03\", \"total\": 47242.21, \"due_date\": \"2024-12-10\", \"items\": [\"Tax Advisory Services\", \"Market Research Report\", \"Consulting (Strategic)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: UltraFit Gym Equipment, 333 Data Drive, Denver CO 80202\nTo: BrightPath Consulting Ltd, 2800 Campus Dr, San Mateo CA 94403\nInvoice No: 34493 | Date: 15/10/2024\nLine items: Network Equipment: $1,162.52. Cleaning Services (Monthly): $1,327.00. Printer Maintenance: $106.26. Office Supplies Bundle: $625.00. Server Hardware: $8,410.00.\nTax (6%): $697.85\nTotal: $12,328.63\nTerms: Annual prepay",
+    "output": "{\"invoice_number\": \"34493\", \"vendor\": \"UltraFit Gym Equipment\", \"customer\": \"BrightPath Consulting Ltd\", \"date\": \"2024-10-15\", \"total\": 12328.63, \"due_date\": \"2024-10-15\", \"items\": [\"Network Equipment\", \"Cleaning Services (Monthly)\", \"Printer Maintenance\", \"Office Supplies Bundle\", \"Server Hardware\"]}"
+  },
+  {
+    "input": "Please find attached invoice SI-56596 from CloudMetrics Pty Ltd dated December 27, 2024. This invoice is for services provided to OakHeart Brewery. The services include: Performance Optimization: $7,631.46. SSL Certificate (Wildcard): $218.01. Technical Training (2 days): $2,570.70. Custom Dashboard Development: $8,421.00. Cloud Hosting (12 months): $15,357.33. The total amount including vat (25%) of $8,549.62 is $42,748.12. Payment is due net 15.",
+    "output": "{\"invoice_number\": \"SI-56596\", \"vendor\": \"CloudMetrics Pty Ltd\", \"customer\": \"OakHeart Brewery\", \"date\": \"2024-12-27\", \"total\": 42748.12, \"due_date\": \"2025-01-11\", \"items\": [\"Performance Optimization\", \"SSL Certificate (Wildcard)\", \"Technical Training (2 days)\", \"Custom Dashboard Development\", \"Cloud Hosting (12 months)\"]}"
+  },
+  {
+    "input": "CrestLine Financial | Invoice FI-12912 | 2024-08-22 | Customer: Coastal Bank & Trust. Services: Load Testing Suite: $6,680.00. Database Administration: $3,540.82. Penetration Testing: $8,424.00. GST (10%): $1,864.48. Total: $20,509.30. Net 14.",
+    "output": "{\"invoice_number\": \"FI-12912\", \"vendor\": \"CrestLine Financial\", \"customer\": \"Coastal Bank & Trust\", \"date\": \"2024-08-22\", \"total\": 20509.3, \"due_date\": \"2024-09-05\", \"items\": [\"Load Testing Suite\", \"Database Administration\", \"Penetration Testing\"]}"
+  },
+  {
+    "input": "JetStream Networks | Invoice SI-2684 | 2024-09-16 | Customer: Bloom Digital Agency. Services: Office Supplies Bundle: $931.00. Equipment Rental: $784.00. Cleaning Services (Monthly): $1,119.00. Network Equipment: $1,343.00. Catering (Event): $3,657.35. Sales Tax (7%): $548.40. Total: $8,382.75. Payment due on completion.",
+    "output": "{\"invoice_number\": \"SI-2684\", \"vendor\": \"JetStream Networks\", \"customer\": \"Bloom Digital Agency\", \"date\": \"2024-09-16\", \"total\": 8382.75, \"due_date\": \"2024-09-16\", \"items\": [\"Office Supplies Bundle\", \"Equipment Rental\", \"Cleaning Services (Monthly)\", \"Network Equipment\", \"Catering (Event)\"]}"
+  },
+  {
+    "input": "Invoice #SVC-86489 from AlphaData Systems, 2500 Enterprise Rd, Dallas TX 75201. Bill to: Highland Scotch Distillery, 255 Harbor View, Seattle WA 98101. Date: February 18, 2024. Items: Mobile App Development (Phase 1): $41,522.70. UI/UX Design Sprint: $12,706.74. Load Testing Suite: $3,911.00. Cloud Hosting (12 months): $9,184.00. Discount (15%): -$10,098.67. Subtotal: $67,324.44. VAT (25%): $14,306.44. Total Due: $71,532.21. Payment terms: Net 15.",
+    "output": "{\"invoice_number\": \"SVC-86489\", \"vendor\": \"AlphaData Systems\", \"customer\": \"Highland Scotch Distillery\", \"date\": \"2024-02-18\", \"total\": 71532.21, \"due_date\": \"2024-03-04\", \"items\": [\"Mobile App Development (Phase 1)\", \"UI/UX Design Sprint\", \"Load Testing Suite\", \"Cloud Hosting (12 months)\"]}"
+  },
+  {
+    "input": "Please find attached invoice INV-59621 from YieldMax Agriculture dated April 18, 2024. This invoice is for services provided to JadeGarden Restaurant. The services include: Consulting (Strategic): $5,265.85. Tax Advisory Services: $6,890.10. Discount (5%): -$607.80. The total amount including vat (25%) of $2,887.04 is $14,435.19. Payment is due net 45.",
+    "output": "{\"invoice_number\": \"INV-59621\", \"vendor\": \"YieldMax Agriculture\", \"customer\": \"JadeGarden Restaurant\", \"date\": \"2024-04-18\", \"total\": 14435.19, \"due_date\": \"2024-06-02\", \"items\": [\"Consulting (Strategic)\", \"Tax Advisory Services\"]}"
+  },
+  {
+    "input": "Invoice #PO-31461 from NetPulse Telecom, 175 Digital Pkwy, Atlanta GA 30301. Bill to: OceanBreeze Resorts, 220 5th Ave, New York NY 10001. Date: November 23, 2024. Items: Performance Optimization: $5,841.95. Kubernetes Cluster Management: $5,696.87. Mobile App Development (Phase 1): $35,003.00. Subtotal: $46,541.82. Tax (6%): $2,792.51. Total Due: $49,334.33. Payment terms: Annual prepay.",
+    "output": "{\"invoice_number\": \"PO-31461\", \"vendor\": \"NetPulse Telecom\", \"customer\": \"OceanBreeze Resorts\", \"date\": \"2024-11-23\", \"total\": 49334.33, \"due_date\": \"2024-11-23\", \"items\": [\"Performance Optimization\", \"Kubernetes Cluster Management\", \"Mobile App Development (Phase 1)\"]}"
+  },
+  {
+    "input": "Please find attached invoice INV#59085 from Elara Strategy Partners dated December 13, 2024. This invoice is for services provided to GemStone Jewelry. The services include: Ergonomic Chairs: $4,635.07. Cleaning Services (Monthly): $692.00. The total amount is $5,327.07. Payment is due net 30.",
+    "output": "{\"invoice_number\": \"INV#59085\", \"vendor\": \"Elara Strategy Partners\", \"customer\": \"GemStone Jewelry\", \"date\": \"2024-12-13\", \"total\": 5327.07, \"due_date\": \"2025-01-12\", \"items\": [\"Ergonomic Chairs\", \"Cleaning Services (Monthly)\"]}"
+  },
+  {
+    "input": "OceanView Catering | Invoice SI-17278 | 2024-02-16 | Customer: FreshCo Imports. Services: Equipment Rental: $773.54. Catering (Event): $2,988.00. Office Supplies Bundle: $917.78. Cleaning Services (Monthly): $1,789.00. Standing Desks: $3,702.00. GST (10%): $1,017.03. Total: $11,187.35. Net 15.",
+    "output": "{\"invoice_number\": \"SI-17278\", \"vendor\": \"OceanView Catering\", \"customer\": \"FreshCo Imports\", \"date\": \"2024-02-16\", \"total\": 11187.35, \"due_date\": \"2024-03-02\", \"items\": [\"Equipment Rental\", \"Catering (Event)\", \"Office Supplies Bundle\", \"Cleaning Services (Monthly)\", \"Standing Desks\"]}"
+  },
+  {
+    "input": "FrostByte Computing | Invoice 62278 | 2024-04-09 | Customer: UrbanEdge Properties. Services: Office Supplies Bundle: $444.79. Cleaning Services (Monthly): $998.41. Standing Desks: $4,935.64. Discount (20%): -$1,275.77. HST (13%): $663.40. Total: $5,766.47. Net 60.",
+    "output": "{\"invoice_number\": \"62278\", \"vendor\": \"FrostByte Computing\", \"customer\": \"UrbanEdge Properties\", \"date\": \"2024-04-09\", \"total\": 5766.47, \"due_date\": \"2024-06-08\", \"items\": [\"Office Supplies Bundle\", \"Cleaning Services (Monthly)\", \"Standing Desks\"]}"
+  },
+  {
+    "input": "MetalWorks Engineering | Invoice BILL-98882 | 2024-12-01 | Customer: SandDune Tours. Services: Brand Strategy Workshop: $3,252.92. Board Presentation Prep: $4,701.39. GST (10%): $795.43. Total: $8,749.74. Due on receipt.",
+    "output": "{\"invoice_number\": \"BILL-98882\", \"vendor\": \"MetalWorks Engineering\", \"customer\": \"SandDune Tours\", \"date\": \"2024-12-01\", \"total\": 8749.74, \"due_date\": \"2024-12-01\", \"items\": [\"Brand Strategy Workshop\", \"Board Presentation Prep\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: RedOak Furniture, 300 Park Avenue Suite 1200, New York NY 10022\nTo: PeakView Hotels, 125 University Ave, Palo Alto CA 94301\nInvoice No: INV-2024-90313 | Date: 24/03/2024\nLine items: Brand Strategy Workshop: $9,444.46. Recruitment Services: $16,256.48. IP Filing Preparation: $2,332.04. Contract Review: $1,607.18. Tax Advisory Services: $3,480.00.\nTotal: $33,120.16\nTerms: Payment due on completion",
+    "output": "{\"invoice_number\": \"INV-2024-90313\", \"vendor\": \"RedOak Furniture\", \"customer\": \"PeakView Hotels\", \"date\": \"2024-03-24\", \"total\": 33120.16, \"due_date\": \"2024-03-24\", \"items\": [\"Brand Strategy Workshop\", \"Recruitment Services\", \"IP Filing Preparation\", \"Contract Review\", \"Tax Advisory Services\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: XenonBright Lighting, 88 Cloud Way, Portland OR 97201\nTo: XpressShip Delivery, 1450 Larimer St, Denver CO 80202\nInvoice No: REF-95012 | Date: 17/05/2024\nLine items: HVAC Service Visit: $705.19. Ergonomic Chairs: $4,654.66. Printer Maintenance: $157.00. Standing Desks: $6,667.38. Cleaning Services (Monthly): $904.32.\nTax (6%): $785.31\nTotal: $13,873.86\nTerms: Due on receipt",
+    "output": "{\"invoice_number\": \"REF-95012\", \"vendor\": \"XenonBright Lighting\", \"customer\": \"XpressShip Delivery\", \"date\": \"2024-05-17\", \"total\": 13873.86, \"due_date\": \"2024-05-17\", \"items\": [\"HVAC Service Visit\", \"Ergonomic Chairs\", \"Printer Maintenance\", \"Standing Desks\", \"Cleaning Services (Monthly)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: XenonBright Lighting, 88 Cloud Way, Portland OR 97201\nTo: BrightPath Consulting Ltd, 1000 Peachtree St, Atlanta GA 30309\nInvoice No: SI-24227 | Date: 1/06/2024\nLine items: Tax Advisory Services: $6,104.00. Consulting (Strategic): $26,358.34. Recruitment Services: $11,011.70. Contract Review: $1,586.68. Market Research Report: $11,410.00.\nGST (10%): $5,647.07\nTotal: $62,117.79\nTerms: Net 60",
+    "output": "{\"invoice_number\": \"SI-24227\", \"vendor\": \"XenonBright Lighting\", \"customer\": \"BrightPath Consulting Ltd\", \"date\": \"2024-06-01\", \"total\": 62117.79, \"due_date\": \"2024-07-31\", \"items\": [\"Tax Advisory Services\", \"Consulting (Strategic)\", \"Recruitment Services\", \"Contract Review\", \"Market Research Report\"]}"
+  },
+  {
+    "input": "Please find attached invoice PO-86844 from IronClad Security dated July 16, 2024. This invoice is for services provided to IvoryTower University. The services include: Performance Optimization: $10,921.60. Compliance Audit (SOC2): $14,747.00. The total amount including sales tax (7%) of $1,796.80 is $27,465.40. Payment is due due within 7 business days.",
+    "output": "{\"invoice_number\": \"PO-86844\", \"vendor\": \"IronClad Security\", \"customer\": \"IvoryTower University\", \"date\": \"2024-07-16\", \"total\": 27465.4, \"due_date\": \"2024-07-23\", \"items\": [\"Performance Optimization\", \"Compliance Audit (SOC2)\"]}"
+  },
+  {
+    "input": "Please find attached invoice INV-2024-6013 from UltraFit Gym Equipment dated November 15, 2024. This invoice is for services provided to Highland Scotch Distillery. The services include: Brand Strategy Workshop: $7,038.00. Tax Advisory Services: $2,352.38. Executive Coaching (Monthly): $4,276.50. Contract Review: $4,462.00. Consulting (Strategic): $15,403.67. The total amount including vat (25%) of $8,383.14 is $41,915.69. Payment is due net 15.",
+    "output": "{\"invoice_number\": \"INV-2024-6013\", \"vendor\": \"UltraFit Gym Equipment\", \"customer\": \"Highland Scotch Distillery\", \"date\": \"2024-11-15\", \"total\": 41915.69, \"due_date\": \"2024-11-30\", \"items\": [\"Brand Strategy Workshop\", \"Tax Advisory Services\", \"Executive Coaching (Monthly)\", \"Contract Review\", \"Consulting (Strategic)\"]}"
+  },
+  {
+    "input": "Elara Strategy Partners | Invoice 9374 | 2024-03-27 | Customer: NextGen Robotics Inc. Services: Standing Desks: $4,919.75. Office Supplies Bundle: $421.00. HVAC Service Visit: $720.58. VAT (20%): $1,212.27. Total: $7,273.60. Net 45.",
+    "output": "{\"invoice_number\": \"9374\", \"vendor\": \"Elara Strategy Partners\", \"customer\": \"NextGen Robotics Inc\", \"date\": \"2024-03-27\", \"total\": 7273.6, \"due_date\": \"2024-05-11\", \"items\": [\"Standing Desks\", \"Office Supplies Bundle\", \"HVAC Service Visit\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: OceanView Catering, 175 Digital Pkwy, Atlanta GA 30301\nTo: LightHouse Insurance, Industriepark 5, 80339 Munich\nInvoice No: STM-11768 | Date: 21/10/2024\nLine items: Equipment Rental: $1,300.09. HVAC Service Visit: $579.00.\nTax (9.25%): $173.82\nTotal: $2,052.91\nTerms: Net 45",
+    "output": "{\"invoice_number\": \"STM-11768\", \"vendor\": \"OceanView Catering\", \"customer\": \"LightHouse Insurance\", \"date\": \"2024-10-21\", \"total\": 2052.91, \"due_date\": \"2024-12-05\", \"items\": [\"Equipment Rental\", \"HVAC Service Visit\"]}"
+  },
+  {
+    "input": "ZenithPeak Consulting | Invoice 12407 | 2024-03-25 | Customer: OceanBreeze Resorts. Services: API Integration Package: $13,968.00. Data Migration Services: $12,651.98. Monitoring & Alerting Setup: $5,718.43. MwSt (19%): $6,144.30. Total: $38,482.71. Net 60.",
+    "output": "{\"invoice_number\": \"12407\", \"vendor\": \"ZenithPeak Consulting\", \"customer\": \"OceanBreeze Resorts\", \"date\": \"2024-03-25\", \"total\": 38482.71, \"due_date\": \"2024-05-24\", \"items\": [\"API Integration Package\", \"Data Migration Services\", \"Monitoring & Alerting Setup\"]}"
+  },
+  {
+    "input": "Invoice #PRO-79203 from BetaLabs Research, 610 Startup Ave, Miami FL 33101. Bill to: Riverside Manufacturing, 255 Harbor View, Seattle WA 98101. Date: November 11, 2024. Items: Financial Modeling: $8,942.40. Consulting (Strategic): $15,577.00. Executive Coaching (Monthly): $2,395.90. Subtotal: $26,915.30. Total Due: $26,915.30. Payment terms: Net 15.",
+    "output": "{\"invoice_number\": \"PRO-79203\", \"vendor\": \"BetaLabs Research\", \"customer\": \"Riverside Manufacturing\", \"date\": \"2024-11-11\", \"total\": 26915.3, \"due_date\": \"2024-11-26\", \"items\": [\"Financial Modeling\", \"Consulting (Strategic)\", \"Executive Coaching (Monthly)\"]}"
+  },
+  {
+    "input": "Invoice #PRO-94742 from DeepSea Mining Corp, 333 Data Drive, Denver CO 80202. Bill to: NorthPole Expeditions, 1600 Hillside Rd, Boulder CO 80302. Date: July 13, 2024. Items: Technical Training (2 days): $2,598.00. Penetration Testing: $5,104.55. Code Review (40 hours): $4,258.00. Priority Support (Annual): $4,592.85. Security Audit: $5,831.54. Subtotal: $22,384.94. Total Due: $22,384.94. Payment terms: Net 15.",
+    "output": "{\"invoice_number\": \"PRO-94742\", \"vendor\": \"DeepSea Mining Corp\", \"customer\": \"NorthPole Expeditions\", \"date\": \"2024-07-13\", \"total\": 22384.94, \"due_date\": \"2024-07-28\", \"items\": [\"Technical Training (2 days)\", \"Penetration Testing\", \"Code Review (40 hours)\", \"Priority Support (Annual)\", \"Security Audit\"]}"
+  },
+  {
+    "input": "Invoice #PRO-35682 from IronClad Security, Friedrichstrasse 100, 10117 Berlin. Bill to: IvoryTower University, 1 Wall Street Floor 32, New York NY 10005. Date: January 12, 2024. Items: Equipment Rental: $327.00. Network Equipment: $1,390.84. Standing Desks: $3,190.00. Server Hardware: $15,702.33. Subtotal: $20,610.17. Total Due: $20,610.17. Payment terms: Due on receipt.",
+    "output": "{\"invoice_number\": \"PRO-35682\", \"vendor\": \"IronClad Security\", \"customer\": \"IvoryTower University\", \"date\": \"2024-01-12\", \"total\": 20610.17, \"due_date\": \"2024-01-12\", \"items\": [\"Equipment Rental\", \"Network Equipment\", \"Standing Desks\", \"Server Hardware\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: BridgePort Engineering, 610 Startup Ave, Miami FL 33101\nTo: LightHouse Insurance, 77 Harbour Square, Toronto ON M5J 2S2\nInvoice No: PRO-45384 | Date: 24/07/2024\nLine items: Network Equipment: $3,021.00. Ergonomic Chairs: $7,917.00.\nTax (9.25%): $1,011.76\nTotal: $11,949.76\nTerms: Net 14",
+    "output": "{\"invoice_number\": \"PRO-45384\", \"vendor\": \"BridgePort Engineering\", \"customer\": \"LightHouse Insurance\", \"date\": \"2024-07-24\", \"total\": 11949.76, \"due_date\": \"2024-08-07\", \"items\": [\"Network Equipment\", \"Ergonomic Chairs\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: Global Supply Co, Friedrichstrasse 100, 10117 Berlin\nTo: OceanBreeze Resorts, 400 Lake Shore Dr, Chicago IL 60611\nInvoice No: INV-2024-26390 | Date: 19/11/2024\nLine items: Market Research Report: $8,004.94. IP Filing Preparation: $2,026.97. Tax Advisory Services: $4,346.47.\nTotal: $14,378.38\nTerms: Due within 7 business days",
+    "output": "{\"invoice_number\": \"INV-2024-26390\", \"vendor\": \"Global Supply Co\", \"customer\": \"OceanBreeze Resorts\", \"date\": \"2024-11-19\", \"total\": 14378.38, \"due_date\": \"2024-11-26\", \"items\": [\"Market Research Report\", \"IP Filing Preparation\", \"Tax Advisory Services\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: GreenField Organic Farms, 1200 Tech Park Dr, Raleigh NC 27601\nTo: LightHouse Insurance, 400 Lake Shore Dr, Chicago IL 60611\nInvoice No: INV#61534 | Date: 17/05/2024\nLine items: Security Audit: $7,845.00. SSL Certificate (Wildcard): $402.31.\nVAT (25%): $2,061.83\nTotal: $10,309.14\nTerms: Net 60",
+    "output": "{\"invoice_number\": \"INV#61534\", \"vendor\": \"GreenField Organic Farms\", \"customer\": \"LightHouse Insurance\", \"date\": \"2024-05-17\", \"total\": 10309.14, \"due_date\": \"2024-07-16\", \"items\": [\"Security Audit\", \"SSL Certificate (Wildcard)\"]}"
+  },
+  {
+    "input": "Invoice #QI-74534 from VeloCraft Bicycles, 1200 Tech Park Dr, Raleigh NC 27601. Bill to: FreshCo Imports, 1 Wall Street Floor 32, New York NY 10005. Date: August 22, 2024. Items: Board Presentation Prep: $5,625.00. Tax Advisory Services: $7,649.35. Contract Review: $4,094.70. Brand Strategy Workshop: $5,374.79. Market Research Report: $10,069.00. Subtotal: $32,812.84. GST (10%): $3,281.28. Total Due: $36,094.12. Payment terms: Payment due on completion.",
+    "output": "{\"invoice_number\": \"QI-74534\", \"vendor\": \"VeloCraft Bicycles\", \"customer\": \"FreshCo Imports\", \"date\": \"2024-08-22\", \"total\": 36094.12, \"due_date\": \"2024-08-22\", \"items\": [\"Board Presentation Prep\", \"Tax Advisory Services\", \"Contract Review\", \"Brand Strategy Workshop\", \"Market Research Report\"]}"
+  },
+  {
+    "input": "Please find attached invoice INV-87221 from ZenithPeak Consulting dated February 7, 2024. This invoice is for services provided to Coastal Bank & Trust. The services include: Disaster Recovery Setup: $7,412.00. API Integration Package: $9,382.05. Custom Dashboard Development: $12,765.67. Cloud Hosting (12 months): $9,022.00. The total amount including tax (9.25%) of $3,568.81 is $42,150.53. Payment is due net 30.",
+    "output": "{\"invoice_number\": \"INV-87221\", \"vendor\": \"ZenithPeak Consulting\", \"customer\": \"Coastal Bank & Trust\", \"date\": \"2024-02-07\", \"total\": 42150.53, \"due_date\": \"2024-03-08\", \"items\": [\"Disaster Recovery Setup\", \"API Integration Package\", \"Custom Dashboard Development\", \"Cloud Hosting (12 months)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: CrestLine Financial, 175 Digital Pkwy, Atlanta GA 30301\nTo: OceanBreeze Resorts, 1 Wall Street Floor 32, New York NY 10005\nInvoice No: QI-44503 | Date: 10/06/2024\nLine items: Market Research Report: $8,638.79. Board Presentation Prep: $2,542.96. Recruitment Services: $19,732.05. IP Filing Preparation: $3,257.23. Tax Advisory Services: $3,862.92.\nGST (10%): $3,803.39\nTotal: $41,837.34\nTerms: Net 30",
+    "output": "{\"invoice_number\": \"QI-44503\", \"vendor\": \"CrestLine Financial\", \"customer\": \"OceanBreeze Resorts\", \"date\": \"2024-06-10\", \"total\": 41837.34, \"due_date\": \"2024-07-10\", \"items\": [\"Market Research Report\", \"Board Presentation Prep\", \"Recruitment Services\", \"IP Filing Preparation\", \"Tax Advisory Services\"]}"
+  },
+  {
+    "input": "RapidScale Inc | Invoice STM-17605 | 2024-09-08 | Customer: NorthPole Expeditions. Services: Cleaning Services (Monthly): $1,414.00. Ergonomic Chairs: $4,390.32. Standing Desks: $5,630.00. Server Hardware: $16,697.26. Discount (15%): -$4,219.74. Sales Tax (7%): $1,673.83. Total: $25,585.67. Payment due on completion.",
+    "output": "{\"invoice_number\": \"STM-17605\", \"vendor\": \"RapidScale Inc\", \"customer\": \"NorthPole Expeditions\", \"date\": \"2024-09-08\", \"total\": 25585.67, \"due_date\": \"2024-09-08\", \"items\": [\"Cleaning Services (Monthly)\", \"Ergonomic Chairs\", \"Standing Desks\", \"Server Hardware\"]}"
+  },
+  {
+    "input": "Global Supply Co | Invoice BILL-33367 | 2024-09-27 | Customer: XpressShip Delivery. Services: Financial Modeling: $12,784.00. Contract Review: $3,136.02. Market Research Report: $6,495.00. Consulting (Strategic): $13,695.00. Executive Coaching (Monthly): $4,548.00. Tax (6%): $2,439.48. Total: $43,097.50. Due within 7 business days.",
+    "output": "{\"invoice_number\": \"BILL-33367\", \"vendor\": \"Global Supply Co\", \"customer\": \"XpressShip Delivery\", \"date\": \"2024-09-27\", \"total\": 43097.5, \"due_date\": \"2024-10-04\", \"items\": [\"Financial Modeling\", \"Contract Review\", \"Market Research Report\", \"Consulting (Strategic)\", \"Executive Coaching (Monthly)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: YieldMax Agriculture, 55 Creative Way, Austin TX 78701\nTo: OceanBreeze Resorts, PO Box 4481, Melbourne VIC 3000\nInvoice No: INV-58400 | Date: 20/09/2024\nLine items: Market Research Report: $3,116.00. Contract Review: $2,342.57.\nVAT (25%): $1,364.64\nTotal: $6,823.21\nTerms: Net 14",
+    "output": "{\"invoice_number\": \"INV-58400\", \"vendor\": \"YieldMax Agriculture\", \"customer\": \"OceanBreeze Resorts\", \"date\": \"2024-09-20\", \"total\": 6823.21, \"due_date\": \"2024-10-04\", \"items\": [\"Market Research Report\", \"Contract Review\"]}"
+  },
+  {
+    "input": "Please find attached invoice INV-2024-21416 from YieldMax Agriculture dated March 28, 2024. This invoice is for services provided to Pinnacle Health Systems. The services include: Brand Strategy Workshop: $9,996.28. Contract Review: $4,042.00. Tax Advisory Services: $7,721.98. The total amount including tax (8.5%) of $1,849.62 is $23,609.88. Payment is due net 30.",
+    "output": "{\"invoice_number\": \"INV-2024-21416\", \"vendor\": \"YieldMax Agriculture\", \"customer\": \"Pinnacle Health Systems\", \"date\": \"2024-03-28\", \"total\": 23609.88, \"due_date\": \"2024-04-27\", \"items\": [\"Brand Strategy Workshop\", \"Contract Review\", \"Tax Advisory Services\"]}"
+  },
+  {
+    "input": "FrostByte Computing | Invoice 11196 | 2024-02-14 | Customer: Coastal Bank & Trust. Services: Brand Strategy Workshop: $3,225.10. IP Filing Preparation: $2,176.00. Market Research Report: $5,026.53. Sales Tax (7%): $729.93. Total: $11,157.56. Net 30.",
+    "output": "{\"invoice_number\": \"11196\", \"vendor\": \"FrostByte Computing\", \"customer\": \"Coastal Bank & Trust\", \"date\": \"2024-02-14\", \"total\": 11157.56, \"due_date\": \"2024-03-15\", \"items\": [\"Brand Strategy Workshop\", \"IP Filing Preparation\", \"Market Research Report\"]}"
+  },
+  {
+    "input": "Please find attached invoice PO-58879 from SilverLine Transport dated June 26, 2024. This invoice is for services provided to WestWind Energy. The services include: Penetration Testing: $9,553.00. CI/CD Pipeline Setup: $7,018.07. Priority Support (Annual): $3,163.68. The total amount is $19,734.75. Payment is due net 60.",
+    "output": "{\"invoice_number\": \"PO-58879\", \"vendor\": \"SilverLine Transport\", \"customer\": \"WestWind Energy\", \"date\": \"2024-06-26\", \"total\": 19734.75, \"due_date\": \"2024-08-25\", \"items\": [\"Penetration Testing\", \"CI/CD Pipeline Setup\", \"Priority Support (Annual)\"]}"
+  },
+  {
+    "input": "Invoice #BILL-96226 from MavenBuild Software, Storgatan 45, Stockholm, Sweden. Bill to: UrbanEdge Properties, 400 Lake Shore Dr, Chicago IL 60611. Date: June 6, 2024. Items: Priority Support (Annual): $6,504.85. Monitoring & Alerting Setup: $5,826.76. API Integration Package: $6,113.00. Subtotal: $18,444.61. Total Due: $18,444.61. Payment terms: Due on receipt.",
+    "output": "{\"invoice_number\": \"BILL-96226\", \"vendor\": \"MavenBuild Software\", \"customer\": \"UrbanEdge Properties\", \"date\": \"2024-06-06\", \"total\": 18444.61, \"due_date\": \"2024-06-06\", \"items\": [\"Priority Support (Annual)\", \"Monitoring & Alerting Setup\", \"API Integration Package\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: NordicTech Solutions AB, Storgatan 45, Stockholm, Sweden\nTo: UrbanEdge Properties, 1 Wall Street Floor 32, New York NY 10005\nInvoice No: PRO-68220 | Date: 16/04/2024\nLine items: Recruitment Services: $15,096.00. Board Presentation Prep: $7,455.00. Executive Coaching (Monthly): $5,847.29.\nGST (10%): $2,839.83\nTotal: $31,238.12\nTerms: Net 45",
+    "output": "{\"invoice_number\": \"PRO-68220\", \"vendor\": \"NordicTech Solutions AB\", \"customer\": \"UrbanEdge Properties\", \"date\": \"2024-04-16\", \"total\": 31238.12, \"due_date\": \"2024-05-31\", \"items\": [\"Recruitment Services\", \"Board Presentation Prep\", \"Executive Coaching (Monthly)\"]}"
+  },
+  {
+    "input": "Please find attached invoice INV#34992 from AlphaData Systems dated January 14, 2024. This invoice is for services provided to NorthStar Logistics. The services include: Financial Modeling: $14,216.16. Contract Review: $3,804.55. Discount (15%): -$2,703.11. The total amount including tax (9.25%) of $1,416.88 is $16,734.48. Payment is due net 60.",
+    "output": "{\"invoice_number\": \"INV#34992\", \"vendor\": \"AlphaData Systems\", \"customer\": \"NorthStar Logistics\", \"date\": \"2024-01-14\", \"total\": 16734.48, \"due_date\": \"2024-03-14\", \"items\": [\"Financial Modeling\", \"Contract Review\"]}"
+  },
+  {
+    "input": "Please find attached invoice INV-2024-1295 from TerraFirm Construction dated August 18, 2024. This invoice is for services provided to OakHeart Brewery. The services include: IP Filing Preparation: $3,153.00. Brand Strategy Workshop: $4,648.77. The total amount including vat (25%) of $1,950.44 is $9,752.21. Payment is due net 15.",
+    "output": "{\"invoice_number\": \"INV-2024-1295\", \"vendor\": \"TerraFirm Construction\", \"customer\": \"OakHeart Brewery\", \"date\": \"2024-08-18\", \"total\": 9752.21, \"due_date\": \"2024-09-02\", \"items\": [\"IP Filing Preparation\", \"Brand Strategy Workshop\"]}"
+  },
+  {
+    "input": "Invoice #SI-89226 from NetPulse Telecom, 800 Wilshire Blvd, Los Angeles CA 90017. Bill to: Pinnacle Health Systems, 78 Farm Road, Burlington VT 05401. Date: July 1, 2024. Items: Consulting (Strategic): $25,252.00. Recruitment Services: $11,755.00. Tax Advisory Services: $7,946.00. Board Presentation Prep: $3,974.03. Executive Coaching (Monthly): $5,102.00. Subtotal: $54,029.03. Tax (9.25%): $4,997.69. Total Due: $59,026.72. Payment terms: Net 60.",
+    "output": "{\"invoice_number\": \"SI-89226\", \"vendor\": \"NetPulse Telecom\", \"customer\": \"Pinnacle Health Systems\", \"date\": \"2024-07-01\", \"total\": 59026.72, \"due_date\": \"2024-08-30\", \"items\": [\"Consulting (Strategic)\", \"Recruitment Services\", \"Tax Advisory Services\", \"Board Presentation Prep\", \"Executive Coaching (Monthly)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: SilverLine Transport, 789 Commerce Blvd, Chicago IL 60601\nTo: SunsetGlow Photography, 77 Harbour Square, Toronto ON M5J 2S2\nInvoice No: INV-2024-87318 | Date: 11/12/2024\nLine items: Printer Maintenance: $467.00. Equipment Rental: $668.84. Server Hardware: $9,396.00. HVAC Service Visit: $730.00. Ergonomic Chairs: $4,483.00.\nMwSt (19%): $2,991.52\nTotal: $18,736.36\nTerms: Net 30",
+    "output": "{\"invoice_number\": \"INV-2024-87318\", \"vendor\": \"SilverLine Transport\", \"customer\": \"SunsetGlow Photography\", \"date\": \"2024-12-11\", \"total\": 18736.36, \"due_date\": \"2025-01-10\", \"items\": [\"Printer Maintenance\", \"Equipment Rental\", \"Server Hardware\", \"HVAC Service Visit\", \"Ergonomic Chairs\"]}"
+  },
+  {
+    "input": "Invoice #QI-15096 from Pacific Rim Logistics, 920 Maple Street, Minneapolis MN 55401. Bill to: RainForest Conservation, 3200 Innovation Drive, Palo Alto CA 94304. Date: June 6, 2024. Items: Compliance Audit (SOC2): $24,134.00. Cloud Hosting (12 months): $11,446.00. Custom Dashboard Development: $9,488.00. Subtotal: $45,068.00. Total Due: $45,068.00. Payment terms: Net 30.",
+    "output": "{\"invoice_number\": \"QI-15096\", \"vendor\": \"Pacific Rim Logistics\", \"customer\": \"RainForest Conservation\", \"date\": \"2024-06-06\", \"total\": 45068.0, \"due_date\": \"2024-07-06\", \"items\": [\"Compliance Audit (SOC2)\", \"Cloud Hosting (12 months)\", \"Custom Dashboard Development\"]}"
+  },
+  {
+    "input": "Please find attached invoice INV-2024-81780 from KiloWatt Energy dated March 2, 2024. This invoice is for services provided to Riverside Manufacturing. The services include: Performance Optimization: $5,160.65. UI/UX Design Sprint: $8,712.35. SSL Certificate (Wildcard): $414.00. Technical Training (2 days): $2,723.64. Database Administration: $4,575.00. The total amount including gst (10%) of $2,158.56 is $23,744.20. Payment is due due on receipt.",
+    "output": "{\"invoice_number\": \"INV-2024-81780\", \"vendor\": \"KiloWatt Energy\", \"customer\": \"Riverside Manufacturing\", \"date\": \"2024-03-02\", \"total\": 23744.2, \"due_date\": \"2024-03-02\", \"items\": [\"Performance Optimization\", \"UI/UX Design Sprint\", \"SSL Certificate (Wildcard)\", \"Technical Training (2 days)\", \"Database Administration\"]}"
+  },
+  {
+    "input": "Global Supply Co | Invoice 25192 | 2024-01-13 | Customer: YearRound Gardening. Services: Penetration Testing: $12,919.00. Monitoring & Alerting Setup: $4,623.00. GST (10%): $1,754.20. Total: $19,296.20. Payment due on completion.",
+    "output": "{\"invoice_number\": \"25192\", \"vendor\": \"Global Supply Co\", \"customer\": \"YearRound Gardening\", \"date\": \"2024-01-13\", \"total\": 19296.2, \"due_date\": \"2024-01-13\", \"items\": [\"Penetration Testing\", \"Monitoring & Alerting Setup\"]}"
+  },
+  {
+    "input": "Invoice #SVC-40340 from SwiftCode Consulting, 1500 Harbor Way, Long Beach CA 90802. Bill to: UrbanEdge Properties, 1000 Peachtree St, Atlanta GA 30309. Date: October 8, 2024. Items: Printer Maintenance: $236.74. Cleaning Services (Monthly): $1,998.00. Server Hardware: $9,277.63. Ergonomic Chairs: $5,349.53. Network Equipment: $1,703.93. Subtotal: $18,565.83. VAT (25%): $4,641.46. Total Due: $23,207.29. Payment terms: Annual prepay.",
+    "output": "{\"invoice_number\": \"SVC-40340\", \"vendor\": \"SwiftCode Consulting\", \"customer\": \"UrbanEdge Properties\", \"date\": \"2024-10-08\", \"total\": 23207.29, \"due_date\": \"2024-10-08\", \"items\": [\"Printer Maintenance\", \"Cleaning Services (Monthly)\", \"Server Hardware\", \"Ergonomic Chairs\", \"Network Equipment\"]}"
+  },
+  {
+    "input": "Please find attached invoice SI-42033 from QuantumLeap Analytics dated January 25, 2024. This invoice is for services provided to XpressShip Delivery. The services include: HVAC Service Visit: $313.00. Ergonomic Chairs: $2,431.32. Equipment Rental: $559.29. Printer Maintenance: $350.05. The total amount including sales tax (7%) of $255.76 is $3,909.42. Payment is due net 14.",
+    "output": "{\"invoice_number\": \"SI-42033\", \"vendor\": \"QuantumLeap Analytics\", \"customer\": \"XpressShip Delivery\", \"date\": \"2024-01-25\", \"total\": 3909.42, \"due_date\": \"2024-02-08\", \"items\": [\"HVAC Service Visit\", \"Ergonomic Chairs\", \"Equipment Rental\", \"Printer Maintenance\"]}"
+  },
+  {
+    "input": "GreenField Organic Farms | Invoice SI-20242 | 2024-12-12 | Customer: NorthStar Logistics. Services: Board Presentation Prep: $6,229.62. Recruitment Services: $10,645.00. Brand Strategy Workshop: $7,144.00. Consulting (Strategic): $6,377.00. Financial Modeling: $10,590.98. VAT (20%): $8,197.32. Total: $49,183.92. 50% upfront, 50% Net 30.",
+    "output": "{\"invoice_number\": \"SI-20242\", \"vendor\": \"GreenField Organic Farms\", \"customer\": \"NorthStar Logistics\", \"date\": \"2024-12-12\", \"total\": 49183.92, \"due_date\": \"2025-01-11\", \"items\": [\"Board Presentation Prep\", \"Recruitment Services\", \"Brand Strategy Workshop\", \"Consulting (Strategic)\", \"Financial Modeling\"]}"
+  },
+  {
+    "input": "Please find attached invoice REF-72861 from VeloCraft Bicycles dated April 6, 2024. This invoice is for services provided to JadeGarden Restaurant. The services include: Standing Desks: $9,021.60. Cleaning Services (Monthly): $1,682.67. Server Hardware: $7,205.00. Ergonomic Chairs: $3,507.00. Printer Maintenance: $483.25. The total amount including gst (10%) of $2,189.95 is $24,089.47. Payment is due net 60.",
+    "output": "{\"invoice_number\": \"REF-72861\", \"vendor\": \"VeloCraft Bicycles\", \"customer\": \"JadeGarden Restaurant\", \"date\": \"2024-04-06\", \"total\": 24089.47, \"due_date\": \"2024-06-05\", \"items\": [\"Standing Desks\", \"Cleaning Services (Monthly)\", \"Server Hardware\", \"Ergonomic Chairs\", \"Printer Maintenance\"]}"
+  },
+  {
+    "input": "Invoice #74183 from ClearView Optics, 150 Queen Street, Toronto ON M5H 3K4. Bill to: LightHouse Insurance, 350 Royal St, New Orleans LA 70130. Date: April 13, 2024. Items: Equipment Rental: $1,474.00. Catering (Event): $3,272.00. Server Hardware: $12,745.22. Printer Maintenance: $360.16. Subtotal: $17,851.38. Tax (8.5%): $1,517.37. Total Due: $19,368.75. Payment terms: Net 14.",
+    "output": "{\"invoice_number\": \"74183\", \"vendor\": \"ClearView Optics\", \"customer\": \"LightHouse Insurance\", \"date\": \"2024-04-13\", \"total\": 19368.75, \"due_date\": \"2024-04-27\", \"items\": [\"Equipment Rental\", \"Catering (Event)\", \"Server Hardware\", \"Printer Maintenance\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: Elara Strategy Partners, 920 Maple Street, Minneapolis MN 55401\nTo: VanguardTech Ventures, 78 Farm Road, Burlington VT 05401\nInvoice No: INV-2024-87523 | Date: 28/04/2024\nLine items: Equipment Rental: $357.94. Server Hardware: $15,155.38. HVAC Service Visit: $769.04.\nHST (13%): $2,116.71\nTotal: $18,399.07\nTerms: Net 15",
+    "output": "{\"invoice_number\": \"INV-2024-87523\", \"vendor\": \"Elara Strategy Partners\", \"customer\": \"VanguardTech Ventures\", \"date\": \"2024-04-28\", \"total\": 18399.07, \"due_date\": \"2024-05-13\", \"items\": [\"Equipment Rental\", \"Server Hardware\", \"HVAC Service Visit\"]}"
+  },
+  {
+    "input": "Please find attached invoice REF-55190 from IronClad Security dated October 17, 2024. This invoice is for services provided to FairWind Sailing Co. The services include: Consulting (Strategic): $18,708.00. IP Filing Preparation: $1,094.90. Contract Review: $2,079.00. Financial Modeling: $10,212.00. The total amount including tax (9.25%) of $2,968.69 is $35,062.59. Payment is due net 30.",
+    "output": "{\"invoice_number\": \"REF-55190\", \"vendor\": \"IronClad Security\", \"customer\": \"FairWind Sailing Co\", \"date\": \"2024-10-17\", \"total\": 35062.59, \"due_date\": \"2024-11-16\", \"items\": [\"Consulting (Strategic)\", \"IP Filing Preparation\", \"Contract Review\", \"Financial Modeling\"]}"
+  },
+  {
+    "input": "GoldenGate Imports | Invoice REF-21858 | 2024-02-21 | Customer: DawnBreaker Bakery. Services: Ergonomic Chairs: $5,245.00. Server Hardware: $12,277.00. Network Equipment: $1,389.52. HST (13%): $2,458.50. Total: $21,370.02. 50% upfront, 50% Net 30.",
+    "output": "{\"invoice_number\": \"REF-21858\", \"vendor\": \"GoldenGate Imports\", \"customer\": \"DawnBreaker Bakery\", \"date\": \"2024-02-21\", \"total\": 21370.02, \"due_date\": \"2024-03-22\", \"items\": [\"Ergonomic Chairs\", \"Server Hardware\", \"Network Equipment\"]}"
+  },
+  {
+    "input": "CodeGuard Security | Invoice 6168 | 2024-11-14 | Customer: HealthFirst Clinics. Services: HVAC Service Visit: $777.35. Catering (Event): $4,933.00. Cleaning Services (Monthly): $1,086.58. Standing Desks: $4,546.00. VAT (20%): $2,268.59. Total: $13,611.52. Net 60.",
+    "output": "{\"invoice_number\": \"6168\", \"vendor\": \"CodeGuard Security\", \"customer\": \"HealthFirst Clinics\", \"date\": \"2024-11-14\", \"total\": 13611.52, \"due_date\": \"2025-01-13\", \"items\": [\"HVAC Service Visit\", \"Catering (Event)\", \"Cleaning Services (Monthly)\", \"Standing Desks\"]}"
+  },
+  {
+    "input": "QuartzPoint Analytics | Invoice INV#17411 | 2024-09-17 | Customer: TimberLine Cabins. Services: Mobile App Development (Phase 1): $38,362.84. Monitoring & Alerting Setup: $5,424.74. Kubernetes Cluster Management: $7,673.00. SSL Certificate (Wildcard): $200.31. Discount (5%): -$2,583.04. Total: $49,077.85. Payment due on completion.",
+    "output": "{\"invoice_number\": \"INV#17411\", \"vendor\": \"QuartzPoint Analytics\", \"customer\": \"TimberLine Cabins\", \"date\": \"2024-09-17\", \"total\": 49077.85, \"due_date\": \"2024-09-17\", \"items\": [\"Mobile App Development (Phase 1)\", \"Monitoring & Alerting Setup\", \"Kubernetes Cluster Management\", \"SSL Certificate (Wildcard)\"]}"
+  },
+  {
+    "input": "CloudMetrics Pty Ltd | Invoice SI-54356 | 2024-02-16 | Customer: WestWind Energy. Services: Board Presentation Prep: $3,155.96. Contract Review: $4,680.21. Recruitment Services: $5,360.00. IP Filing Preparation: $3,173.13. Market Research Report: $11,122.91. Total: $27,492.21. Net 14.",
+    "output": "{\"invoice_number\": \"SI-54356\", \"vendor\": \"CloudMetrics Pty Ltd\", \"customer\": \"WestWind Energy\", \"date\": \"2024-02-16\", \"total\": 27492.21, \"due_date\": \"2024-03-01\", \"items\": [\"Board Presentation Prep\", \"Contract Review\", \"Recruitment Services\", \"IP Filing Preparation\", \"Market Research Report\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: LunarTech Space, 1500 Harbor Way, Long Beach CA 90802\nTo: HealthFirst Clinics, 400 Lake Shore Dr, Chicago IL 60611\nInvoice No: SVC-59307 | Date: 3/09/2024\nLine items: Technical Training (2 days): $4,346.00. Cloud Hosting (12 months): $19,202.36. Data Migration Services: $11,770.21. Penetration Testing: $8,432.77. Kubernetes Cluster Management: $7,139.49.\nTotal: $50,890.83\nTerms: 50% upfront, 50% Net 30",
+    "output": "{\"invoice_number\": \"SVC-59307\", \"vendor\": \"LunarTech Space\", \"customer\": \"HealthFirst Clinics\", \"date\": \"2024-09-03\", \"total\": 50890.83, \"due_date\": \"2024-10-03\", \"items\": [\"Technical Training (2 days)\", \"Cloud Hosting (12 months)\", \"Data Migration Services\", \"Penetration Testing\", \"Kubernetes Cluster Management\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: AlphaData Systems, 333 Data Drive, Denver CO 80202\nTo: OpenSpace Coworking, 350 Royal St, New Orleans LA 70130\nInvoice No: INV-2024-62157 | Date: 26/05/2024\nLine items: UI/UX Design Sprint: $7,775.00. SSL Certificate (Wildcard): $353.00. Security Audit: $8,729.64. Data Migration Services: $5,883.59.\nTotal: $22,741.23\nTerms: Due on receipt",
+    "output": "{\"invoice_number\": \"INV-2024-62157\", \"vendor\": \"AlphaData Systems\", \"customer\": \"OpenSpace Coworking\", \"date\": \"2024-05-26\", \"total\": 22741.23, \"due_date\": \"2024-05-26\", \"items\": [\"UI/UX Design Sprint\", \"SSL Certificate (Wildcard)\", \"Security Audit\", \"Data Migration Services\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: Summit Legal Services LLC, 42 Innovation Lane, Boston MA 02210\nTo: OakHeart Brewery, 900 Medical Dr, Houston TX 77030\nInvoice No: BILL-50362 | Date: 26/08/2024\nLine items: Disaster Recovery Setup: $13,211.90. Performance Optimization: $5,125.63. Monitoring & Alerting Setup: $2,615.00. UI/UX Design Sprint: $5,972.62.\nVAT (20%): $5,385.03\nTotal: $32,310.18\nTerms: Net 30",
+    "output": "{\"invoice_number\": \"BILL-50362\", \"vendor\": \"Summit Legal Services LLC\", \"customer\": \"OakHeart Brewery\", \"date\": \"2024-08-26\", \"total\": 32310.18, \"due_date\": \"2024-09-25\", \"items\": [\"Disaster Recovery Setup\", \"Performance Optimization\", \"Monitoring & Alerting Setup\", \"UI/UX Design Sprint\"]}"
+  },
+  {
+    "input": "CloudMetrics Pty Ltd | Invoice #10337 | 2024-09-04 | Customer: UrbanEdge Properties. Services: Load Testing Suite: $3,659.00. Code Review (40 hours): $6,714.18. CI/CD Pipeline Setup: $3,794.00. Compliance Audit (SOC2): $16,158.00. Total: $30,325.18. Net 45.",
+    "output": "{\"invoice_number\": \"10337\", \"vendor\": \"CloudMetrics Pty Ltd\", \"customer\": \"UrbanEdge Properties\", \"date\": \"2024-09-04\", \"total\": 30325.18, \"due_date\": \"2024-10-19\", \"items\": [\"Load Testing Suite\", \"Code Review (40 hours)\", \"CI/CD Pipeline Setup\", \"Compliance Audit (SOC2)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: UltraFit Gym Equipment, 175 Digital Pkwy, Atlanta GA 30301\nTo: IvoryTower University, 125 University Ave, Palo Alto CA 94301\nInvoice No: INV-2024-82401 | Date: 23/07/2024\nLine items: Cloud Hosting (12 months): $20,455.47. Monitoring & Alerting Setup: $5,179.00. Load Testing Suite: $5,593.00.\nVAT (25%): $7,806.87\nTotal: $39,034.34\nTerms: Net 45",
+    "output": "{\"invoice_number\": \"INV-2024-82401\", \"vendor\": \"UltraFit Gym Equipment\", \"customer\": \"IvoryTower University\", \"date\": \"2024-07-23\", \"total\": 39034.34, \"due_date\": \"2024-09-06\", \"items\": [\"Cloud Hosting (12 months)\", \"Monitoring & Alerting Setup\", \"Load Testing Suite\"]}"
+  },
+  {
+    "input": "Invoice #INV-40120 from RedOak Furniture, 450 Market St, San Francisco CA 94105. Bill to: ThunderBolt Electric, 600 Congress Ave, Austin TX 78701. Date: October 9, 2024. Items: Consulting (Strategic): $5,305.00. Market Research Report: $9,784.87. IP Filing Preparation: $3,602.19. Board Presentation Prep: $6,629.20. Financial Modeling: $9,374.00. Subtotal: $34,695.26. Tax (8.5%): $2,949.10. Total Due: $37,644.36. Payment terms: Net 30.",
+    "output": "{\"invoice_number\": \"INV-40120\", \"vendor\": \"RedOak Furniture\", \"customer\": \"ThunderBolt Electric\", \"date\": \"2024-10-09\", \"total\": 37644.36, \"due_date\": \"2024-11-08\", \"items\": [\"Consulting (Strategic)\", \"Market Research Report\", \"IP Filing Preparation\", \"Board Presentation Prep\", \"Financial Modeling\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: JetStream Networks, 14 Bean Street, Seattle WA 98101\nTo: MoonRise Publishing, 125 University Ave, Palo Alto CA 94301\nInvoice No: INV-45282 | Date: 11/06/2024\nLine items: Equipment Rental: $1,924.11. Standing Desks: $9,625.81. Server Hardware: $9,577.00.\nTax (9.25%): $1,954.24\nTotal: $23,081.16\nTerms: Net 15",
+    "output": "{\"invoice_number\": \"INV-45282\", \"vendor\": \"JetStream Networks\", \"customer\": \"MoonRise Publishing\", \"date\": \"2024-06-11\", \"total\": 23081.16, \"due_date\": \"2024-06-26\", \"items\": [\"Equipment Rental\", \"Standing Desks\", \"Server Hardware\"]}"
+  },
+  {
+    "input": "Invoice ##29719 from CloudMetrics Pty Ltd, 920 Maple Street, Minneapolis MN 55401. Bill to: BrightPath Consulting Ltd, 77 Harbour Square, Toronto ON M5J 2S2. Date: May 16, 2024. Items: Compliance Audit (SOC2): $23,446.00. Technical Training (2 days): $3,353.31. Security Audit: $5,792.00. SSL Certificate (Wildcard): $229.00. Subtotal: $32,820.31. Tax (6%): $1,969.22. Total Due: $34,789.53. Payment terms: Payment due on completion.",
+    "output": "{\"invoice_number\": \"29719\", \"vendor\": \"CloudMetrics Pty Ltd\", \"customer\": \"BrightPath Consulting Ltd\", \"date\": \"2024-05-16\", \"total\": 34789.53, \"due_date\": \"2024-05-16\", \"items\": [\"Compliance Audit (SOC2)\", \"Technical Training (2 days)\", \"Security Audit\", \"SSL Certificate (Wildcard)\"]}"
+  },
+  {
+    "input": "BetaLabs Research | Invoice SI-32872 | 2024-06-12 | Customer: NorthPole Expeditions. Services: Cloud Hosting (12 months): $21,067.00. Performance Optimization: $11,621.00. Custom Dashboard Development: $18,482.33. Code Review (40 hours): $6,406.00. VAT (20%): $11,515.27. Total: $69,091.60. Due on receipt.",
+    "output": "{\"invoice_number\": \"SI-32872\", \"vendor\": \"BetaLabs Research\", \"customer\": \"NorthPole Expeditions\", \"date\": \"2024-06-12\", \"total\": 69091.6, \"due_date\": \"2024-06-12\", \"items\": [\"Cloud Hosting (12 months)\", \"Performance Optimization\", \"Custom Dashboard Development\", \"Code Review (40 hours)\"]}"
+  },
+  {
+    "input": "Please find attached invoice INV#67621 from OptiFlow Hydraulics dated October 2, 2024. This invoice is for services provided to SteelBridge Construction. The services include: Database Administration: $2,820.00. Security Audit: $9,342.00. Custom Dashboard Development: $8,257.41. SSL Certificate (Wildcard): $298.17. Priority Support (Annual): $7,432.00. The total amount including tax (6%) of $1,688.97 is $29,838.55. Payment is due due within 7 business days.",
+    "output": "{\"invoice_number\": \"INV#67621\", \"vendor\": \"OptiFlow Hydraulics\", \"customer\": \"SteelBridge Construction\", \"date\": \"2024-10-02\", \"total\": 29838.55, \"due_date\": \"2024-10-09\", \"items\": [\"Database Administration\", \"Security Audit\", \"Custom Dashboard Development\", \"SSL Certificate (Wildcard)\", \"Priority Support (Annual)\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: LunarTech Space, 1200 Tech Park Dr, Raleigh NC 27601\nTo: WestWind Energy, 1 Wall Street Floor 32, New York NY 10005\nInvoice No: 2024-65253 | Date: 16/08/2024\nLine items: Equipment Rental: $1,296.85. Printer Maintenance: $337.20. HVAC Service Visit: $329.73. Ergonomic Chairs: $4,280.00. Server Hardware: $16,306.22.\nVAT (20%): $4,510.00\nTotal: $27,060.00\nTerms: Annual prepay",
+    "output": "{\"invoice_number\": \"2024-65253\", \"vendor\": \"LunarTech Space\", \"customer\": \"WestWind Energy\", \"date\": \"2024-08-16\", \"total\": 27060.0, \"due_date\": \"2024-08-16\", \"items\": [\"Equipment Rental\", \"Printer Maintenance\", \"HVAC Service Visit\", \"Ergonomic Chairs\", \"Server Hardware\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: JetStream Networks, Level 3, 200 George St, Sydney NSW 2000\nTo: ZephyrAir HVAC, 125 University Ave, Palo Alto CA 94301\nInvoice No: SVC-25385 | Date: 7/02/2024\nLine items: Technical Training (2 days): $4,558.73. Data Migration Services: $11,822.00. Penetration Testing: $6,826.00. SSL Certificate (Wildcard): $368.89.\nMwSt (19%): $4,479.37\nTotal: $28,054.99\nTerms: Net 60",
+    "output": "{\"invoice_number\": \"SVC-25385\", \"vendor\": \"JetStream Networks\", \"customer\": \"ZephyrAir HVAC\", \"date\": \"2024-02-07\", \"total\": 28054.99, \"due_date\": \"2024-04-07\", \"items\": [\"Technical Training (2 days)\", \"Data Migration Services\", \"Penetration Testing\", \"SSL Certificate (Wildcard)\"]}"
+  },
+  {
+    "input": "Invoice #PO-13232 from UltraFit Gym Equipment, 300 Park Avenue Suite 1200, New York NY 10022. Bill to: JadeGarden Restaurant, 1 Wall Street Floor 32, New York NY 10005. Date: June 8, 2024. Items: Equipment Rental: $1,749.00. Ergonomic Chairs: $7,847.17. HVAC Service Visit: $735.00. Office Supplies Bundle: $213.23. Subtotal: $10,544.40. Sales Tax (7%): $738.11. Total Due: $11,282.51. Payment terms: 50% upfront, 50% Net 30.",
+    "output": "{\"invoice_number\": \"PO-13232\", \"vendor\": \"UltraFit Gym Equipment\", \"customer\": \"JadeGarden Restaurant\", \"date\": \"2024-06-08\", \"total\": 11282.51, \"due_date\": \"2024-07-08\", \"items\": [\"Equipment Rental\", \"Ergonomic Chairs\", \"HVAC Service Visit\", \"Office Supplies Bundle\"]}"
+  },
+  {
+    "input": "Please find attached invoice QI-81545 from Acme Corp dated January 11, 2024. This invoice is for services provided to NextGen Robotics Inc. The services include: Cleaning Services (Monthly): $1,900.91. Catering (Event): $3,844.12. HVAC Service Visit: $691.00. Discount (20%): -$1,287.21. The total amount including vat (25%) of $1,287.20 is $6,436.02. Payment is due annual prepay.",
+    "output": "{\"invoice_number\": \"QI-81545\", \"vendor\": \"Acme Corp\", \"customer\": \"NextGen Robotics Inc\", \"date\": \"2024-01-11\", \"total\": 6436.02, \"due_date\": \"2024-01-11\", \"items\": [\"Cleaning Services (Monthly)\", \"Catering (Event)\", \"HVAC Service Visit\"]}"
+  },
+  {
+    "input": "Please find attached invoice 57979 from MetalWorks Engineering dated October 23, 2024. This invoice is for services provided to IvoryTower University. The services include: Disaster Recovery Setup: $10,074.03. CI/CD Pipeline Setup: $8,249.14. Monitoring & Alerting Setup: $2,872.53. Kubernetes Cluster Management: $4,436.23. Performance Optimization: $11,561.00. The total amount including tax (6%) of $2,231.58 is $39,424.51. Payment is due net 30.",
+    "output": "{\"invoice_number\": \"57979\", \"vendor\": \"MetalWorks Engineering\", \"customer\": \"IvoryTower University\", \"date\": \"2024-10-23\", \"total\": 39424.51, \"due_date\": \"2024-11-22\", \"items\": [\"Disaster Recovery Setup\", \"CI/CD Pipeline Setup\", \"Monitoring & Alerting Setup\", \"Kubernetes Cluster Management\", \"Performance Optimization\"]}"
+  },
+  {
+    "input": "Invoice #PO-94091 from HarborLight Shipping, 920 Maple Street, Minneapolis MN 55401. Bill to: EverGreen Parks Dept, Industriepark 5, 80339 Munich. Date: September 21, 2024. Items: Recruitment Services: $7,727.00. Market Research Report: $3,404.00. Subtotal: $11,131.00. Total Due: $11,131.00. Payment terms: Net 30.",
+    "output": "{\"invoice_number\": \"PO-94091\", \"vendor\": \"HarborLight Shipping\", \"customer\": \"EverGreen Parks Dept\", \"date\": \"2024-09-21\", \"total\": 11131.0, \"due_date\": \"2024-10-21\", \"items\": [\"Recruitment Services\", \"Market Research Report\"]}"
+  },
+  {
+    "input": "INVOICE\nFrom: Global Supply Co, 2500 Enterprise Rd, Dallas TX 75201\nTo: QuickMart Retail, 2800 Campus Dr, San Mateo CA 94403\nInvoice No: INV-99993 | Date: 2/02/2024\nLine items: Ergonomic Chairs: $5,812.56. Printer Maintenance: $126.00. Server Hardware: $5,560.00.\nGST (10%): $1,149.86\nTotal: $12,648.42\nTerms: Net 60",
+    "output": "{\"invoice_number\": \"INV-99993\", \"vendor\": \"Global Supply Co\", \"customer\": \"QuickMart Retail\", \"date\": \"2024-02-02\", \"total\": 12648.42, \"due_date\": \"2024-04-02\", \"items\": [\"Ergonomic Chairs\", \"Printer Maintenance\", \"Server Hardware\"]}"
+  },
+  {
+    "input": "Please find attached invoice INV-89804 from CodeGuard Security dated January 27, 2024. This invoice is for services provided to BlueSky Airlines. The services include: Ergonomic Chairs: $4,074.39. HVAC Service Visit: $203.07. Printer Maintenance: $124.71. Catering (Event): $3,167.00. Office Supplies Bundle: $940.00. The total amount is $8,509.17. Payment is due net 15.",
+    "output": "{\"invoice_number\": \"INV-89804\", \"vendor\": \"CodeGuard Security\", \"customer\": \"BlueSky Airlines\", \"date\": \"2024-01-27\", \"total\": 8509.17, \"due_date\": \"2024-02-11\", \"items\": [\"Ergonomic Chairs\", \"HVAC Service Visit\", \"Printer Maintenance\", \"Catering (Event)\", \"Office Supplies Bundle\"]}"
+  },
+  {
+    "input": "Invoice #SVC-84546 from TidalWave Media, Storgatan 45, Stockholm, Sweden. Bill to: TechStart Inc, 900 Medical Dr, Houston TX 77030. Date: November 13, 2024. Items: Standing Desks: $3,345.70. Office Supplies Bundle: $395.00. Subtotal: $3,740.70. VAT (25%): $935.17. Total Due: $4,675.87. Payment terms: Net 30.",
+    "output": "{\"invoice_number\": \"SVC-84546\", \"vendor\": \"TidalWave Media\", \"customer\": \"TechStart Inc\", \"date\": \"2024-11-13\", \"total\": 4675.87, \"due_date\": \"2024-12-13\", \"items\": [\"Standing Desks\", \"Office Supplies Bundle\"]}"
+  },
+  {
+    "input": "Please find attached invoice INV#88776 from SkyHigh Aviation Parts dated December 5, 2024. This invoice is for services provided to NorthPole Expeditions. The services include: API Integration Package: $10,571.10. Compliance Audit (SOC2): $25,691.00. The total amount including mwst (19%) of $6,889.80 is $43,151.90. Payment is due annual prepay.",
+    "output": "{\"invoice_number\": \"INV#88776\", \"vendor\": \"SkyHigh Aviation Parts\", \"customer\": \"NorthPole Expeditions\", \"date\": \"2024-12-05\", \"total\": 43151.9, \"due_date\": \"2024-12-05\", \"items\": [\"API Integration Package\", \"Compliance Audit (SOC2)\"]}"
+  },
+  {
+    "input": "Global Supply Co | Invoice QI-62564 | 2024-12-03 | Customer: AnchorPoint Marine. Services: Office Supplies Bundle: $370.00. Catering (Event): $2,414.00. Cleaning Services (Monthly): $1,553.61. Server Hardware: $13,638.00. Total: $17,975.61. Annual prepay.",
+    "output": "{\"invoice_number\": \"QI-62564\", \"vendor\": \"Global Supply Co\", \"customer\": \"AnchorPoint Marine\", \"date\": \"2024-12-03\", \"total\": 17975.61, \"due_date\": \"2024-12-03\", \"items\": [\"Office Supplies Bundle\", \"Catering (Event)\", \"Cleaning Services (Monthly)\", \"Server Hardware\"]}"
+  }
+]

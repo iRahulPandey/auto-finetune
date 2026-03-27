@@ -1,0 +1,802 @@
+[
+  {
+    "input": "Team conference is scheduled for April 1, please RSVP by tomorrow",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Backup verification failed \u2014 last 3 daily backups are corrupted",
+    "output": "urgent"
+  },
+  {
+    "input": "SSL certificate for auth.service expired last night, HTTPS traffic rejected",
+    "output": "urgent"
+  },
+  {
+    "input": "CI/CD pipeline compromised, malicious code found in build artifacts",
+    "output": "urgent"
+  },
+  {
+    "input": "Cron job that processes batch imports hasn't run in 72 hours, 5 items stuck",
+    "output": "urgent"
+  },
+  {
+    "input": "Does anyone have a recommendation for a good stickers for the office?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Security breach: unauthorized access to transaction logs detected from external VPN",
+    "output": "urgent"
+  },
+  {
+    "input": "Third-party auth service API revoked our credentials without notice, integration broken",
+    "output": "urgent"
+  },
+  {
+    "input": "DDoS attack in progress, 200Gbps traffic spike overwhelming WAF rules",
+    "output": "urgent"
+  },
+  {
+    "input": "Emma is organizing a lunch run, reply to this thread to order",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Third-party GraphQL endpoint API revoked our credentials without notice, integration broken",
+    "output": "urgent"
+  },
+  {
+    "input": "Ransomware detected on 500 workstations in engineering",
+    "output": "urgent"
+  },
+  {
+    "input": "Quick question: what's the process for ordering stickers?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Can we add search to the internal reporting app? Low priority",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Office t-shirts shipment arrived, pick up yours from the front desk",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Just published a blog post about engineering culture, please share if you like it",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Sarah is organizing a lunch run, reply to this thread to order",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Suspicious admin login from unknown VPN in Brazil IP at during peak hours, not matching any team member",
+    "output": "urgent"
+  },
+  {
+    "input": "API keys for message queue leaked in public GitHub repo, immediate rotation needed",
+    "output": "urgent"
+  },
+  {
+    "input": "CDN edge nodes in EU-West returning stale content from 3 days ago",
+    "output": "urgent"
+  },
+  {
+    "input": "CRITICAL: user service cluster lost quorum, complete outage affecting 100,000 users",
+    "output": "urgent"
+  },
+  {
+    "input": "Suspicious admin login from Russia IP at midnight, not matching any team member",
+    "output": "urgent"
+  },
+  {
+    "input": "Found a typo on the pricing page, should I just fix it?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Parking policy changes starting April 1, see attached PDF for details",
+    "output": "not_urgent"
+  },
+  {
+    "input": "New mugs installed in the break room, enjoy!",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Billing service calculating wrong amounts, 8 invoices sent with errors",
+    "output": "urgent"
+  },
+  {
+    "input": "Can we add keyboard shortcuts to the internal dashboard? Low priority",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Free hoodies from the holiday party in the supply closet",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Primary database replication lag at 6 hours and growing, reads serving stale data",
+    "output": "urgent"
+  },
+  {
+    "input": "Happy birthday to James from infrastructure! Cake in the kitchen at 2pm",
+    "output": "not_urgent"
+  },
+  {
+    "input": "IT is doing storage maintenance this Sunday, expect brief email downtime",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Database disk at 94% capacity, auto-extend disabled, writes will fail in 3am",
+    "output": "urgent"
+  },
+  {
+    "input": "Parking policy changes starting next Friday, see attached PDF for details",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Auto-scaling hit Azure account limits during peak, can't launch new instances",
+    "output": "urgent"
+  },
+  {
+    "input": "Does anyone have a recommendation for a good notebooks for the office?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Cron job that processes reports hasn't run in 12 hours, 500 items stuck",
+    "output": "urgent"
+  },
+  {
+    "input": "Security breach: unauthorized access to user sessions detected from former contractor credentials",
+    "output": "urgent"
+  },
+  {
+    "input": "Database disk at 90% capacity, auto-extend disabled, writes will fail in since the maintenance window",
+    "output": "urgent"
+  },
+  {
+    "input": "The standup is rescheduled to Friday at 4:30pm",
+    "output": "not_urgent"
+  },
+  {
+    "input": "The microwave on floor 5 is out of order again",
+    "output": "not_urgent"
+  },
+  {
+    "input": "order service OOM killed on prod-web-01, automatic restart failing in loop",
+    "output": "urgent"
+  },
+  {
+    "input": "Reminder: submit your expense reports by end of quarter",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Cron job that processes refunds hasn't run in 72 hours, 5 items stuck",
+    "output": "urgent"
+  },
+  {
+    "input": "Weekly quarterly notes posted in the #random channel",
+    "output": "not_urgent"
+  },
+  {
+    "input": "New hoodies installed in the break room, enjoy!",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Team team offsite is scheduled for Dec 20, please RSVP by tomorrow",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Kubernetes pods in CrashLoopBackOff on k8s-main, 12 services affected",
+    "output": "urgent"
+  },
+  {
+    "input": "Can we add search to the internal admin panel? Low priority",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Payment processing failing for all wire transfer transactions since since the maintenance window",
+    "output": "urgent"
+  },
+  {
+    "input": "IT is doing network maintenance this Saturday, expect brief Slack downtime",
+    "output": "not_urgent"
+  },
+  {
+    "input": "I'll be working from conference room B Monday, reachable on Slack",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Just published a blog post about scaling challenges, please share if you like it",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Primary database replication lag at 2 hours and growing, reads serving stale data",
+    "output": "urgent"
+  },
+  {
+    "input": "Production payment service is down, all GraphQL queries returning 503 Service Unavailable since 2:47am",
+    "output": "urgent"
+  },
+  {
+    "input": "Cron job that processes batch imports hasn't run in 72 hours, 12 items stuck",
+    "output": "urgent"
+  },
+  {
+    "input": "Updated the runbook page with team norms for reference",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Data pipeline broke overnight, 24 hours of transaction logs data missing",
+    "output": "urgent"
+  },
+  {
+    "input": "notification service memory leak detected, RSS growing 1GB per hour, OOM imminent",
+    "output": "urgent"
+  },
+  {
+    "input": "Please update your BambooHR profile with current emergency contact info",
+    "output": "not_urgent"
+  },
+  {
+    "input": "New t-shirts installed in the kitchen, enjoy!",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Please update your BambooHR profile with current tax forms",
+    "output": "not_urgent"
+  },
+  {
+    "input": "FYI: I updated the playbook with the new updated endpoints",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Load balancer health checks failing, 99% of traffic hitting dead backends",
+    "output": "urgent"
+  },
+  {
+    "input": "Auto-scaling hit AWS account limits during peak, can't launch new instances",
+    "output": "urgent"
+  },
+  {
+    "input": "Kubernetes pods in CrashLoopBackOff on prod-east, 8 services affected",
+    "output": "urgent"
+  },
+  {
+    "input": "The vending machine on floor 7 is out of order again",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Customer PII exposed via misconfigured payment service bucket, 3 records affected",
+    "output": "urgent"
+  },
+  {
+    "input": "DDoS attack in progress, 100Gbps traffic spike overwhelming WAF rules",
+    "output": "urgent"
+  },
+  {
+    "input": "Please update your Okta profile with current emergency contact info",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Sharing the slides from yesterday's architecture review",
+    "output": "not_urgent"
+  },
+  {
+    "input": "FYI: I updated the runbook with the new team norms",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Parking policy changes starting Dec 20, see attached PDF for details",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Office hoodies shipment arrived, pick up yours from the front desk",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Suspicious admin login from North Korea IP at 2:47am, not matching any team member",
+    "output": "urgent"
+  },
+  {
+    "input": "Sharing the slides from yesterday's security review",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Anyone interested in joining a cooking group on Tuesdays?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Cron job that processes data exports hasn't run in 72 hours, 8 items stuck",
+    "output": "urgent"
+  },
+  {
+    "input": "Billing service calculating wrong amounts, 200 invoices sent with errors",
+    "output": "urgent"
+  },
+  {
+    "input": "Third-party webhook processor API revoked our credentials without notice, integration broken",
+    "output": "urgent"
+  },
+  {
+    "input": "Cron job that processes refunds hasn't run in 24 hours, 5 items stuck",
+    "output": "urgent"
+  },
+  {
+    "input": "SSL certificate for dashboard.internal expired since the last deploy, HTTPS traffic rejected",
+    "output": "urgent"
+  },
+  {
+    "input": "Third-party email service API revoked our credentials without notice, integration broken",
+    "output": "urgent"
+  },
+  {
+    "input": "FYI: I updated the confluence page with the new troubleshooting tips",
+    "output": "not_urgent"
+  },
+  {
+    "input": "CDN edge nodes in EU-West returning stale content from since the last deploy",
+    "output": "urgent"
+  },
+  {
+    "input": "Team all-hands is scheduled for March 15, please RSVP by tomorrow",
+    "output": "not_urgent"
+  },
+  {
+    "input": "analytics pipeline OOM killed on prod-web-01, automatic restart failing in loop",
+    "output": "urgent"
+  },
+  {
+    "input": "New notebooks installed in the main lobby, enjoy!",
+    "output": "not_urgent"
+  },
+  {
+    "input": "CRITICAL: GraphQL endpoint cluster lost quorum, complete outage affecting 50,000 users",
+    "output": "urgent"
+  },
+  {
+    "input": "FYI: I updated the runbook with the new troubleshooting tips",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Updated the architecture diagram page with new onboarding steps for reference",
+    "output": "not_urgent"
+  },
+  {
+    "input": "The vending machine on floor 2 is out of order again",
+    "output": "not_urgent"
+  },
+  {
+    "input": "The all-hands is rescheduled to Friday at noon",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Kubernetes pods in CrashLoopBackOff on staging-eu, 500 services affected",
+    "output": "urgent"
+  },
+  {
+    "input": "Backup verification failed \u2014 last 50 daily backups are corrupted",
+    "output": "urgent"
+  },
+  {
+    "input": "The microwave on floor 2 is out of order again",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Found a typo on the about us page, should I just fix it?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Weekly quarterly notes posted in the #standup channel",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Security breach: unauthorized access to audit logs detected from unknown IP in China",
+    "output": "urgent"
+  },
+  {
+    "input": "Let's discuss switching from Datadog to Teams in next week's meeting",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Cron job that processes refunds hasn't run in 12 hours, 12 items stuck",
+    "output": "urgent"
+  },
+  {
+    "input": "FYI: I updated the confluence page with the new team norms",
+    "output": "not_urgent"
+  },
+  {
+    "input": "API keys for analytics pipeline leaked in public GitHub repo, immediate rotation needed",
+    "output": "urgent"
+  },
+  {
+    "input": "search cluster memory leak detected, RSS growing 1GB per hour, OOM imminent",
+    "output": "urgent"
+  },
+  {
+    "input": "SSL certificate for auth.service expired 2 hours ago, HTTPS traffic rejected",
+    "output": "urgent"
+  },
+  {
+    "input": "Office mugs shipment arrived, pick up yours from the front desk",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Let's discuss switching from Jira to GitHub Actions in next week's meeting",
+    "output": "not_urgent"
+  },
+  {
+    "input": "FYI: I updated the confluence page with the new new onboarding steps",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Priya is organizing a lunch run, reply to this thread to order",
+    "output": "not_urgent"
+  },
+  {
+    "input": "8 refunds stuck in queue, processing cron job failed silently",
+    "output": "urgent"
+  },
+  {
+    "input": "DNS resolution completely broken for auth.service, site unreachable globally",
+    "output": "urgent"
+  },
+  {
+    "input": "New hire Omar starting Friday, please help make them feel welcome",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Payment processing failing for all ACH transactions since 3am",
+    "output": "urgent"
+  },
+  {
+    "input": "Office notebooks shipment arrived, pick up yours from the front desk",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Sharing the slides from yesterday's incident review",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Can we add notifications to the internal internal tool? Low priority",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Can someone review my PR for the config update?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Reminder: submit your expense reports by end of month",
+    "output": "not_urgent"
+  },
+  {
+    "input": "SSL certificate for api.example.com expired yesterday, HTTPS traffic rejected",
+    "output": "urgent"
+  },
+  {
+    "input": "Production user service is down, all REST endpoints returning 503 Service Unavailable since midnight",
+    "output": "urgent"
+  },
+  {
+    "input": "GraphQL endpoint OOM killed on worker-node-7, automatic restart failing in loop",
+    "output": "urgent"
+  },
+  {
+    "input": "Weekly quarterly notes posted in the #engineering channel",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Can we add dark mode to the internal admin panel? Low priority",
+    "output": "not_urgent"
+  },
+  {
+    "input": "I'll be working from lounge Monday, reachable on Slack",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Found a typo on the careers page, should I just fix it?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "50 refunds stuck in queue, processing cron job failed silently",
+    "output": "urgent"
+  },
+  {
+    "input": "Suspicious admin login from North Korea IP at after the 5pm deploy, not matching any team member",
+    "output": "urgent"
+  },
+  {
+    "input": "caching layer OOM killed on api-server-12, automatic restart failing in loop",
+    "output": "urgent"
+  },
+  {
+    "input": "Cron job that processes data exports hasn't run in 72 hours, 50 items stuck",
+    "output": "urgent"
+  },
+  {
+    "input": "Production message queue is down, all GraphQL queries returning ECONNREFUSED since midnight",
+    "output": "urgent"
+  },
+  {
+    "input": "Security breach: unauthorized access to transaction logs detected from former contractor credentials",
+    "output": "urgent"
+  },
+  {
+    "input": "FYI: I updated the FAQ with the new team norms",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Found a typo on the blog page, should I just fix it?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Can someone review my PR for the README update?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "The sprint review is rescheduled to Friday at noon",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Kubernetes pods in CrashLoopBackOff on prod-east, 12 services affected",
+    "output": "urgent"
+  },
+  {
+    "input": "Weekly expense notes posted in the #engineering channel",
+    "output": "not_urgent"
+  },
+  {
+    "input": "order service OOM killed on api-server-12, automatic restart failing in loop",
+    "output": "urgent"
+  },
+  {
+    "input": "The sprint review is rescheduled to Wednesday at 3pm",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Cron job that processes reports hasn't run in 12 hours, 3 items stuck",
+    "output": "urgent"
+  },
+  {
+    "input": "Data pipeline broke overnight, 72 hours of audit logs data missing",
+    "output": "urgent"
+  },
+  {
+    "input": "I'll be working from kitchen Thursday, reachable on Slack",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Please update your HR portal profile with current emergency contact info",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Payment processing failing for all PayPal transactions since 2:47am",
+    "output": "urgent"
+  },
+  {
+    "input": "The microwave on floor 3 is out of order again",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Redis split-brain scenario detected, data inconsistency across 3 services",
+    "output": "urgent"
+  },
+  {
+    "input": "Please update your HR portal profile with current phone number",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Stripe webhooks returning errors, customers charged but orders not created",
+    "output": "urgent"
+  },
+  {
+    "input": "IT is doing storage maintenance this Saturday, expect brief SSO downtime",
+    "output": "not_urgent"
+  },
+  {
+    "input": "DDoS attack in progress, 40Gbps traffic spike overwhelming WAF rules",
+    "output": "urgent"
+  },
+  {
+    "input": "Third-party user service API revoked our credentials without notice, integration broken",
+    "output": "urgent"
+  },
+  {
+    "input": "Payment processing failing for all wire transfer transactions since after the 5pm deploy",
+    "output": "urgent"
+  },
+  {
+    "input": "IT is doing database maintenance this weekend, expect brief Slack downtime",
+    "output": "not_urgent"
+  },
+  {
+    "input": "The board meeting is rescheduled to Thursday at 4:30pm",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Cron job that processes data exports hasn't run in 24 hours, 3 items stuck",
+    "output": "urgent"
+  },
+  {
+    "input": "Payment processing failing for all wire transfer transactions since 3am",
+    "output": "urgent"
+  },
+  {
+    "input": "Database disk at 97% capacity, auto-extend disabled, writes will fail in during peak hours",
+    "output": "urgent"
+  },
+  {
+    "input": "IT is doing security patch maintenance this Saturday, expect brief SSO downtime",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Happy birthday to Emma from product! Cake in the lounge at 2pm",
+    "output": "not_urgent"
+  },
+  {
+    "input": "FYI: I updated the FAQ with the new new onboarding steps",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Primary database replication lag at 45 minutes and growing, reads serving stale data",
+    "output": "urgent"
+  },
+  {
+    "input": "Found a typo on the docs landing page, should I just fix it?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Office snacks shipment arrived, pick up yours from the front desk",
+    "output": "not_urgent"
+  },
+  {
+    "input": "CDN edge nodes in EU-West returning stale content from yesterday",
+    "output": "urgent"
+  },
+  {
+    "input": "CRITICAL: notification service cluster lost quorum, complete outage affecting 50,000 users",
+    "output": "urgent"
+  },
+  {
+    "input": "Please update your HR portal profile with current home address",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Does anyone have a recommendation for a good mugs for the office?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Anyone interested in joining a book club group on Thursdays?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Ransomware detected on 3 workstations in customer support",
+    "output": "urgent"
+  },
+  {
+    "input": "Let's discuss switching from Jira to Grafana in next week's meeting",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Happy birthday to Chen from marketing! Cake in the kitchen at 4:30pm",
+    "output": "not_urgent"
+  },
+  {
+    "input": "FYI: I updated the wiki with the new team norms",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Customer PII exposed via misconfigured file storage bucket, 8 records affected",
+    "output": "urgent"
+  },
+  {
+    "input": "CRITICAL: email service cluster lost quorum, complete outage affecting 5,000 users",
+    "output": "urgent"
+  },
+  {
+    "input": "Suspicious admin login from North Korea IP at midnight, not matching any team member",
+    "output": "urgent"
+  },
+  {
+    "input": "Billing service calculating wrong amounts, 12 invoices sent with errors",
+    "output": "urgent"
+  },
+  {
+    "input": "Redis split-brain scenario detected, data inconsistency across 12 services",
+    "output": "urgent"
+  },
+  {
+    "input": "payment service OOM killed on prod-web-01, automatic restart failing in loop",
+    "output": "urgent"
+  },
+  {
+    "input": "Please update your BambooHR profile with current home address",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Production API gateway is down, all GraphQL queries returning ECONNREFUSED since 3am",
+    "output": "urgent"
+  },
+  {
+    "input": "Anyone interested in joining a yoga group on Fridays?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Auto-scaling hit GCP account limits during peak, can't launch new instances",
+    "output": "urgent"
+  },
+  {
+    "input": "Reminder: submit your timesheet reports by end of quarter",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Production search cluster is down, all health checks returning 502 Bad Gateway since since the maintenance window",
+    "output": "urgent"
+  },
+  {
+    "input": "I'll be working from conference room B Friday, reachable on Slack",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Database disk at 97% capacity, auto-extend disabled, writes will fail in 3am",
+    "output": "urgent"
+  },
+  {
+    "input": "I'll be working from conference room B Tuesday, reachable on Slack",
+    "output": "not_urgent"
+  },
+  {
+    "input": "The sprint review is rescheduled to Monday at 2pm",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Reminder: submit your weekly standup reports by end of week",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Suspicious admin login from Tor exit node IP at 2:47am, not matching any team member",
+    "output": "urgent"
+  },
+  {
+    "input": "The printer on floor 4 is out of order again",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Data pipeline broke overnight, 24 hours of customer PII data missing",
+    "output": "urgent"
+  },
+  {
+    "input": "Can someone review my PR for the typo update?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Happy birthday to Mike from product! Cake in the main lobby at 4:30pm",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Customer PII exposed via misconfigured search cluster bucket, 500 records affected",
+    "output": "urgent"
+  },
+  {
+    "input": "The dishwasher on floor 4 is out of order again",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Omar is organizing a coffee run, reply to this thread to order",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Quick question: what's the process for ordering mugs?",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Team hackathon is scheduled for next Friday, please RSVP by next Monday",
+    "output": "not_urgent"
+  },
+  {
+    "input": "Production auth service is down, all REST endpoints returning connection timeouts since after the 5pm deploy",
+    "output": "urgent"
+  },
+  {
+    "input": "Payment processing failing for all ACH transactions since since the maintenance window",
+    "output": "urgent"
+  }
+]
