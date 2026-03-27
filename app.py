@@ -860,42 +860,64 @@ with tab_infer:
             return msgs
 
         def _get_model(adapter_path: Optional[str]):
+            """Load base model once; subsequent adapters load only LoRA weights (~MB).
+
+            Uses PEFT's multi-adapter API so the GB base model is read from disk
+            exactly once per base_model_id, regardless of how many adapters are
+            selected for comparison.
+
+            Returns (model, tokenizer, active_adapter_name).
+            active_adapter_name is None for base model inference.
+            """
             import torch
             from transformers import AutoTokenizer, AutoModelForCausalLM
-            from peft import PeftModel
 
-            cache_key = adapter_path or "__base__"
-            if cache_key not in st.session_state.infer_models:
-                with st.spinner(f"Loading {'base' if not adapter_path else 'adapter'} model…"):
-                    tok = AutoTokenizer.from_pretrained(
-                        base_model_id, trust_remote_code=True
-                    )
+            # Keyed by base_model_id so switching experiments uses the right weights
+            shared_key = f"__shared_{base_model_id}__"
+            cache = st.session_state.infer_models
+
+            if shared_key not in cache:
+                with st.spinner("Loading base model…"):
+                    tok = AutoTokenizer.from_pretrained(base_model_id, trust_remote_code=True)
                     if tok.pad_token is None:
                         tok.pad_token = tok.eos_token
-
                     extra_kwargs = {"device_map": "auto"} if DEVICE == "cuda" else {}
                     mdl = AutoModelForCausalLM.from_pretrained(
-                        base_model_id, dtype=DTYPE,
-                        trust_remote_code=True, **extra_kwargs,
+                        base_model_id, dtype=DTYPE, trust_remote_code=True, **extra_kwargs,
                     )
                     if DEVICE == "mps":
                         mdl = mdl.to("mps")
-
-                    if adapter_path:
-                        mdl = PeftModel.from_pretrained(mdl, adapter_path)
-                        mdl = mdl.merge_and_unload()
-                        if DEVICE == "mps":
-                            mdl = mdl.to("mps")
-
                     mdl.eval()
-                    st.session_state.infer_models[cache_key] = (mdl, tok)
+                cache[shared_key] = {"model": mdl, "tok": tok, "adapters": {}}
 
-            return st.session_state.infer_models[cache_key]
+            entry = cache[shared_key]
 
-        def _generate(model, tokenizer, messages_: list[dict]) -> str:
+            if not adapter_path:
+                return entry["model"], entry["tok"], None
+
+            if adapter_path not in entry["adapters"]:
+                from peft import PeftModel
+                adapter_name = f"run_{len(entry['adapters'])}"
+                with st.spinner("Loading adapter weights…"):
+                    if not entry["adapters"]:
+                        # First adapter: wrap base model in PeftModel
+                        peft = PeftModel.from_pretrained(
+                            entry["model"], adapter_path, adapter_name=adapter_name,
+                        )
+                        peft.eval()
+                        entry["model"] = peft
+                    else:
+                        # Subsequent adapters: only LoRA weights loaded, no base reload
+                        entry["model"].load_adapter(adapter_path, adapter_name=adapter_name)
+                entry["adapters"][adapter_path] = adapter_name
+
+            adapter_name = entry["adapters"][adapter_path]
+            entry["model"].set_adapter(adapter_name)
+            return entry["model"], entry["tok"], adapter_name
+
+        def _generate(model, tokenizer, messages_: list[dict], active_adapter: Optional[str] = None) -> str:
             import torch
-            # Task-aware max_new_tokens: classification needs ~30,
-            # extraction/generation need 256 for full JSON/text output
+            from peft import PeftModel
             _is_cls = metric_name in ("accuracy", "f1_macro", "f1_weighted")
             _max_tok = 30 if _is_cls else 256
             prompt_text = tokenizer.apply_chat_template(
@@ -903,17 +925,24 @@ with tab_infer:
             )
             inputs = tokenizer(prompt_text, return_tensors="pt")
             device_obj = next(model.parameters()).device
-            with torch.no_grad():
-                out = model.generate(
-                    **inputs.to(device_obj),
-                    max_new_tokens=_max_tok,
-                    do_sample=False,
-                    pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
-                )
-            return tokenizer.decode(
-                out[0][inputs["input_ids"].shape[1]:],
-                skip_special_tokens=True,
-            ).strip()
+
+            def _run() -> str:
+                with torch.no_grad():
+                    out = model.generate(
+                        **inputs.to(device_obj),
+                        max_new_tokens=_max_tok,
+                        do_sample=False,
+                        pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
+                    )
+                return tokenizer.decode(
+                    out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True,
+                ).strip()
+
+            # Base model inference through a PeftModel: disable all LoRA layers
+            if isinstance(model, PeftModel) and active_adapter is None:
+                with model.disable_adapter():
+                    return _run()
+            return _run()
 
         def _clean_prediction(text: str) -> str:
             """Strip markdown code fences and whitespace from model output."""
@@ -966,8 +995,8 @@ with tab_infer:
             with st.spinner(f"Generating from {n_models} model{'s' if n_models != 1 else ''}…"):
                 messages = _build_messages(user_text)
                 for label, adapter_path in col_specs:
-                    model, tokenizer = _get_model(adapter_path)
-                    text = _generate(model, tokenizer, messages)
+                    model, tokenizer, active_adapter = _get_model(adapter_path)
+                    text = _generate(model, tokenizer, messages, active_adapter)
                     results_list.append((label, text))
 
             st.session_state.infer_results_list = results_list
@@ -1099,8 +1128,8 @@ with tab_infer:
                                 "Expected": ex["expected"],
                             }
                             for label, adapter_path in col_specs:
-                                model, tokenizer = _get_model(adapter_path)
-                                pred = _generate(model, tokenizer, messages)
+                                model, tokenizer, active_adapter = _get_model(adapter_path)
+                                pred = _generate(model, tokenizer, messages, active_adapter)
                                 # Smart comparison: JSON-aware with partial credit
                                 is_correct = _check_match(pred, ex["expected"])
                                 if is_correct:
