@@ -4,7 +4,7 @@ You have input/output examples. You want a small model that does exactly that ta
 
 This project automates that. You describe your task in plain English, upload examples, and an LLM agent searches for the best LoRA hyperparameters by training, evaluating, and iterating — all tracked in MLflow. The best adapter is saved when it's done.
 
-<video src="https://github.com/iRahulPandey/auto-finetune/releases/download/v0.1.0/auto-finetune-demo.mp4" controls width="100%"></video>
+![auto-finetune demo](demo/auto-finetune-demo.gif)
 
 ---
 
