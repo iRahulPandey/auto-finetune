@@ -4,10 +4,10 @@ tests/test_config.py — Unit tests for RunConfig and config constants.
 
 import pytest
 
-from _core.config import RunConfig, SUPPORTED_MODELS, TASK_TYPES, CONSTRAINTS, SEARCH_SPACE
-
+from _core.config import CONSTRAINTS, SEARCH_SPACE, SUPPORTED_MODELS, TASK_TYPES, RunConfig
 
 # ── RunConfig defaults ────────────────────────────────────────────────────────
+
 
 def test_runconfig_default_metric_classification():
     rc = RunConfig(use_case="test", task_type="classification")
@@ -56,6 +56,7 @@ def test_runconfig_custom_metric_not_overwritten():
 
 
 # ── RunConfig.validate ────────────────────────────────────────────────────────
+
 
 def test_validate_valid_config():
     rc = RunConfig(use_case="test", model_key="qwen2.5-0.5b", task_type="classification")
@@ -107,6 +108,7 @@ def test_validate_max_iterations_invalid():
 
 # ── Model properties ──────────────────────────────────────────────────────────
 
+
 def test_model_info_returns_dict():
     rc = RunConfig(use_case="test", model_key="qwen2.5-0.5b")
     info = rc.model_info
@@ -120,6 +122,7 @@ def test_hf_model_id():
 
 
 # ── Constants sanity checks ───────────────────────────────────────────────────
+
 
 def test_all_supported_models_have_hf_id():
     for key, info in SUPPORTED_MODELS.items():

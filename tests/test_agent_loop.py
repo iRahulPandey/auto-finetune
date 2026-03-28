@@ -7,12 +7,12 @@ No LLM calls, no subprocess execution, no file I/O beyond reading finetune.py.
 import pytest
 
 from _core.agent_loop import (
-    _validate_proposed_config,
-    _extract_config_from_finetune,
-    _read_finetune_py,
-    _ALLOWED_SCHEDULERS,
     _ALLOWED_BIAS,
     _ALLOWED_OPTIM,
+    _ALLOWED_SCHEDULERS,
+    _extract_config_from_finetune,
+    _read_finetune_py,
+    _validate_proposed_config,
 )
 
 
@@ -38,6 +38,7 @@ def _good_config(**overrides) -> dict:
 
 
 # ── Valid config passes ───────────────────────────────────────────────────────
+
 
 def test_valid_config_no_errors():
     assert _validate_proposed_config(_good_config()) == []
@@ -71,6 +72,7 @@ def test_valid_all_optim_values():
 
 
 # ── Numeric constraints ───────────────────────────────────────────────────────
+
 
 def test_lora_rank_too_high():
     cfg = _good_config()
@@ -109,6 +111,7 @@ def test_epochs_too_low():
 
 # ── Missing hypothesis ────────────────────────────────────────────────────────
 
+
 def test_missing_hypothesis():
     cfg = _good_config()
     del cfg["hypothesis"]
@@ -117,6 +120,7 @@ def test_missing_hypothesis():
 
 
 # ── String field allowlist validation ─────────────────────────────────────────
+
 
 def test_invalid_scheduler_rejected():
     cfg = _good_config()
@@ -155,6 +159,7 @@ def test_invalid_target_modules_rejected():
 
 # ── Multiple errors reported together ────────────────────────────────────────
 
+
 def test_multiple_errors_all_reported():
     cfg = _good_config()
     cfg["lora_config"]["r"] = 512
@@ -165,6 +170,7 @@ def test_multiple_errors_all_reported():
 
 
 # ── _extract_config_from_finetune ─────────────────────────────────────────────
+
 
 def test_extract_config_has_hypothesis():
     source = _read_finetune_py()

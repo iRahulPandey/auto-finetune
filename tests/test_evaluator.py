@@ -7,24 +7,25 @@ compute_accuracy is tested with high-accuracy inputs so the strict path
 """
 
 import json
-import pytest
 from unittest.mock import patch
 
+import pytest
+
 from _core.evaluator import (
-    _normalize_text,
     _json_match,
     _labels_match,
-    compute_f1_macro,
-    compute_f1_weighted,
-    compute_f1_token,
-    compute_rouge_l,
-    compute_bleu,
-    compute_json_field_accuracy,
+    _normalize_text,
     compute_accuracy,
+    compute_bleu,
+    compute_f1_macro,
+    compute_f1_token,
+    compute_f1_weighted,
+    compute_json_field_accuracy,
+    compute_rouge_l,
 )
 
-
 # ── _normalize_text ──────────────────────────────────────────────────────────
+
 
 def test_normalize_text_lowercases():
     assert _normalize_text("URGENT") == "urgent"
@@ -48,6 +49,7 @@ def test_normalize_text_empty():
 
 # ── _json_match ──────────────────────────────────────────────────────────────
 
+
 def test_json_match_equal_dicts():
     assert _json_match('{"a": 1, "b": 2}', '{"b": 2, "a": 1}') is True
 
@@ -69,6 +71,7 @@ def test_json_match_whitespace_differences():
 
 
 # ── _labels_match ────────────────────────────────────────────────────────────
+
 
 def test_labels_match_exact():
     assert _labels_match("urgent", "urgent") is True
@@ -102,15 +105,16 @@ def test_labels_match_json_objects():
 
 # ── compute_accuracy ─────────────────────────────────────────────────────────
 
+
 def test_compute_accuracy_perfect():
     preds = ["urgent", "not_urgent", "urgent"]
-    refs  = ["urgent", "not_urgent", "urgent"]
+    refs = ["urgent", "not_urgent", "urgent"]
     assert compute_accuracy(preds, refs) == 1.0
 
 
 def test_compute_accuracy_partial():
     preds = ["urgent", "not_urgent", "urgent", "urgent"]
-    refs  = ["urgent", "not_urgent", "not_urgent", "urgent"]
+    refs = ["urgent", "not_urgent", "not_urgent", "urgent"]
     # 3/4 = 0.75 — strict path is < 0.8 so mock judge to avoid API call
     with patch("_core.evaluator._judge_batch", return_value=[True, True, False, True]):
         result = compute_accuracy(preds, refs)
@@ -123,15 +127,16 @@ def test_compute_accuracy_empty():
 
 # ── compute_f1_macro ─────────────────────────────────────────────────────────
 
+
 def test_f1_macro_perfect():
     preds = ["urgent", "not_urgent", "urgent", "not_urgent"]
-    refs  = ["urgent", "not_urgent", "urgent", "not_urgent"]
+    refs = ["urgent", "not_urgent", "urgent", "not_urgent"]
     assert compute_f1_macro(preds, refs) == pytest.approx(1.0)
 
 
 def test_f1_macro_all_wrong():
     preds = ["not_urgent", "not_urgent"]
-    refs  = ["urgent", "urgent"]
+    refs = ["urgent", "urgent"]
     assert compute_f1_macro(preds, refs) == pytest.approx(0.0)
 
 
@@ -141,16 +146,17 @@ def test_f1_macro_empty():
 
 def test_f1_macro_three_classes():
     preds = ["a", "b", "c", "a", "b"]
-    refs  = ["a", "b", "c", "b", "a"]
+    refs = ["a", "b", "c", "b", "a"]
     result = compute_f1_macro(preds, refs)
     assert 0.0 < result <= 1.0
 
 
 # ── compute_f1_weighted ──────────────────────────────────────────────────────
 
+
 def test_f1_weighted_perfect():
     preds = ["urgent"] * 3 + ["not_urgent"] * 2
-    refs  = ["urgent"] * 3 + ["not_urgent"] * 2
+    refs = ["urgent"] * 3 + ["not_urgent"] * 2
     assert compute_f1_weighted(preds, refs) == pytest.approx(1.0)
 
 
@@ -160,29 +166,30 @@ def test_f1_weighted_empty():
 
 def test_f1_weighted_between_zero_and_one():
     preds = ["urgent", "urgent", "not_urgent"]
-    refs  = ["urgent", "not_urgent", "not_urgent"]
+    refs = ["urgent", "not_urgent", "not_urgent"]
     result = compute_f1_weighted(preds, refs)
     assert 0.0 <= result <= 1.0
 
 
 # ── compute_f1_token ─────────────────────────────────────────────────────────
 
+
 def test_f1_token_identical():
     preds = ["the cat sat on the mat"]
-    refs  = ["the cat sat on the mat"]
+    refs = ["the cat sat on the mat"]
     assert compute_f1_token(preds, refs) == pytest.approx(1.0)
 
 
 def test_f1_token_partial_overlap():
     preds = ["the cat sat on the mat"]
-    refs  = ["the cat on the mat"]
+    refs = ["the cat on the mat"]
     result = compute_f1_token(preds, refs)
     assert 0.0 < result < 1.0
 
 
 def test_f1_token_no_overlap():
     preds = ["hello world"]
-    refs  = ["completely different text"]
+    refs = ["completely different text"]
     assert compute_f1_token(preds, refs) == pytest.approx(0.0)
 
 
@@ -192,15 +199,16 @@ def test_f1_token_empty():
 
 # ── compute_rouge_l ──────────────────────────────────────────────────────────
 
+
 def test_rouge_l_identical():
     preds = ["feat: add login feature"]
-    refs  = ["feat: add login feature"]
+    refs = ["feat: add login feature"]
     assert compute_rouge_l(preds, refs) == pytest.approx(1.0)
 
 
 def test_rouge_l_partial():
     preds = ["feat: add feature"]
-    refs  = ["feat: add login feature"]
+    refs = ["feat: add login feature"]
     result = compute_rouge_l(preds, refs)
     assert 0.0 < result < 1.0
 
@@ -211,15 +219,16 @@ def test_rouge_l_empty():
 
 # ── compute_bleu ─────────────────────────────────────────────────────────────
 
+
 def test_bleu_identical():
     preds = ["fix: resolve the null pointer exception in auth"]
-    refs  = ["fix: resolve the null pointer exception in auth"]
+    refs = ["fix: resolve the null pointer exception in auth"]
     assert compute_bleu(preds, refs) == pytest.approx(1.0)
 
 
 def test_bleu_between_zero_and_one():
     preds = ["fix: resolve null pointer"]
-    refs  = ["fix: resolve the null pointer exception in auth module"]
+    refs = ["fix: resolve the null pointer exception in auth module"]
     result = compute_bleu(preds, refs)
     assert 0.0 <= result <= 1.0
 
@@ -230,28 +239,29 @@ def test_bleu_empty():
 
 # ── compute_json_field_accuracy ──────────────────────────────────────────────
 
+
 def test_json_field_accuracy_perfect():
     preds = ['{"vendor": "Acme", "total": 100}']
-    refs  = ['{"vendor": "Acme", "total": 100}']
+    refs = ['{"vendor": "Acme", "total": 100}']
     assert compute_json_field_accuracy(preds, refs) == pytest.approx(1.0)
 
 
 def test_json_field_accuracy_partial():
     preds = ['{"vendor": "Acme", "total": 999}']
-    refs  = ['{"vendor": "Acme", "total": 100}']
+    refs = ['{"vendor": "Acme", "total": 100}']
     # vendor matches, total doesn't → 1/2 = 0.5
     assert compute_json_field_accuracy(preds, refs) == pytest.approx(0.5)
 
 
 def test_json_field_accuracy_case_insensitive_strings():
     preds = ['{"vendor": "acme corp"}']
-    refs  = ['{"vendor": "Acme Corp"}']
+    refs = ['{"vendor": "Acme Corp"}']
     assert compute_json_field_accuracy(preds, refs) == pytest.approx(1.0)
 
 
 def test_json_field_accuracy_invalid_prediction():
     preds = ["not valid json"]
-    refs  = ['{"vendor": "Acme", "total": 100}']
+    refs = ['{"vendor": "Acme", "total": 100}']
     # All fields missed → 0.0
     assert compute_json_field_accuracy(preds, refs) == pytest.approx(0.0)
 

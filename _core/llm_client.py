@@ -17,7 +17,6 @@ from typing import Optional
 
 import requests
 
-
 # ── Stage names ──────────────────────────────────────────────────────────────
 
 STAGE_DATA_PREP = "data_prep"
@@ -28,12 +27,14 @@ ALL_STAGES = [STAGE_DATA_PREP, STAGE_AGENT, STAGE_EVALUATOR]
 
 # ── Per-stage config ─────────────────────────────────────────────────────────
 
+
 @dataclass
 class StageConfig:
     """Provider config for a single stage."""
-    provider: str = "claude"          # "claude" | "ollama"
+
+    provider: str = "claude"  # "claude" | "ollama"
     ollama_url: str = "http://127.0.0.1:11434"
-    ollama_model: str = ""            # e.g. "llama3.1", "mistral"
+    ollama_model: str = ""  # e.g. "llama3.1", "mistral"
 
     def is_ollama(self) -> bool:
         return self.provider == "ollama"
@@ -51,6 +52,7 @@ class StageConfig:
 @dataclass
 class LLMConfig:
     """Full configuration — one StageConfig per stage."""
+
     data_prep: StageConfig = field(default_factory=StageConfig)
     agent: StageConfig = field(default_factory=StageConfig)
     evaluator: StageConfig = field(default_factory=StageConfig)
@@ -83,6 +85,7 @@ def get_stage_config(stage: str) -> StageConfig:
 
 
 # ── Generation ───────────────────────────────────────────────────────────────
+
 
 def generate(
     prompt: str,
@@ -140,6 +143,7 @@ def _generate_claude(
 def _validate_ollama_url(url: str) -> str:
     """Reject non-HTTP schemes to prevent SSRF via user-supplied Ollama URL."""
     from urllib.parse import urlparse
+
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https"):
         raise ValueError(f"Ollama URL must use http or https scheme, got: {parsed.scheme!r}")

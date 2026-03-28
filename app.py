@@ -15,15 +15,16 @@ from typing import Optional
 import streamlit as st
 
 from _core.config import (
-    RunConfig,
-    SUPPORTED_MODELS,
-    TASK_TYPES,
-    PROJECT_ROOT,
     DEVICE,
     DTYPE,
+    PROJECT_ROOT,
+    SUPPORTED_MODELS,
+    TASK_TYPES,
+    RunConfig,
 )
 
 # ── Load .env if present (runs before any env var checks) ────────────────────
+
 
 def _load_dotenv(dotenv_path: Path) -> None:
     """Minimal .env loader — sets missing env vars from key=value lines."""
@@ -39,18 +40,21 @@ def _load_dotenv(dotenv_path: Path) -> None:
         if key and key not in os.environ:
             os.environ[key] = value
 
+
 _load_dotenv(PROJECT_ROOT / ".env")
 
-from _core.data_prep import prepare_data
-from _core.program_md_generator import write_program_md
-from _core.agent_loop import run_agent_loop, IterationResult
-from _core.mlflow_utils import get_all_experiments
-from _core.evaluator import _labels_match, _json_match, compute_json_field_accuracy
 from _core import llm_client
+from _core.agent_loop import IterationResult, run_agent_loop
+from _core.data_prep import prepare_data
+from _core.evaluator import _json_match, _labels_match, compute_json_field_accuracy
 from _core.llm_client import (
-    LLMConfig, StageConfig, list_ollama_models, check_ollama_server,
+    LLMConfig,
+    StageConfig,
+    check_ollama_server,
+    list_ollama_models,
 )
-
+from _core.mlflow_utils import get_all_experiments
+from _core.program_md_generator import write_program_md
 
 # ── Page config ───────────────────────────────────────────────────────────────
 
@@ -67,7 +71,7 @@ st.set_page_config(
 # ── Session state init ────────────────────────────────────────────────────────
 
 defaults = {
-    "train_stage": "setup",   # setup | running | complete
+    "train_stage": "setup",  # setup | running | complete
     "iterations": [],
     "summary": None,
     "session_id": None,
@@ -75,13 +79,13 @@ defaults = {
     "run_config": None,
     "examples": [],
     # Inference Lab
-    "infer_models": {},       # adapter_path → (model, tokenizer) cache
-    "infer_results": {},      # run_id → generated text
-    "infer_results_list": [], # list of (label, text) tuples from last generation
+    "infer_models": {},  # adapter_path → (model, tokenizer) cache
+    "infer_results": {},  # run_id → generated text
+    "infer_results_list": [],  # list of (label, text) tuples from last generation
     "infer_base_text": "",
     "infer_input": "",
-    "infer_last_input": "",   # last input text for display
-    "infer_expected": "",     # expected output from eval set (if applicable)
+    "infer_last_input": "",  # last input text for display
+    "infer_expected": "",  # expected output from eval set (if applicable)
     "infer_batch_results": [],  # batch eval results
     "infer_generation_count": 0,  # incremented on every Generate click to bust widget key cache
     # Data augmentation (off by default — example datasets are pre-balanced)
@@ -106,6 +110,7 @@ _mlflow_uri = os.environ.get("MLFLOW_TRACKING_URI") or f"file://{PROJECT_ROOT / 
 os.environ["MLFLOW_TRACKING_URI"] = _mlflow_uri
 
 # ── Apply per-stage LLM config ────────────────────────────────────────────────
+
 
 def _build_stage_config(stage_key: str) -> StageConfig:
     """Build a StageConfig from session state for a given stage."""
@@ -136,8 +141,10 @@ with st.sidebar:
 
 # ── Example parsing helpers ───────────────────────────────────────────────────
 
+
 def _is_valid_example(e: dict) -> bool:
     return "input" in e and "output" in e
+
 
 def _parse_examples(text: str) -> list[dict]:
     text = text.strip()
@@ -163,11 +170,14 @@ def _parse_examples(text: str) -> list[dict]:
             pass
     return out
 
+
 _MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
 
 
 def _parse_file(f) -> list[dict]:
-    import csv, io
+    import csv
+    import io
+
     raw = f.read()
     if len(raw) > _MAX_UPLOAD_BYTES:
         raise ValueError(f"File too large ({len(raw) // 1024} KB). Maximum is 10 MB.")
@@ -179,8 +189,9 @@ def _parse_file(f) -> list[dict]:
             return [e for e in data if _is_valid_example(e)]
     elif name.endswith(".csv"):
         reader = csv.DictReader(io.StringIO(content))
-        return [{"input": r["input"], "output": r["output"]}
-                for r in reader if _is_valid_example(r)]
+        return [
+            {"input": r["input"], "output": r["output"]} for r in reader if _is_valid_example(r)
+        ]
     return _parse_examples(content)
 
 
@@ -223,7 +234,6 @@ tab_train, tab_infer, tab_lora = st.tabs(["Finetune", "Inference Lab", "LoRA Car
 # ════════════════════════════════════════════════════════════════════════════════
 
 with tab_train:
-
     # ── Sidebar config ─────────────────────────────────────────────────────────
     with st.sidebar:
         # ── Data source ────────────────────────────────────────────────────────
@@ -297,11 +307,13 @@ with tab_train:
             "Run until threshold (no iteration limit)",
             value=False,
             help="Keep searching until the metric reaches the early-stop threshold. "
-                 "Stop manually with Ctrl-C or by closing the app.",
+            "Stop manually with Ctrl-C or by closing the app.",
         )
         max_iterations = st.slider(
             "Search iterations",
-            min_value=3, max_value=100, value=10,
+            min_value=3,
+            max_value=100,
+            value=10,
             disabled=run_until_threshold,
         )
         if run_until_threshold:
@@ -309,7 +321,8 @@ with tab_train:
             max_iterations = 9999
         target_threshold = st.number_input(
             "Early-stop threshold",
-            min_value=0.0, max_value=1.0,
+            min_value=0.0,
+            max_value=1.0,
             value=0.95 if task_type == "classification" else 0.85,
             step=0.05,
         )
@@ -396,11 +409,13 @@ with tab_train:
                 st.warning("No Ollama models available")
 
         # Re-apply config after sidebar changes
-        llm_client.configure(LLMConfig(
-            data_prep=_build_stage_config("data_prep"),
-            agent=_build_stage_config("agent"),
-            evaluator=_build_stage_config("evaluator"),
-        ))
+        llm_client.configure(
+            LLMConfig(
+                data_prep=_build_stage_config("data_prep"),
+                agent=_build_stage_config("agent"),
+                evaluator=_build_stage_config("evaluator"),
+            )
+        )
 
         st.divider()
 
@@ -422,9 +437,10 @@ with tab_train:
 
     # ── Setup stage ────────────────────────────────────────────────────────────
     if st.session_state.train_stage == "setup":
-
         st.title("Finetune model")
-        st.write("Describe your task, upload examples, and let the agent find the best LoRA configuration.")
+        st.write(
+            "Describe your task, upload examples, and let the agent find the best LoRA configuration."
+        )
 
         examples: list[dict] = list(st.session_state.get("examples", []))
 
@@ -438,7 +454,8 @@ with tab_train:
 
             with tab_paste:
                 raw = st.text_area(
-                    "Examples (JSON array or JSONL)", height=280,
+                    "Examples (JSON array or JSONL)",
+                    height=280,
                     placeholder='[\n  {"input": "...", "output": "..."},\n  ...\n]',
                 )
                 pasted = _parse_examples(raw) if raw else []
@@ -473,7 +490,9 @@ with tab_train:
                 with col_b:
                     st.metric("Examples", len(examples))
             elif _chosen_idx == 0:
-                st.info("Select a dataset from the sidebar to get started, or switch to **My own data**.")
+                st.info(
+                    "Select a dataset from the sidebar to get started, or switch to **My own data**."
+                )
 
         if examples:
             with st.expander(f"Preview — {len(examples)} examples", expanded=False):
@@ -485,16 +504,14 @@ with tab_train:
                     st.caption(f"… and {len(examples) - 4} more")
 
         st.divider()
-        can_start = (
-            len(examples) >= 2
-            and use_case.strip()
-            and os.environ.get("ANTHROPIC_API_KEY")
-        )
+        can_start = len(examples) >= 2 and use_case.strip() and os.environ.get("ANTHROPIC_API_KEY")
         col_btn, col_warn = st.columns([1, 3])
         with col_btn:
             start = st.button(
-                "Start Training", type="primary",
-                disabled=not can_start, use_container_width=True,
+                "Start Training",
+                type="primary",
+                disabled=not can_start,
+                use_container_width=True,
             )
         with col_warn:
             if not use_case.strip():
@@ -531,13 +548,15 @@ with tab_train:
 
         iter_label = "Unlimited" if rc.max_iterations >= 9999 else str(rc.max_iterations)
         st.title(rc.use_case[:70])
-        st.write(f"{SUPPORTED_MODELS[rc.model_key]['short_name']} · {DEVICE.upper()} · {rc.metric_name} · {iter_label} iterations")
+        st.write(
+            f"{SUPPORTED_MODELS[rc.model_key]['short_name']} · {DEVICE.upper()} · {rc.metric_name} · {iter_label} iterations"
+        )
 
         # ── Live status banner ──────────────────────────────────────────────
-        banner        = st.empty()
-        iter_metrics  = st.empty()   # scoreboard updated after each iteration
-        log_expander  = st.expander("Training log", expanded=True)
-        log_area      = log_expander.empty()
+        banner = st.empty()
+        iter_metrics = st.empty()  # scoreboard updated after each iteration
+        log_expander = st.expander("Training log", expanded=True)
+        log_area = log_expander.empty()
 
         log_lines: list[str] = []
 
@@ -555,24 +574,25 @@ with tab_train:
                     f"| {r.iteration} "
                     f"| {'★' if r.is_improvement else ' '} "
                     f"| {r.metric_value:.4f} "
-                    f"| {r.training_args.get('learning_rate','')} "
-                    f"| {r.lora_config.get('r','')} "
+                    f"| {r.training_args.get('learning_rate', '')} "
+                    f"| {r.lora_config.get('r', '')} "
                     f"| {r.hypothesis[:55]} |\n"
                     for r in good
                 )
                 iter_metrics.markdown(
                     f"**Best {rc.metric_name}: {best_val:.4f}**  "
-                    f"({len(good)} iteration{'s' if len(good)!=1 else ''} complete)\n\n"
+                    f"({len(good)} iteration{'s' if len(good) != 1 else ''} complete)\n\n"
                     f"| Iter | ★ | {rc.metric_name} | LR | Rank | Hypothesis |\n"
-                    f"|------|---|--------|----|------|------------|\n"
-                    + rows
+                    f"|------|---|--------|----|------|------------|\n" + rows
                 )
 
         # ── Free memory before training ──────────────────────────────────
         # Clear any cached inference models from the Inference Lab tab
         # and flush MPS/CUDA memory so the training subprocess gets a clean slate.
-        import torch
         import gc
+
+        import torch
+
         if st.session_state.infer_models:
             _append_log("Clearing cached inference models to free memory...")
             st.session_state.infer_models = {}
@@ -604,10 +624,7 @@ with tab_train:
                 f"Data ready — {data_info['train_count']} train / "
                 f"{data_info['eval_count']} eval examples"
             )
-            _append_log(
-                f"System prompt synthesized. "
-                f"MLflow experiment: {rc.use_case[:50]}"
-            )
+            _append_log(f"System prompt synthesized. MLflow experiment: {rc.use_case[:50]}")
             banner.info(
                 f"Data ready · {data_info['train_count']} train / "
                 f"{data_info['eval_count']} eval · Search starting…"
@@ -627,6 +644,7 @@ with tab_train:
 
         except Exception as e:
             import traceback
+
             _append_log(f"ERROR: {e}")
             _append_log(traceback.format_exc())
             banner.error(f"Training failed: {e}")
@@ -643,8 +661,7 @@ with tab_train:
         st.caption(f"Session: {summary['session_id'][:12]}")
 
         col1, col2, col3, col4 = st.columns(4)
-        col1.metric(f"Best {summary['best_metric_name']}",
-                    f"{summary['best_metric_value']:.4f}")
+        col1.metric(f"Best {summary['best_metric_name']}", f"{summary['best_metric_value']:.4f}")
         col2.metric("Iterations", summary["total_iterations"])
         col3.metric("Improvements", summary["improvements"])
         col4.metric("Errors", summary["errors"])
@@ -652,21 +669,27 @@ with tab_train:
         iters = [r for r in st.session_state.iterations if not r.error]
         if iters:
             import pandas as pd
-            df = pd.DataFrame([{
-                "Iter": r.iteration,
-                summary["best_metric_name"]: round(r.metric_value, 4),
-                "Loss": round(r.train_loss, 4),
-                "Best": "★" if r.is_improvement else "",
-                "LR": r.training_args.get("learning_rate", ""),
-                "Rank": r.lora_config.get("r", ""),
-                "Hypothesis": r.hypothesis[:90],
-            } for r in iters])
+
+            df = pd.DataFrame(
+                [
+                    {
+                        "Iter": r.iteration,
+                        summary["best_metric_name"]: round(r.metric_value, 4),
+                        "Loss": round(r.train_loss, 4),
+                        "Best": "★" if r.is_improvement else "",
+                        "LR": r.training_args.get("learning_rate", ""),
+                        "Rank": r.lora_config.get("r", ""),
+                        "Hypothesis": r.hypothesis[:90],
+                    }
+                    for r in iters
+                ]
+            )
 
             st.subheader(f"{summary['best_metric_name']} over iterations")
             st.line_chart(df.set_index("Iter")[summary["best_metric_name"]])
 
             st.subheader("All iterations")
-            st.dataframe(df, width='stretch', hide_index=True)
+            st.dataframe(df, width="stretch", hide_index=True)
 
         st.info(
             f"All adapters saved to `adapters/runs/{summary['session_id'][:12]}/`. "
@@ -684,7 +707,6 @@ with tab_train:
 # ════════════════════════════════════════════════════════════════════════════════
 
 with tab_infer:
-
     st.title("Inference Lab")
     st.write("Pick an experiment, select runs, and compare outputs side-by-side.")
 
@@ -700,10 +722,7 @@ with tab_infer:
     experiments = _load_experiments()
 
     if not experiments:
-        st.info(
-            "No experiments found yet. "
-            "Run a training session first, then come back here."
-        )
+        st.info("No experiments found yet. Run a training session first, then come back here.")
         st.stop()
 
     # ── Experiment + session + run selector ────────────────────────────────────
@@ -739,8 +758,7 @@ with tab_infer:
         exp_sessions = experiment["sessions"]
         if len(exp_sessions) > 1:
             session_options = ["All sessions"] + [
-                f"Session {s['session_id'][:8]} ({s['run_count']} runs)"
-                for s in exp_sessions
+                f"Session {s['session_id'][:8]} ({s['run_count']} runs)" for s in exp_sessions
             ]
             selected_session_label = st.selectbox(
                 "Filter by session",
@@ -782,8 +800,7 @@ with tab_infer:
                 label_parts.append("⚠ no adapter")
 
             disabled = not adapter_exists or (
-                len(selected_run_ids) >= 3
-                and run["run_id"] not in selected_run_ids
+                len(selected_run_ids) >= 3 and run["run_id"] not in selected_run_ids
             )
             checked = st.checkbox(
                 "  ·  ".join(label_parts),
@@ -797,7 +814,6 @@ with tab_infer:
     # ── Inference panel ────────────────────────────────────────────────────────
 
     with col_main:
-
         n_cols = (1 if include_base else 0) + len(selected_run_ids)
         if n_cols == 0:
             st.info("Select the base model and/or at least one run on the left to start.")
@@ -808,6 +824,7 @@ with tab_infer:
         def _load_eval_examples(session_ids: tuple) -> list[dict]:
             """Load examples from eval.jsonl files for the given sessions."""
             import json as _json
+
             examples = []
             seen_inputs = set()
             for sid in session_ids:
@@ -826,19 +843,25 @@ with tab_infer:
                     expected = next((m["content"] for m in msgs if m["role"] == "assistant"), None)
                     if user_msg and user_msg not in seen_inputs:
                         seen_inputs.add(user_msg)
-                        examples.append({
-                            "input": user_msg,
-                            "expected": expected or "",
-                        })
+                        examples.append(
+                            {
+                                "input": user_msg,
+                                "expected": expected or "",
+                            }
+                        )
             return examples
 
         _session_ids = tuple(s["session_id"] for s in exp_sessions)
         eval_examples = _load_eval_examples(_session_ids)
 
         # ── Tabs: Single Test | Examples | Batch Eval ─────────────────────────
-        infer_tab_single, infer_tab_examples, infer_tab_batch = st.tabs([
-            "Single Test", "Examples from Dataset", "Batch Evaluation",
-        ])
+        infer_tab_single, infer_tab_examples, infer_tab_batch = st.tabs(
+            [
+                "Single Test",
+                "Examples from Dataset",
+                "Batch Evaluation",
+            ]
+        )
 
         # ── Shared helpers (defined once, used across tabs) ───────────────────
         base_model_id = experiment["base_model_id"]
@@ -876,7 +899,7 @@ with tab_infer:
             active_adapter_name is None for base model inference.
             """
             import torch
-            from transformers import AutoTokenizer, AutoModelForCausalLM
+            from transformers import AutoModelForCausalLM, AutoTokenizer
 
             # Keyed by base_model_id so switching experiments uses the right weights
             shared_key = f"__shared_{base_model_id}__"
@@ -889,7 +912,10 @@ with tab_infer:
                         tok.pad_token = tok.eos_token
                     extra_kwargs = {"device_map": "auto"} if DEVICE == "cuda" else {}
                     mdl = AutoModelForCausalLM.from_pretrained(
-                        base_model_id, dtype=DTYPE, trust_remote_code=True, **extra_kwargs,
+                        base_model_id,
+                        dtype=DTYPE,
+                        trust_remote_code=True,
+                        **extra_kwargs,
                     )
                     if DEVICE == "mps":
                         mdl = mdl.to("mps")
@@ -903,12 +929,15 @@ with tab_infer:
 
             if adapter_path not in entry["adapters"]:
                 from peft import PeftModel
+
                 adapter_name = f"run_{len(entry['adapters'])}"
                 with st.spinner("Loading adapter weights…"):
                     if not entry["adapters"]:
                         # First adapter: wrap base model in PeftModel
                         peft = PeftModel.from_pretrained(
-                            entry["model"], adapter_path, adapter_name=adapter_name,
+                            entry["model"],
+                            adapter_path,
+                            adapter_name=adapter_name,
                         )
                         peft.eval()
                         entry["model"] = peft
@@ -921,13 +950,18 @@ with tab_infer:
             entry["model"].set_adapter(adapter_name)
             return entry["model"], entry["tok"], adapter_name
 
-        def _generate(model, tokenizer, messages_: list[dict], active_adapter: Optional[str] = None) -> str:
+        def _generate(
+            model, tokenizer, messages_: list[dict], active_adapter: Optional[str] = None
+        ) -> str:
             import torch
             from peft import PeftModel
+
             _is_cls = metric_name in ("accuracy", "f1_macro", "f1_weighted")
             _max_tok = 30 if _is_cls else 256
             prompt_text = tokenizer.apply_chat_template(
-                messages_, tokenize=False, add_generation_prompt=True,
+                messages_,
+                tokenize=False,
+                add_generation_prompt=True,
             )
             inputs = tokenizer(prompt_text, return_tensors="pt")
             device_obj = next(model.parameters()).device
@@ -941,7 +975,8 @@ with tab_infer:
                         pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
                     )
                 return tokenizer.decode(
-                    out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True,
+                    out[0][inputs["input_ids"].shape[1] :],
+                    skip_special_tokens=True,
                 ).strip()
 
             # Base model inference through a PeftModel: disable all LoRA layers
@@ -953,10 +988,11 @@ with tab_infer:
         def _clean_prediction(text: str) -> str:
             """Strip markdown code fences and whitespace from model output."""
             import re as _re
+
             t = text.strip()
             # Remove ```json ... ``` wrappers
-            t = _re.sub(r'^```(?:json)?\s*\n?', '', t)
-            t = _re.sub(r'\n?```\s*$', '', t)
+            t = _re.sub(r"^```(?:json)?\s*\n?", "", t)
+            t = _re.sub(r"\n?```\s*$", "", t)
             return t.strip()
 
         def _check_match(prediction: str, expected: str) -> bool:
@@ -982,10 +1018,8 @@ with tab_infer:
                 run_obj = next((r for r in runs if r["run_id"] == rid), None)
                 if run_obj:
                     m = run_obj["metrics"].get(metric_name, 0.0)
-                    label = (
-                        f"Iter {run_obj['iteration']}  "
-                        f"{metric_name}={m:.4f}"
-                        + (" ★" if run_obj["run_id"] == best_run_id else "")
+                    label = f"Iter {run_obj['iteration']}  {metric_name}={m:.4f}" + (
+                        " ★" if run_obj["run_id"] == best_run_id else ""
                     )
                     specs.append((label, run_obj["adapter_path"]))
             return specs
@@ -1054,7 +1088,9 @@ with tab_infer:
                             expanded=False,
                         ):
                             for idx, ex in enumerate(class_examples[:5]):
-                                preview = ex["input"][:120] + ("…" if len(ex["input"]) > 120 else "")
+                                preview = ex["input"][:120] + (
+                                    "…" if len(ex["input"]) > 120 else ""
+                                )
                                 if st.button(
                                     preview,
                                     key=f"ex_{label_val}_{idx}",
@@ -1067,7 +1103,9 @@ with tab_infer:
                     # Show flat list
                     for idx, ex in enumerate(eval_examples[:15]):
                         preview = ex["input"][:120] + ("…" if len(ex["input"]) > 120 else "")
-                        expected_tag = f"  [expected: {ex['expected'][:40]}]" if ex["expected"] else ""
+                        expected_tag = (
+                            f"  [expected: {ex['expected'][:40]}]" if ex["expected"] else ""
+                        )
                         if st.button(
                             f"{preview}{expected_tag}",
                             key=f"ex_flat_{idx}",
@@ -1085,9 +1123,7 @@ with tab_infer:
             if not eval_examples:
                 st.info("No evaluation examples found for this experiment.")
             else:
-                st.caption(
-                    "Run all selected models on multiple examples and compare accuracy."
-                )
+                st.caption("Run all selected models on multiple examples and compare accuracy.")
                 n_batch = st.slider(
                     "Number of examples",
                     min_value=5,
@@ -1103,6 +1139,7 @@ with tab_infer:
 
                 if batch_btn:
                     import random as _rnd
+
                     import pandas as pd
 
                     col_specs = _build_col_specs()
@@ -1142,7 +1179,9 @@ with tab_infer:
                                     model_correct[label] += 1
                                 row[label] = pred + (" ✓" if is_correct else " ✗")
                             batch_rows.append(row)
-                            progress.progress((ex_i + 1) / total, text=f"Example {ex_i + 1}/{total}")
+                            progress.progress(
+                                (ex_i + 1) / total, text=f"Example {ex_i + 1}/{total}"
+                            )
 
                         progress.empty()
 
@@ -1152,13 +1191,15 @@ with tab_infer:
                         for i, (label, _) in enumerate(col_specs):
                             acc = model_correct[label] / total if total else 0
                             with acc_cols[i]:
-                                st.metric(label[:30], f"{acc:.0%}", f"{model_correct[label]}/{total}")
+                                st.metric(
+                                    label[:30], f"{acc:.0%}", f"{model_correct[label]}/{total}"
+                                )
 
                         # Detailed results table
                         st.markdown("#### Detailed Results")
                         st.dataframe(
                             pd.DataFrame(batch_rows),
-                            width='stretch',
+                            width="stretch",
                             hide_index=True,
                         )
 
@@ -1204,31 +1245,34 @@ with tab_infer:
         if selected_run_ids:
             with st.expander("Selected run details"):
                 import pandas as pd
+
                 detail_rows = []
                 for rid in selected_run_ids:
                     run_obj = next((r for r in runs if r["run_id"] == rid), None)
                     if run_obj:
                         p = run_obj["params"]
                         m = run_obj["metrics"]
-                        detail_rows.append({
-                            "Iter": run_obj["iteration"],
-                            metric_name: round(m.get(metric_name, 0), 4),
-                            "Loss": round(m.get("train_loss", 0), 4),
-                            "LR": p.get("learning_rate", ""),
-                            "Rank": p.get("lora_r", ""),
-                            "Epochs": p.get("num_train_epochs", ""),
-                            "Scheduler": p.get("lr_scheduler_type", ""),
-                            "Hypothesis": run_obj["hypothesis"][:100],
-                        })
+                        detail_rows.append(
+                            {
+                                "Iter": run_obj["iteration"],
+                                metric_name: round(m.get(metric_name, 0), 4),
+                                "Loss": round(m.get("train_loss", 0), 4),
+                                "LR": p.get("learning_rate", ""),
+                                "Rank": p.get("lora_r", ""),
+                                "Epochs": p.get("num_train_epochs", ""),
+                                "Scheduler": p.get("lr_scheduler_type", ""),
+                                "Hypothesis": run_obj["hypothesis"][:100],
+                            }
+                        )
                 if detail_rows:
-                    st.dataframe(pd.DataFrame(detail_rows),
-                                 width='stretch', hide_index=True)
+                    st.dataframe(pd.DataFrame(detail_rows), width="stretch", hide_index=True)
 
         # ── Clear model cache ──────────────────────────────────────────────────
         if st.session_state.infer_models:
             cached_count = len(st.session_state.infer_models)
             if st.button(f"Clear model cache ({cached_count} loaded)", type="secondary"):
                 import torch
+
                 st.session_state.infer_models = {}
                 if torch.backends.mps.is_available():
                     torch.mps.empty_cache()
@@ -1241,7 +1285,6 @@ with tab_infer:
 # ════════════════════════════════════════════════════════════════════════════════
 
 with tab_lora:
-
     st.title("LoRA Card")
     st.write("Select any completed run to inspect its full configuration and system prompt.")
 
@@ -1275,8 +1318,7 @@ with tab_lora:
         lora_sessions = lora_exp["sessions"]
         if len(lora_sessions) > 1:
             _lora_sess_opts = ["All sessions"] + [
-                f"Session {s['session_id'][:8]} ({s['run_count']} runs)"
-                for s in lora_sessions
+                f"Session {s['session_id'][:8]} ({s['run_count']} runs)" for s in lora_sessions
             ]
             lora_sess_sel = st.selectbox(
                 "Session",
@@ -1318,7 +1360,6 @@ with tab_lora:
         lora_run = lora_runs_sorted[lora_run_idx]
 
     with lora_col_card:
-
         import datetime as _dt
 
         p = lora_run["params"]
@@ -1326,10 +1367,7 @@ with tab_lora:
         _lora_metric_val = m.get(_lora_metric, 0.0)
         _is_best_run = lora_run["run_id"] == _lora_best_id
         _ts = lora_run.get("timestamp", 0)
-        _ts_str = (
-            _dt.datetime.fromtimestamp(_ts).strftime("%Y-%m-%d %H:%M")
-            if _ts else "—"
-        )
+        _ts_str = _dt.datetime.fromtimestamp(_ts).strftime("%Y-%m-%d %H:%M") if _ts else "—"
 
         # ── Header ─────────────────────────────────────────────────────────────
         _star = " ★ Best run" if _is_best_run else ""

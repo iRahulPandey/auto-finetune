@@ -36,6 +36,8 @@ ignore = [
     "E501",   # line too long — handled by formatter
     "F401",   # unused imports — too noisy for this codebase style
     "E741",   # ambiguous variable name (e.g. 'l') — not a real issue here
+    "E402",   # module-level import not at top — app.py imports after _load_dotenv intentionally
+    "F841",   # unused variable — test_e2e.py has some dead assignments
 ]
 
 [tool.pytest.ini_options]

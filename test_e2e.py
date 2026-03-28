@@ -14,10 +14,10 @@ burning GPU hours. Run with:
     python test_e2e.py --no-gpu     # skip stages needing torch/GPU
 """
 
+import argparse
 import json
 import os
 import sys
-import argparse
 import traceback
 from pathlib import Path
 
@@ -61,6 +61,7 @@ def _load_examples() -> list[dict]:
 
 # ── Stage 1: Data Preparation ───────────────────────────────────────────────
 
+
 def test_stage1_data_prep(skip_api: bool = False) -> bool:
     _header(1, "Data Preparation")
     ok = True
@@ -72,12 +73,14 @@ def test_stage1_data_prep(skip_api: bool = False) -> bool:
 
     # Test hash
     from data_prep import _hash_examples
+
     h = _hash_examples(examples)
     assert len(h) == 12
     _pass(f"Deterministic hash: {h}")
 
     # Test formatting
     from data_prep import format_chat_examples
+
     formatted = format_chat_examples(examples, "Classify as urgent or not_urgent.", "qwen2.5-0.5b")
     assert len(formatted) == 50
     assert "messages" in formatted[0]
@@ -88,6 +91,7 @@ def test_stage1_data_prep(skip_api: bool = False) -> bool:
 
     # Test split
     from data_prep import split_train_eval
+
     train, eval_set = split_train_eval(formatted)
     assert len(train) + len(eval_set) == 50
     assert len(eval_set) >= 1
@@ -101,6 +105,7 @@ def test_stage1_data_prep(skip_api: bool = False) -> bool:
     # Test full pipeline (with or without API)
     if skip_api:
         from data_prep import prepare_data
+
         result = prepare_data(
             use_case="Classify emails as urgent or not urgent",
             examples=examples,
@@ -114,17 +119,21 @@ def test_stage1_data_prep(skip_api: bool = False) -> bool:
             _skip("ANTHROPIC_API_KEY not set — skipping prompt synthesis")
         else:
             from data_prep import prepare_data
+
             result = prepare_data(
                 use_case="Classify emails as urgent or not urgent",
                 examples=examples,
                 model_key="qwen2.5-0.5b",
                 session_id="test-e2e",
             )
-            _pass(f"Pipeline (with Claude API): train={result['train_count']}, eval={result['eval_count']}")
+            _pass(
+                f"Pipeline (with Claude API): train={result['train_count']}, eval={result['eval_count']}"
+            )
             _pass(f"System prompt: {result['system_prompt'][:80]}...")
 
     # Verify files on disk
     from config import DATA_DIR
+
     session_dir = DATA_DIR / "test-e2e"
     assert (session_dir / "train.jsonl").exists(), "train.jsonl not found"
     assert (session_dir / "eval.jsonl").exists(), "eval.jsonl not found"
@@ -135,10 +144,11 @@ def test_stage1_data_prep(skip_api: bool = False) -> bool:
 
 # ── Stage 2: Program.md Generation ──────────────────────────────────────────
 
+
 def test_stage2_program_md() -> bool:
     _header(2, "Program.md Generation")
 
-    from config import RunConfig, PROGRAM_MD_PATH
+    from config import PROGRAM_MD_PATH, RunConfig
     from program_md_generator import generate_program_md, write_program_md
 
     cfg = RunConfig(
@@ -169,11 +179,13 @@ def test_stage2_program_md() -> bool:
 
 # ── Stage 3: Finetune Dry Run ───────────────────────────────────────────────
 
+
 def test_stage3_finetune_dryrun(skip_gpu: bool = False) -> bool:
     _header(3, "Finetune Structure Validation")
 
     # Validate finetune.py parses
     import ast
+
     with open(PROJECT_ROOT / "finetune.py") as f:
         tree = ast.parse(f.read())
     funcs = [n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]
@@ -196,9 +208,11 @@ def test_stage3_finetune_dryrun(skip_gpu: bool = False) -> bool:
     else:
         try:
             from config import DEVICE, DTYPE, DTYPE_STR
+
             _pass(f"Device detected: {DEVICE}, dtype: {DTYPE}, flag: {DTYPE_STR}")
 
             from finetune import _apply_dtype_flags
+
             test_args = {"learning_rate": 3e-5, "num_train_epochs": 2}
             resolved = _apply_dtype_flags(test_args)
             if DEVICE == "mps":
@@ -219,13 +233,19 @@ def test_stage3_finetune_dryrun(skip_gpu: bool = False) -> bool:
 
 # ── Stage 4: Evaluator Metrics ──────────────────────────────────────────────
 
+
 def test_stage4_evaluator_metrics() -> bool:
     _header(4, "Evaluator Metrics")
 
     from evaluator import (
-        compute_accuracy, compute_f1_macro, compute_f1_weighted,
-        compute_exact_match, compute_f1_token, compute_rouge_l, compute_bleu,
         _normalize_text,
+        compute_accuracy,
+        compute_bleu,
+        compute_exact_match,
+        compute_f1_macro,
+        compute_f1_token,
+        compute_f1_weighted,
+        compute_rouge_l,
     )
 
     # Normalization
@@ -235,7 +255,7 @@ def test_stage4_evaluator_metrics() -> bool:
 
     # Accuracy
     preds = ["urgent", "not_urgent", "urgent", "urgent"]
-    refs =  ["urgent", "not_urgent", "not_urgent", "urgent"]
+    refs = ["urgent", "not_urgent", "not_urgent", "urgent"]
     acc = compute_accuracy(preds, refs)
     assert acc == 0.75, f"Expected 0.75, got {acc}"
     _pass(f"Accuracy: {acc}")
@@ -282,13 +302,17 @@ def test_stage4_evaluator_metrics() -> bool:
 
 # ── Stage 5: MLflow Logging ─────────────────────────────────────────────────
 
+
 def test_stage5_mlflow() -> bool:
     _header(5, "MLflow Logging")
 
     try:
         from mlflow_utils import (
-            init_mlflow, log_run, get_run_history,
-            get_best_metric, format_history_for_agent,
+            format_history_for_agent,
+            get_best_metric,
+            get_run_history,
+            init_mlflow,
+            log_run,
         )
 
         experiment_name = "test-e2e-validation"
@@ -299,8 +323,17 @@ def test_stage5_mlflow() -> bool:
         run_id = log_run(
             iteration=1,
             hypothesis="Test hypothesis for validation",
-            lora_config={"r": 16, "lora_alpha": 32, "lora_dropout": 0.05, "target_modules": ["q_proj", "v_proj"]},
-            training_args={"learning_rate": 3e-5, "num_train_epochs": 2, "lr_scheduler_type": "cosine"},
+            lora_config={
+                "r": 16,
+                "lora_alpha": 32,
+                "lora_dropout": 0.05,
+                "target_modules": ["q_proj", "v_proj"],
+            },
+            training_args={
+                "learning_rate": 3e-5,
+                "num_train_epochs": 2,
+                "lr_scheduler_type": "cosine",
+            },
             train_loss=0.5,
             metric_name="accuracy",
             metric_value=0.75,
@@ -314,8 +347,17 @@ def test_stage5_mlflow() -> bool:
         run_id_2 = log_run(
             iteration=2,
             hypothesis="Increase learning rate to 1e-4",
-            lora_config={"r": 16, "lora_alpha": 32, "lora_dropout": 0.05, "target_modules": ["q_proj", "v_proj"]},
-            training_args={"learning_rate": 1e-4, "num_train_epochs": 2, "lr_scheduler_type": "cosine"},
+            lora_config={
+                "r": 16,
+                "lora_alpha": 32,
+                "lora_dropout": 0.05,
+                "target_modules": ["q_proj", "v_proj"],
+            },
+            training_args={
+                "learning_rate": 1e-4,
+                "num_train_epochs": 2,
+                "lr_scheduler_type": "cosine",
+            },
             train_loss=0.3,
             metric_name="accuracy",
             metric_value=0.85,
@@ -348,19 +390,25 @@ def test_stage5_mlflow() -> bool:
 
 # ── Stage 6: Agent Loop Structure ────────────────────────────────────────────
 
+
 def test_stage6_agent_loop() -> bool:
     _header(6, "Agent Loop Structure")
 
     import ast
+
     with open(PROJECT_ROOT / "agent_loop.py") as f:
         tree = ast.parse(f.read())
 
     funcs = [n.name for n in ast.walk(tree) if isinstance(n, ast.FunctionDef)]
     required = [
-        "_read_finetune_py", "_write_finetune_py",
-        "_build_agent_prompt", "_call_claude_api",
-        "_apply_config_to_finetune", "_run_training",
-        "_validate_proposed_config", "run_agent_loop",
+        "_read_finetune_py",
+        "_write_finetune_py",
+        "_build_agent_prompt",
+        "_call_claude_api",
+        "_apply_config_to_finetune",
+        "_run_training",
+        "_validate_proposed_config",
+        "run_agent_loop",
     ]
     for fn in required:
         assert fn in funcs, f"Missing function: {fn}"
@@ -368,6 +416,7 @@ def test_stage6_agent_loop() -> bool:
 
     # Test config extraction
     from agent_loop import _extract_config_from_finetune, _read_finetune_py
+
     source = _read_finetune_py()
     config = _extract_config_from_finetune(source)
     assert "hypothesis" in config
@@ -375,6 +424,7 @@ def test_stage6_agent_loop() -> bool:
 
     # Test validation
     from agent_loop import _validate_proposed_config
+
     good_config = {
         "hypothesis": "Test",
         "lora_config": {"r": 16},
@@ -398,10 +448,13 @@ def test_stage6_agent_loop() -> bool:
 
 # ── Main ─────────────────────────────────────────────────────────────────────
 
+
 def main():
     parser = argparse.ArgumentParser(description="auto-finetune e2e validation")
     parser.add_argument("--stage", type=int, help="Run only this stage (1-6)")
-    parser.add_argument("--no-api", action="store_true", help="Skip stages needing ANTHROPIC_API_KEY")
+    parser.add_argument(
+        "--no-api", action="store_true", help="Skip stages needing ANTHROPIC_API_KEY"
+    )
     parser.add_argument("--no-gpu", action="store_true", help="Skip stages needing torch/GPU")
     args = parser.parse_args()
 
@@ -431,20 +484,21 @@ def main():
 
     # Summary
     print(f"\n{Colors.BOLD}{'=' * 60}")
-    print(f"SUMMARY")
+    print("SUMMARY")
     print(f"{'=' * 60}{Colors.RESET}")
 
     all_pass = True
     for num, passed in results.items():
-        status = f"{Colors.GREEN}PASS{Colors.RESET}" if passed else f"{Colors.RED}FAIL{Colors.RESET}"
-        name = stages.get(num, (f"Stage {num}",))[0] if num in stages else f"Stage {num}"
+        status = (
+            f"{Colors.GREEN}PASS{Colors.RESET}" if passed else f"{Colors.RED}FAIL{Colors.RESET}"
+        )
         print(f"  Stage {num}: {status}")
         if not passed:
             all_pass = False
 
     if all_pass:
         print(f"\n{Colors.GREEN}{Colors.BOLD}All stages passed!{Colors.RESET}")
-        print(f"\nReady to run: streamlit run app.py")
+        print("\nReady to run: streamlit run app.py")
     else:
         print(f"\n{Colors.RED}{Colors.BOLD}Some stages failed.{Colors.RESET}")
 

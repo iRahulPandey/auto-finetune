@@ -11,21 +11,21 @@ Responsibilities:
   7. Save to disk as JSONL
 """
 
-import json
 import hashlib
+import json
 import random
 import re
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import Optional
 
+from . import llm_client
 from .config import (
-    DATA_DIR,
     CONSTRAINTS,
+    DATA_DIR,
     SUPPORTED_MODELS,
     RunConfig,
 )
-from . import llm_client
 
 # Minimum examples per class before augmentation kicks in.
 # 20 ensures each class has enough diversity for LoRA fine-tuning.
@@ -42,12 +42,11 @@ def _analyze_class_distribution(examples: list[dict]) -> dict:
 
     warnings = []
     if total < 20:
-        warnings.append(
-            f"Very few examples ({total}). 50+ recommended for reliable fine-tuning."
-        )
+        warnings.append(f"Very few examples ({total}). 50+ recommended for reliable fine-tuning.")
 
-    minority_classes = {label: count for label, count in dist.items()
-                        if count < MIN_EXAMPLES_PER_CLASS}
+    minority_classes = {
+        label: count for label, count in dist.items() if count < MIN_EXAMPLES_PER_CLASS
+    }
     if minority_classes:
         for label, count in minority_classes.items():
             warnings.append(
@@ -77,10 +76,7 @@ def _augment_minority_classes(
     the existing ones. This prevents model collapse to majority classes.
     """
     dist = Counter(ex["output"].strip() for ex in examples)
-    classes_to_augment = {
-        label: count for label, count in dist.items()
-        if count < min_per_class
-    }
+    classes_to_augment = {label: count for label, count in dist.items() if count < min_per_class}
 
     if not classes_to_augment:
         return examples
@@ -96,15 +92,13 @@ def _augment_minority_classes(
 
         # Show all existing examples for this class
         example_text = "\n".join(
-            f"  Input: {ex['input'][:300]}\n  Output: {ex['output']}"
-            for ex in class_examples
+            f"  Input: {ex['input'][:300]}\n  Output: {ex['output']}" for ex in class_examples
         )
 
         # Also show a few examples from OTHER classes for contrast
         other_examples = [ex for ex in examples if ex["output"].strip() != label][:3]
         contrast_text = "\n".join(
-            f"  Input: {ex['input'][:300]}\n  Output: {ex['output']}"
-            for ex in other_examples
+            f"  Input: {ex['input'][:300]}\n  Output: {ex['output']}" for ex in other_examples
         )
 
         prompt = f"""You are helping create training data for a fine-tuned classifier.
@@ -142,12 +136,13 @@ Return ONLY a JSON array:
             )
 
             # Extract JSON array
-            match = re.search(r'\[.*\]', raw, re.DOTALL)
+            match = re.search(r"\[.*\]", raw, re.DOTALL)
             if match:
                 new_examples = json.loads(match.group(0))
                 # Validate: every output must be exactly the target label
                 valid = [
-                    ex for ex in new_examples
+                    ex
+                    for ex in new_examples
                     if isinstance(ex, dict)
                     and "input" in ex
                     and ex.get("output", "").strip() == label
@@ -231,13 +226,15 @@ def format_chat_examples(
     """
     formatted = []
     for ex in examples:
-        formatted.append({
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": ex["input"]},
-                {"role": "assistant", "content": ex["output"]},
-            ]
-        })
+        formatted.append(
+            {
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": ex["input"]},
+                    {"role": "assistant", "content": ex["output"]},
+                ]
+            }
+        )
     return formatted
 
 
@@ -279,7 +276,7 @@ def split_train_eval(
         n_eval = max(2, int(total * eval_ratio))
         eval_set = all_examples[:n_eval]
         train_set = all_examples[n_eval:]
-        print(f"  Unique outputs detected — using random split instead of stratified")
+        print("  Unique outputs detected — using random split instead of stratified")
     else:
         # Classification: stratified split preserving class balance
         if total < 80:
@@ -372,8 +369,7 @@ def prepare_data(
     analysis = _analyze_class_distribution(examples)
     print(f"  Total examples: {analysis['total']}")
     print(f"  Classes ({analysis['num_classes']}):")
-    for label, count in sorted(analysis["distribution"].items(),
-                                key=lambda x: -x[1]):
+    for label, count in sorted(analysis["distribution"].items(), key=lambda x: -x[1]):
         pct = count / analysis["total"] * 100
         bar = "#" * int(pct / 2)
         print(f"    {count:>3} ({pct:4.0f}%) {bar} {label}")
@@ -388,8 +384,7 @@ def prepare_data(
         # Re-analyze after augmentation
         post_analysis = _analyze_class_distribution(examples)
         print(f"  After augmentation: {post_analysis['total']} total examples")
-        for label, count in sorted(post_analysis["distribution"].items(),
-                                    key=lambda x: -x[1]):
+        for label, count in sorted(post_analysis["distribution"].items(), key=lambda x: -x[1]):
             print(f"    {count:>3}  {label}")
     elif analysis["minority_classes"]:
         print("\n  Augmentation disabled — skipping. Enable in sidebar if classes are imbalanced.")
@@ -416,8 +411,7 @@ def prepare_data(
 
     # Save raw examples for reference
     raw_path = DATA_DIR / session_id / "raw_examples.json"
-    raw_path.write_text(json.dumps(examples, indent=2, ensure_ascii=False),
-                        encoding="utf-8")
+    raw_path.write_text(json.dumps(examples, indent=2, ensure_ascii=False), encoding="utf-8")
 
     return {
         "system_prompt": system_prompt,

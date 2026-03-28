@@ -7,10 +7,10 @@ No actual MLflow server or tracking calls.
 
 import pytest
 
-from _core.mlflow_utils import _slugify, _run_name, _experiment_name, get_run_history
-
+from _core.mlflow_utils import _experiment_name, _run_name, _slugify, get_run_history
 
 # ── _slugify ──────────────────────────────────────────────────────────────────
+
 
 def test_slugify_lowercases():
     assert _slugify("Classify Email") == "classify-email"
@@ -42,6 +42,7 @@ def test_slugify_no_trailing_hyphens():
 
 # ── _run_name ─────────────────────────────────────────────────────────────────
 
+
 def test_run_name_format():
     name = _run_name(1, 3e-5, 16)
     assert "iter-001" in name
@@ -64,6 +65,7 @@ def test_run_name_plain_notation_for_larger_lr():
 
 # ── _experiment_name ──────────────────────────────────────────────────────────
 
+
 def test_experiment_name_slugifies_use_case():
     name = _experiment_name("Classify email urgency")
     assert name == "classify-email-urgency"
@@ -75,6 +77,7 @@ def test_experiment_name_empty_returns_default():
 
 
 # ── session_id validation (get_run_history) ───────────────────────────────────
+
 
 def test_get_run_history_rejects_invalid_session_id():
     with pytest.raises(ValueError, match="Invalid session_id"):

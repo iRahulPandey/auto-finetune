@@ -7,11 +7,10 @@ The agent reads this file to understand its search strategy.
 """
 
 from .config import (
-    SEARCH_SPACE,
     CONSTRAINTS,
-    TASK_TYPES,
     LAYER_RATIONALE,
     PROGRAM_MD_PATH,
+    SEARCH_SPACE,
     RunConfig,
 )
 
@@ -19,7 +18,6 @@ from .config import (
 def generate_program_md(run_config: RunConfig) -> str:
     """Generate the program.md content from a RunConfig."""
 
-    task_info = TASK_TYPES[run_config.task_type]
     metric_name = run_config.metric_name
     use_case = run_config.use_case
     model_key = run_config.model_key
@@ -104,7 +102,7 @@ If metric stagnates after 3 iterations, switch layer set before changing rank or
 ## Run History
 
 | Iteration | Hypothesis | {metric_name} | LR | Rank | Epochs | Scheduler | Status |
-|-----------|-----------|{'-' * len(metric_name)}--|------|------|--------|-----------|--------|
+|-----------|-----------|{"-" * len(metric_name)}--|------|------|--------|-----------|--------|
 """
     return content
 

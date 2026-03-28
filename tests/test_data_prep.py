@@ -25,6 +25,7 @@ def _make_examples(labels: list[str]) -> list[dict]:
 
 # ── _hash_examples ────────────────────────────────────────────────────────────
 
+
 def test_hash_examples_returns_12_chars():
     examples = [{"input": "hello", "output": "urgent"}]
     h = _hash_examples(examples)
@@ -50,6 +51,7 @@ def test_hash_examples_order_sensitive():
 
 
 # ── format_chat_examples ──────────────────────────────────────────────────────
+
 
 def test_format_chat_examples_structure():
     raw = [{"input": "Is this urgent?", "output": "urgent"}]
@@ -80,6 +82,7 @@ def test_format_chat_examples_empty():
 
 # ── split_train_eval ──────────────────────────────────────────────────────────
 
+
 def test_split_preserves_all_examples():
     examples = _make_examples(["urgent"] * 60 + ["not_urgent"] * 60)
     train, eval_set = split_train_eval(examples)
@@ -89,7 +92,9 @@ def test_split_preserves_all_examples():
 def test_split_eval_contains_both_classes():
     examples = _make_examples(["urgent"] * 60 + ["not_urgent"] * 60)
     _, eval_set = split_train_eval(examples)
-    eval_labels = {m["content"] for ex in eval_set for m in ex["messages"] if m["role"] == "assistant"}
+    eval_labels = {
+        m["content"] for ex in eval_set for m in ex["messages"] if m["role"] == "assistant"
+    }
     assert "urgent" in eval_labels
     assert "not_urgent" in eval_labels
 
