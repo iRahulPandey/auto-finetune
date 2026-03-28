@@ -340,13 +340,17 @@ def _run_training(
         bufsize=1,                  # line-buffered
     )
 
+    def _sanitize_output(line: str) -> str:
+        """Strip absolute filesystem paths from subprocess output before display."""
+        return re.sub(r'/[/\w.\-]*/([^/\s]+\.py)', r'<path>/\1', line)
+
     captured_lines: list[str] = []
     for line in proc.stdout:
         line = line.rstrip("\n")
         captured_lines.append(line)
-        print(line)                 # always echo to agent_loop stdout
+        print(line)                 # always echo to agent_loop stdout (full paths ok here)
         if on_output:
-            on_output(line)
+            on_output(_sanitize_output(line))
 
     proc.wait()
     if proc.returncode != 0:
@@ -455,8 +459,19 @@ def _diagnose_failure(
         return None
 
 
+_ALLOWED_SCHEDULERS = {"cosine", "linear", "constant_with_warmup"}
+_ALLOWED_BIAS = {"none", "all", "lora_only"}
+_ALLOWED_OPTIM = {"adamw_torch", "adamw_hf", "adafactor"}
+_ALLOWED_TARGET_MODULES = {
+    frozenset(["q_proj", "v_proj"]),
+    frozenset(["q_proj", "v_proj", "k_proj"]),
+    frozenset(["q_proj", "v_proj", "o_proj"]),
+    frozenset(["q_proj", "v_proj", "k_proj", "o_proj"]),
+}
+
+
 def _validate_proposed_config(proposed: dict) -> list[str]:
-    """Validate that the proposed config respects constraints."""
+    """Validate that the proposed config respects constraints and allowlists."""
     errors = []
 
     lora = proposed.get("lora_config", {})
@@ -475,6 +490,23 @@ def _validate_proposed_config(proposed: dict) -> list[str]:
 
     if "hypothesis" not in proposed:
         errors.append("Missing hypothesis")
+
+    # String-typed fields written verbatim into Python source — must be allowlisted
+    sched = ta.get("lr_scheduler_type", "cosine")
+    if sched not in _ALLOWED_SCHEDULERS:
+        errors.append(f"lr_scheduler_type '{sched}' not in allowed set {_ALLOWED_SCHEDULERS}")
+
+    bias = lora.get("bias", "none")
+    if bias not in _ALLOWED_BIAS:
+        errors.append(f"lora bias '{bias}' not in allowed set {_ALLOWED_BIAS}")
+
+    optim = ta.get("optim", "adamw_torch")
+    if optim not in _ALLOWED_OPTIM:
+        errors.append(f"optim '{optim}' not in allowed set {_ALLOWED_OPTIM}")
+
+    mods = lora.get("target_modules", [])
+    if mods and frozenset(mods) not in _ALLOWED_TARGET_MODULES:
+        errors.append(f"target_modules {mods} not in allowed combinations")
 
     return errors
 
