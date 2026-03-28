@@ -77,6 +77,7 @@ def log_run(
     use_case: str = "",
     base_model_id: str = "",
     extra_metrics: Optional[dict] = None,
+    diagnosis: Optional[str] = None,
 ) -> str:
     """
     Log a single iteration to MLflow. Always re-sets tracking URI + experiment
@@ -101,12 +102,15 @@ def log_run(
         mlflow.set_tag("use_case", use_case[:200])
         mlflow.set_tag("base_model_id", base_model_id)
         mlflow.set_tag("timestamp", str(int(time.time())))
+        if diagnosis:
+            mlflow.set_tag("failure_diagnosis", diagnosis[:500])
 
         # ── Params ────────────────────────────────────────────────────────────
         mlflow.log_param("lora_r", lora_config.get("r"))
         mlflow.log_param("lora_alpha", lora_config.get("lora_alpha"))
         mlflow.log_param("lora_dropout", lora_config.get("lora_dropout"))
-        mlflow.log_param("target_modules", str(lora_config.get("target_modules")))
+        import json as _json
+        mlflow.log_param("target_modules", _json.dumps(lora_config.get("target_modules", [])))
         mlflow.log_param("learning_rate", training_args.get("learning_rate"))
         mlflow.log_param("num_train_epochs", training_args.get("num_train_epochs"))
         mlflow.log_param("lr_scheduler_type", training_args.get("lr_scheduler_type"))
@@ -186,6 +190,7 @@ def get_all_experiments() -> list[dict]:
                 "base_model_id": tags.get("base_model_id", ""),
                 "session_id": tags.get("session_id", ""),
                 "timestamp": int(tags.get("timestamp", 0)),
+                "diagnosis": tags.get("failure_diagnosis", ""),
                 "metrics": dict(run.data.metrics),
                 "params": dict(run.data.params),
             }
@@ -282,6 +287,10 @@ def get_run_history(
         if not exp_ids:
             return []
 
+    # Validate session_id before interpolating into MLflow filter DSL.
+    # session_id is a 12-char hex prefix of SHA-256; reject anything else.
+    if session_id and not re.match(r'^[a-f0-9]{8,64}$', session_id):
+        raise ValueError(f"Invalid session_id format: {session_id!r}")
     filter_str = f"tags.session_id = '{session_id}'" if session_id else ""
 
     # Paginate through all results to avoid the 200-run cap
@@ -322,6 +331,7 @@ def get_run_history(
             "base_model_id": tags.get("base_model_id", ""),
             "session_id": tags.get("session_id", ""),
             "timestamp": int(tags.get("timestamp", 0)),
+            "diagnosis": tags.get("failure_diagnosis", ""),
             "metrics": dict(run.data.metrics),
             "params": dict(run.data.params),
         })
@@ -417,271 +427,72 @@ def register_best_model(
         return None
 
 
-def compute_parameter_insights(history: list[dict], metric_name: str) -> str:
-    """Bayesian-inspired parameter analysis: compute which parameter values
-    correlate with better metrics and lower loss.
+def generate_config_table(max_iterations: int, task_type: str = "classification") -> list[dict]:
+    """Generate a diverse pre-planned configuration table.
 
-    This is the "surrogate model" — instead of fitting a Gaussian Process,
-    we compute simple statistics that tell the LLM exactly which settings
-    work and which don't, so it doesn't have to guess from a raw table.
-
-    Returns a structured text block with:
-      1. Per-parameter value performance (avg metric, avg loss, n trials)
-      2. Best-performing value for each parameter (marked)
-      3. A suggested "expected improvement" config combining best values
-      4. Untried parameter values (exploration opportunities)
+    Random sampling over the full search space with deduplication.
+    The task-recommended target_modules are weighted 3x so they appear
+    more often — the LLM still picks freely from the table each iteration.
     """
-    from collections import defaultdict
-
-    if len(history) < 3:
-        return "(Not enough history for parameter analysis yet — need 3+ runs.)"
-
-    # Parameters to analyze — these are the ones the agent can control
-    param_keys = [
-        ("learning_rate", "lr"),
-        ("lora_r", "rank"),
-        ("num_train_epochs", "epochs"),
-        ("lr_scheduler_type", "scheduler"),
-        ("target_modules", "modules"),
-        ("batch_size", "batch_sz"),
-        ("lora_dropout", "dropout"),
-    ]
-
-    lines: list[str] = []
-    lines.append("=== PARAMETER PERFORMANCE ANALYSIS (Bayesian-inspired) ===")
-    lines.append("For each parameter, avg metric & loss across all runs using that value:")
-    lines.append("")
-
-    suggested_config: dict[str, str] = {}
-    best_metric_per_param: dict[str, tuple[str, float]] = {}
-
-    for param_key, display_name in param_keys:
-        value_metrics: dict[str, list[float]] = defaultdict(list)
-        value_losses: dict[str, list[float]] = defaultdict(list)
-
-        for run in history:
-            val = run["params"].get(param_key, "unknown")
-            metric = run["metrics"].get(metric_name, 0.0)
-            loss = run["metrics"].get("train_loss", 999.0)
-            val_str = str(val)
-            value_metrics[val_str].append(metric)
-            value_losses[val_str].append(loss)
-
-        if not value_metrics:
-            continue
-
-        # Compute averages and find best
-        avg_metrics = {v: sum(ms) / len(ms) for v, ms in value_metrics.items()}
-        avg_losses = {v: sum(ls) / len(ls) for v, ls in value_losses.items()}
-        best_val = max(avg_metrics, key=avg_metrics.get)
-        worst_val = min(avg_metrics, key=avg_metrics.get)
-
-        suggested_config[param_key] = best_val
-        best_metric_per_param[param_key] = (best_val, avg_metrics[best_val])
-
-        lines.append(f"  {display_name} ({param_key}):")
-        # Sort by avg metric descending
-        for val in sorted(avg_metrics.keys(), key=lambda v: avg_metrics[v], reverse=True):
-            n = len(value_metrics[val])
-            marker = ""
-            if val == best_val:
-                marker = "  ← BEST"
-            elif val == worst_val and val != best_val:
-                marker = "  ← WORST"
-            lines.append(
-                f"    {val:>20}: avg_{metric_name}={avg_metrics[val]:.4f}  "
-                f"avg_loss={avg_losses[val]:.4f}  (n={n} trials){marker}"
-            )
-        lines.append("")
-
-    # ── Suggested next config (acquisition function: combine best values) ──
-    lines.append("=== SUGGESTED NEXT CONFIG (Expected Improvement) ===")
-    lines.append("Combining the best-performing value for each parameter:")
-    for param_key, display_name in param_keys:
-        if param_key in suggested_config:
-            val = suggested_config[param_key]
-            score = best_metric_per_param[param_key][1]
-            lines.append(f"  {display_name:>12} = {val}  (avg {metric_name}={score:.4f} when using this)")
-
-    # ── Check if this exact combination has been tried ──
-    tried_combos = set()
-    for run in history:
-        combo = tuple(str(run["params"].get(pk, "?")) for pk, _ in param_keys)
-        tried_combos.add(combo)
-
-    suggested_combo = tuple(suggested_config.get(pk, "?") for pk, _ in param_keys)
-    if suggested_combo in tried_combos:
-        lines.append("")
-        lines.append("  NOTE: This exact combination was already tried.")
-        lines.append("  → Try the SECOND-best value for one parameter to explore nearby.")
-    else:
-        lines.append("")
-        lines.append("  This combination has NOT been tried — high expected improvement.")
-
-    # ── Exploration gaps: parameter values never tried ──
-    from .config import SEARCH_SPACE
-    search_space_map = {
-        "learning_rate": [str(v) for v in SEARCH_SPACE.get("learning_rate", [])],
-        "lora_r": [str(v) for v in SEARCH_SPACE.get("lora_rank", [])],
-        "num_train_epochs": [str(v) for v in SEARCH_SPACE.get("num_train_epochs", [])],
-        "lr_scheduler_type": SEARCH_SPACE.get("lr_scheduler_type", []),
-        "batch_size": [str(v) for v in SEARCH_SPACE.get("per_device_train_batch_size", [])],
-    }
-
-    gaps = []
-    for param_key, display_name in param_keys:
-        if param_key not in search_space_map:
-            continue
-        all_values = set(search_space_map[param_key])
-        tried_values = set()
-        for run in history:
-            tried_values.add(str(run["params"].get(param_key, "")))
-        untried = all_values - tried_values
-        if untried:
-            gaps.append(f"  {display_name}: never tried {sorted(untried)}")
-
-    if gaps:
-        lines.append("")
-        lines.append("=== EXPLORATION GAPS (untried values) ===")
-        for g in gaps:
-            lines.append(g)
-
-    return "\n".join(lines)
-
-
-def generate_config_table(max_iterations: int) -> list[dict]:
-    """Generate a diverse, pre-planned configuration table for systematic search.
-
-    Uses stratified sampling to ensure all important parameter values are covered.
-    The table is designed so that:
-      - Every learning_rate value is tried at least once
-      - Every batch_size value is tried at least once
-      - Every target_modules combo is tried at least once
-      - Every rank value is tried
-      - Configs are diverse — no two share more than 3 identical params
-
-    Returns a list of config dicts, each with lora_config + training_args.
-    """
-    import itertools
     import random
-
-    from .config import SEARCH_SPACE
+    from .config import SEARCH_SPACE, LAYER_RATIONALE
 
     lrs = SEARCH_SPACE["learning_rate"]
     ranks = SEARCH_SPACE["lora_rank"]
     epochs_list = SEARCH_SPACE["num_train_epochs"]
     schedulers = SEARCH_SPACE["lr_scheduler_type"]
     modules = SEARCH_SPACE["target_modules"]
+    recommended = LAYER_RATIONALE.get(task_type, LAYER_RATIONALE["classification"])["recommended"]
+    weighted_modules = modules + [recommended, recommended, recommended]
     dropouts = SEARCH_SPACE["lora_dropout"]
     warmups = SEARCH_SPACE["warmup_ratio"]
     batch_sizes = SEARCH_SPACE["per_device_train_batch_size"]
     grad_accums = SEARCH_SPACE["gradient_accumulation_steps"]
 
-    # Phase 1: Coverage configs — ensure every value of every key param is tried
-    coverage_configs: list[dict] = []
+    random.seed(42)
 
-    # One config per learning_rate
-    for i, lr in enumerate(lrs):
-        cfg = {
-            "learning_rate": lr,
-            "r": ranks[i % len(ranks)],
-            "num_train_epochs": epochs_list[i % len(epochs_list)],
-            "lr_scheduler_type": schedulers[i % len(schedulers)],
-            "target_modules": modules[i % len(modules)],
-            "lora_dropout": dropouts[i % len(dropouts)],
-            "warmup_ratio": warmups[i % len(warmups)],
-            "per_device_train_batch_size": batch_sizes[i % len(batch_sizes)],
-            "gradient_accumulation_steps": grad_accums[i % len(grad_accums)],
-        }
-        coverage_configs.append(cfg)
+    def _key(c: dict) -> str:
+        return "|".join([
+            str(c["learning_rate"]), str(c["r"]), str(c["num_train_epochs"]),
+            str(c["lr_scheduler_type"]), str(sorted(c["target_modules"])),
+            str(c["per_device_train_batch_size"]), str(c["gradient_accumulation_steps"]),
+            str(c["warmup_ratio"]), str(c["lora_dropout"]),
+        ])
 
-    # One config per batch_size (ensure coverage if not already covered)
-    for i, bs in enumerate(batch_sizes):
-        cfg = {
-            "learning_rate": lrs[(i + 2) % len(lrs)],
-            "r": ranks[(i + 1) % len(ranks)],
-            "num_train_epochs": epochs_list[(i + 1) % len(epochs_list)],
-            "lr_scheduler_type": schedulers[(i + 1) % len(schedulers)],
-            "target_modules": modules[(i + 1) % len(modules)],
-            "lora_dropout": dropouts[(i + 1) % len(dropouts)],
-            "warmup_ratio": warmups[(i + 1) % len(warmups)],
-            "per_device_train_batch_size": bs,
-            "gradient_accumulation_steps": grad_accums[(i + 1) % len(grad_accums)],
-        }
-        coverage_configs.append(cfg)
+    seen: set[str] = set()
+    table: list[dict] = []
 
-    # One config per target_modules combo
-    for i, mod in enumerate(modules):
-        cfg = {
-            "learning_rate": lrs[(i + 3) % len(lrs)],
-            "r": ranks[(i + 2) % len(ranks)],
-            "num_train_epochs": epochs_list[(i + 2) % len(epochs_list)],
-            "lr_scheduler_type": schedulers[(i + 2) % len(schedulers)],
-            "target_modules": mod,
-            "lora_dropout": dropouts[(i + 2) % len(dropouts)],
-            "warmup_ratio": warmups[(i + 2) % len(warmups)],
-            "per_device_train_batch_size": batch_sizes[(i + 2) % len(batch_sizes)],
-            "gradient_accumulation_steps": grad_accums[(i + 2) % len(grad_accums)],
-        }
-        coverage_configs.append(cfg)
-
-    # Phase 2: Random diverse configs to fill remaining budget
-    # Use random sampling from the full space
-    random.seed(42)  # reproducible
-    max_random = max(0, max_iterations - len(coverage_configs))
-    random_configs: list[dict] = []
-
-    for _ in range(max_random * 3):  # oversample, then deduplicate
+    for _ in range(max_iterations * 4):  # oversample then deduplicate
+        r = random.choice(ranks)
         cfg = {
             "learning_rate": random.choice(lrs),
-            "r": random.choice(ranks),
+            "r": r,
+            "lora_alpha": r * 2,
             "num_train_epochs": random.choice(epochs_list),
             "lr_scheduler_type": random.choice(schedulers),
-            "target_modules": random.choice(modules),
+            "target_modules": random.choice(weighted_modules),
             "lora_dropout": random.choice(dropouts),
             "warmup_ratio": random.choice(warmups),
             "per_device_train_batch_size": random.choice(batch_sizes),
             "gradient_accumulation_steps": random.choice(grad_accums),
         }
-        random_configs.append(cfg)
+        k = _key(cfg)
+        if k not in seen:
+            seen.add(k)
+            table.append(cfg)
+        if len(table) >= max_iterations:
+            break
 
-    # Deduplicate all configs
-    def _cfg_key(c: dict) -> str:
-        return "|".join([
-            str(c["learning_rate"]),
-            str(c["r"]),
-            str(c["num_train_epochs"]),
-            str(c["lr_scheduler_type"]),
-            str(sorted(c["target_modules"])),
-            str(c["per_device_train_batch_size"]),
-            str(c["gradient_accumulation_steps"]),
-            str(c["warmup_ratio"]),
-            str(c["lora_dropout"]),
-        ])
-
-    seen = set()
-    unique_configs: list[dict] = []
-    for cfg in coverage_configs + random_configs:
-        key = _cfg_key(cfg)
-        if key not in seen:
-            seen.add(key)
-            unique_configs.append(cfg)
-
-    # Trim to max_iterations
-    table = unique_configs[:max_iterations]
-
-    # Convert to the full format expected by the system
     result = []
     for i, cfg in enumerate(table):
         result.append({
             "config_id": i + 1,
             "status": "pending",
-            "priority": i + 1,  # initial priority = order
             "result_metric": None,
             "result_loss": None,
             "lora_config": {
                 "r": cfg["r"],
-                "lora_alpha": cfg["r"] * 2,
+                "lora_alpha": cfg["lora_alpha"],
                 "lora_dropout": cfg["lora_dropout"],
                 "target_modules": cfg["target_modules"],
                 "task_type": "CAUSAL_LM",
@@ -701,149 +512,50 @@ def generate_config_table(max_iterations: int) -> list[dict]:
                 "report_to": "none",
             },
         })
-
     return result
 
 
-def format_config_table_for_agent(
-    config_table: list[dict],
-    metric_name: str,
-    top_n_pending: int = 10,
-) -> str:
-    """Format the config table for the LLM to pick from.
-
-    Shows:
-      1. Completed configs (with results, sorted by metric desc)
-      2. Top N pending configs (by priority) for the LLM to choose from
-    """
-    completed = [c for c in config_table if c["status"] == "completed"]
-    pending = [c for c in config_table if c["status"] == "pending"]
-
-    completed_sorted = sorted(
-        completed,
+def format_config_table_for_agent(config_table: list[dict], metric_name: str) -> str:
+    """Format config table for the LLM: completed results + next pending configs."""
+    completed = sorted(
+        [c for c in config_table if c["status"] == "completed"],
         key=lambda c: c.get("result_metric") or 0.0,
         reverse=True,
     )
-    pending_sorted = sorted(pending, key=lambda c: c["priority"])
+    pending = [c for c in config_table if c["status"] == "pending"]
 
-    lines: list[str] = []
+    lines: list[str] = [f"=== CONFIG TABLE: {len(completed)} done, {len(pending)} remaining ===", ""]
 
-    lines.append(f"=== CONFIG TABLE: {len(completed)} done, {len(pending)} remaining ===")
-    lines.append("")
-
-    # Completed configs
-    if completed_sorted:
-        lines.append(f"--- COMPLETED (sorted by {metric_name} desc) ---")
-        for c in completed_sorted[:10]:
-            lc = c["lora_config"]
-            ta = c["training_args"]
+    if completed:
+        lines.append(f"--- COMPLETED (best {metric_name} first) ---")
+        for c in completed[:10]:
+            lc, ta = c["lora_config"], c["training_args"]
             lines.append(
-                f"  #{c['config_id']:>3} | {metric_name}={c.get('result_metric', 0):.4f} "
-                f"loss={c.get('result_loss', 0):.4f} | "
+                f"  #{c['config_id']:>3} | {metric_name}={c.get('result_metric') or 0:.4f} "
+                f"loss={c.get('result_loss') or 0:.4f} | "
                 f"lr={ta['learning_rate']} r={lc['r']} ep={ta['num_train_epochs']} "
                 f"sched={ta['lr_scheduler_type']} "
                 f"bs={ta['per_device_train_batch_size']}×ga={ta['gradient_accumulation_steps']} "
-                f"warmup={ta['warmup_ratio']} dropout={lc['lora_dropout']} "
-                f"modules={lc['target_modules']}"
+                f"warmup={ta['warmup_ratio']} dropout={lc['lora_dropout']} modules={lc['target_modules']}"
             )
         lines.append("")
 
-    # Pending configs
-    if pending_sorted:
-        show = pending_sorted[:top_n_pending]
-        lines.append(f"--- NEXT {len(show)} PENDING (by priority — pick one) ---")
+    if pending:
+        show = pending[:10]
+        lines.append(f"--- NEXT {len(show)} PENDING (pick one config_id, or propose custom) ---")
         for c in show:
-            lc = c["lora_config"]
-            ta = c["training_args"]
+            lc, ta = c["lora_config"], c["training_args"]
             lines.append(
-                f"  #{c['config_id']:>3} (pri={c['priority']}) | "
+                f"  #{c['config_id']:>3} | "
                 f"lr={ta['learning_rate']} r={lc['r']} ep={ta['num_train_epochs']} "
                 f"sched={ta['lr_scheduler_type']} "
                 f"bs={ta['per_device_train_batch_size']}×ga={ta['gradient_accumulation_steps']} "
-                f"warmup={ta['warmup_ratio']} dropout={lc['lora_dropout']} "
-                f"modules={lc['target_modules']}"
+                f"warmup={ta['warmup_ratio']} dropout={lc['lora_dropout']} modules={lc['target_modules']}"
             )
-        lines.append("")
-        lines.append(f"  ({len(pending) - len(show)} more pending configs not shown)")
+        if len(pending) > 10:
+            lines.append(f"  ({len(pending) - 10} more pending configs not shown)")
 
     return "\n".join(lines)
-
-
-def reprioritize_config_table(
-    config_table: list[dict],
-    history: list[dict],
-    metric_name: str,
-) -> list[dict]:
-    """Re-rank pending configs based on Bayesian parameter insights.
-
-    For each pending config, compute an "expected score" based on how well
-    each of its parameter values has performed historically. Higher expected
-    score = higher priority (lower number).
-    """
-    from collections import defaultdict
-
-    if len(history) < 2:
-        return config_table
-
-    # Build per-parameter-value average metric
-    param_keys = [
-        ("learning_rate", lambda c: str(c["training_args"]["learning_rate"])),
-        ("lora_r", lambda c: str(c["lora_config"]["r"])),
-        ("num_train_epochs", lambda c: str(c["training_args"]["num_train_epochs"])),
-        ("lr_scheduler_type", lambda c: str(c["training_args"]["lr_scheduler_type"])),
-        ("target_modules", lambda c: str(sorted(c["lora_config"]["target_modules"]))),
-        ("batch_size", lambda c: str(c["training_args"]["per_device_train_batch_size"])),
-        ("gradient_accumulation_steps", lambda c: str(c["training_args"]["gradient_accumulation_steps"])),
-    ]
-
-    # Compute value->avg_metric from history
-    value_avg: dict[str, dict[str, float]] = {}
-    for param_key, _ in param_keys:
-        metrics_by_val: dict[str, list[float]] = defaultdict(list)
-        for run in history:
-            val = str(run["params"].get(param_key, "?"))
-            m = run["metrics"].get(metric_name, 0.0)
-            metrics_by_val[val].append(m)
-        value_avg[param_key] = {
-            v: sum(ms) / len(ms) for v, ms in metrics_by_val.items()
-        }
-
-    # Score each pending config
-    for cfg in config_table:
-        if cfg["status"] != "pending":
-            continue
-
-        score = 0.0
-        n_known = 0
-        n_novel = 0
-        for param_key, extractor in param_keys:
-            val = extractor(cfg)
-            if val in value_avg.get(param_key, {}):
-                score += value_avg[param_key][val]
-                n_known += 1
-            else:
-                # Bonus for novelty: untried values get a small exploration bonus
-                n_novel += 1
-
-        # Expected score = avg of known param scores + exploration bonus
-        if n_known > 0:
-            expected = score / n_known
-        else:
-            expected = 0.5  # no data at all: neutral
-
-        # Exploration bonus: configs with more untried params get a bump
-        exploration_bonus = n_novel * 0.05
-        cfg["_expected_score"] = expected + exploration_bonus
-
-    # Sort pending by expected score (desc) and assign priorities
-    pending = [c for c in config_table if c["status"] == "pending"]
-    pending.sort(key=lambda c: c.get("_expected_score", 0), reverse=True)
-
-    for rank, cfg in enumerate(pending, 1):
-        cfg["priority"] = rank
-        cfg.pop("_expected_score", None)
-
-    return config_table
 
 
 def format_history_for_agent(history: list[dict], metric_name: str) -> str:
@@ -862,10 +574,13 @@ def format_history_for_agent(history: list[dict], metric_name: str) -> str:
         mods = p.get("target_modules", "?")
         if isinstance(mods, str) and mods.startswith("["):
             try:
-                import ast
-                mods = "+".join(ast.literal_eval(mods))
+                import json as _json
+                # New runs store JSON; old runs store Python repr with single quotes
+                _normalized = mods.replace("'", '"')
+                mods = "+".join(_json.loads(_normalized))
             except Exception:
-                pass
+                # Fall back to extracting known projection names via regex
+                mods = "+".join(re.findall(r'q_proj|v_proj|k_proj|o_proj', mods)) or mods
         return (
             f"  iter={run['iteration']:>3} "
             f"{metric_name}={m.get(metric_name, 0.0):.4f} "
@@ -900,6 +615,8 @@ def format_history_for_agent(history: list[dict], metric_name: str) -> str:
         for run in by_metric[:5]:
             lines.append(_row(run))
             lines.append(f"    hypothesis: {run['hypothesis'][:100]}")
+            if run.get("diagnosis"):
+                lines.append(f"    diagnosis: {run['diagnosis'][:150]}")
     else:
         lines.append("  (none yet)")
     lines.append("")
@@ -910,6 +627,8 @@ def format_history_for_agent(history: list[dict], metric_name: str) -> str:
         for run in by_loss[:3]:
             lines.append(_row(run))
             lines.append(f"    hypothesis: {run['hypothesis'][:100]}")
+            if run.get("diagnosis"):
+                lines.append(f"    diagnosis: {run['diagnosis'][:150]}")
     else:
         lines.append("  (none yet)")
     lines.append("")
@@ -928,10 +647,13 @@ def format_history_for_agent(history: list[dict], metric_name: str) -> str:
         mods = p.get("target_modules", "?")
         if isinstance(mods, str) and mods.startswith("["):
             try:
-                import ast
-                mods = "+".join(ast.literal_eval(mods))
+                import json as _json
+                # New runs store JSON; old runs store Python repr with single quotes
+                _normalized = mods.replace("'", '"')
+                mods = "+".join(_json.loads(_normalized))
             except Exception:
-                pass
+                # Fall back to extracting known projection names via regex
+                mods = "+".join(re.findall(r'q_proj|v_proj|k_proj|o_proj', mods)) or mods
         lines.append(
             f"  {run['iteration']:>4} | "
             f"{m.get(metric_name, 0.0):>8.4f} | "

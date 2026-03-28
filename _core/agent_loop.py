@@ -14,10 +14,8 @@ The mapping from AutoResearch:
 
 import json
 import re
-import time
 import subprocess
 import sys
-from pathlib import Path
 from typing import Optional, Callable
 from dataclasses import dataclass
 
@@ -26,7 +24,6 @@ from . import llm_client
 from .config import (
     RunConfig,
     AGENT_CONFIG,
-    SEARCH_SPACE,
     CONSTRAINTS,
     PROGRAM_MD_PATH,
     ADAPTERS_DIR,
@@ -36,17 +33,32 @@ from .mlflow_utils import (
     init_mlflow,
     log_run,
     get_run_history,
-    get_best_metric,
     save_best_adapter,
     register_best_model,
     format_history_for_agent,
-    compute_parameter_insights,
     generate_config_table,
     format_config_table_for_agent,
-    reprioritize_config_table,
 )
 # evaluate() no longer called here — finetune.py runs eval in-process
 # to avoid loading the model twice per iteration
+
+
+_DIAGNOSIS_PROMPT_TEMPLATE = """\
+You are an ML debugging assistant. A fine-tuning iteration just completed with a low {metric_name} of {metric_value:.4f}.
+
+## Config used
+LoRA: r={lora_r}, alpha={lora_alpha}, dropout={lora_dropout}, modules={target_modules}
+Training: lr={learning_rate}, epochs={num_epochs}, sched={scheduler}, bs={batch_size}×ga={grad_acc}
+
+## Sample prediction mismatches ({n_mismatches} total)
+{mismatch_block}
+
+## Task type: {task_type}
+
+Diagnose the most likely failure mode in 1-2 sentences. Be specific and actionable.
+Focus on: underfitting vs overfitting, learning rate too high/low, wrong target modules,
+insufficient epochs, label format errors, or model collapse.
+Do NOT say "try more experiments". Give a concrete hypothesis about what went wrong."""
 
 
 @dataclass
@@ -62,6 +74,7 @@ class IterationResult:
     adapter_path: Optional[str]
     run_id: str
     error: Optional[str] = None
+    diagnosis: Optional[str] = None
 
 
 def _read_finetune_py() -> str:
@@ -111,119 +124,9 @@ def _extract_config_from_finetune(source: str) -> dict:
     return config
 
 
-def _compute_phase(iteration: int, max_iterations: int) -> tuple[int, str]:
-    """Return (phase_number, phase_name) for the current iteration.
-
-    Phase 1 — EXPLORATION  (first 30% of budget, or first 12 iters if unlimited)
-    Phase 2 — EXPLOITATION (middle 40%, or iters 13-35 if unlimited)
-    Phase 3 — REFINEMENT   (final 30%, or iter 36+ if unlimited)
-    """
-    unlimited = max_iterations >= 9999
-    if unlimited:
-        p1_end = AGENT_CONFIG["unlimited_phase1_end"]
-        p2_end = AGENT_CONFIG["unlimited_phase2_end"]
-    else:
-        p1_end = max(3, int(max_iterations * AGENT_CONFIG["phase1_end_frac"]))
-        p2_end = max(p1_end + 2, int(max_iterations * AGENT_CONFIG["phase2_end_frac"]))
-
-    if iteration <= p1_end:
-        return 1, "EXPLORATION"
-    if iteration <= p2_end:
-        return 2, "EXPLOITATION"
-    return 3, "REFINEMENT"
-
-
-def _phase_instructions(
-    phase: int,
-    phase_name: str,
-    metric_name: str,
-    stagnation_count: int,
-    best_metric: float,
-    run_history_str: str,
-) -> str:
-    """Return phase-specific instructions to inject into the agent prompt."""
-    threshold = AGENT_CONFIG["stagnation_threshold"]
-    escape_needed = stagnation_count >= threshold
-    escape_block = ""
-    if escape_needed:
-        # Cycle between: escape attempt → return to best → small tweak
-        # This prevents the infinite "dramatic escape" loop seen in logs
-        escape_cycle = (stagnation_count - threshold) % 3
-        if escape_cycle == 0:
-            escape_block = f"""
-⚠ STAGNATION ESCAPE — ATTEMPT ({stagnation_count} consecutive non-improvements)
-Try ONE specific change from the EXPLORATION GAPS in the parameter analysis.
-Pick a parameter value that has NEVER been tried. Keep all other parameters
-at their analysis-best values. Do NOT flip everything to the opposite extreme.
-"""
-        elif escape_cycle == 1:
-            escape_block = f"""
-⚠ STAGNATION — RETURN TO BEST ({stagnation_count} consecutive non-improvements)
-The last escape attempt didn't help. Go back to the EXACT configuration from the
-best-performing run (the one that achieved {best_metric:.4f}). Do NOT change anything.
-Reproduce it exactly to confirm it wasn't a fluke.
-"""
-        else:
-            escape_block = f"""
-⚠ STAGNATION — SMALL TWEAK FROM BEST ({stagnation_count} consecutive non-improvements)
-Start from the best-performing config and change ONLY ONE parameter by a small amount:
-  • learning_rate: ×1.5 or ÷1.5
-  • epochs: ±1
-  • warmup_ratio: ±0.05
-Do NOT make dramatic changes. You are hill-climbing from the best known point.
-"""
-
-    if phase == 1:
-        return f"""
-=== PHASE 1 — WIDE EXPLORATION ===
-You have not explored enough yet. Your ONLY goal this phase is to COVER DIFFERENT REGIONS
-of the parameter space. Each iteration should try something meaningfully different from all others.
-Rules for this phase:
-  • Vary learning_rate across the full range: 1e-5, 3e-5, 5e-5, 1e-4, 3e-4, 5e-4, 1e-3
-  • Try ALL target_module combinations: [q_proj,v_proj], [q,v,k], [q,v,o], [q,v,k,o]
-  • Vary LoRA rank: 8, 16, 32, 64 — try all of them across iterations
-  • Try different warmup_ratio values: 0.05, 0.1, 0.15, 0.2
-  • Try different batch/grad_acc combos: (bs=1,ga=8), (bs=2,ga=4), (bs=4,ga=2)
-  • Try different schedulers: cosine, linear, constant_with_warmup
-Do NOT repeat a configuration already tried. Be bold — you are mapping the landscape.
-{escape_block}
-""".strip()
-
-    if phase == 2:
-        return f"""
-=== PHASE 2 — EXPLOITATION ===
-You have explored broadly. Now it is time to EXPLOIT what works.
-The run history above shows which configs achieved the best {metric_name} AND lowest train_loss.
-Your strategy this phase:
-  1. Look at the "TOP BY {metric_name.upper()}" section — pick the BEST config as your base.
-  2. Make exactly ONE targeted change to that base config. Ask yourself:
-     "If I could improve one thing about this config, what would it be?"
-  3. Typical targeted changes: ±1 epoch, ±1 rank step, LR ×2 or ÷2, warmup tweak
-  4. Do NOT randomly explore. You are hill-climbing from the best known point.
-  5. If the top metric config and the lowest-loss config are DIFFERENT runs — try a hybrid.
-{escape_block}
-""".strip()
-
-    # phase == 3
-    return f"""
-=== PHASE 3 — FINE-GRAINED REFINEMENT ===
-You are near the end of the search. The best {metric_name} so far is {best_metric:.4f}.
-Strategy: start from the BEST KNOWN CONFIG (top of "TOP BY {metric_name.upper()}" above)
-and make VERY SMALL, surgical changes:
-  • ±10-20% on learning rate
-  • ±1 epoch
-  • Slightly different warmup_ratio (e.g. 0.08 or 0.12 instead of 0.1)
-  • Try the best target_modules with a different dropout (0.0 vs 0.05 vs 0.1)
-Do NOT make large changes. You are polishing, not exploring.
-{escape_block}
-""".strip()
-
-
 def _build_agent_prompt(
     program_md: str,
-    finetune_source: str,
     run_history_str: str,
-    parameter_insights: str,
     config_table_str: str,
     best_metric: float,
     metric_name: str,
@@ -231,91 +134,72 @@ def _build_agent_prompt(
     max_iterations: int,
     stagnation_count: int,
     last_per_class: str = "",
+    last_diagnosis: Optional[str] = None,
 ) -> str:
-    """Build the prompt for the Claude API agent.
-
-    The prompt uses a PRE-PLANNED CONFIG TABLE approach:
-      1. A diverse config table was generated upfront covering all param combos.
-      2. After each run, configs are re-ranked by Bayesian expected improvement.
-      3. The LLM's job is to PICK the best config from the table, not invent one.
-      4. The LLM may also propose a custom config if the table doesn't cover
-         a promising region discovered during the search.
-    """
-    phase, phase_name = _compute_phase(iteration, max_iterations)
-    phase_block = _phase_instructions(
-        phase=phase,
-        phase_name=phase_name,
-        metric_name=metric_name,
-        stagnation_count=stagnation_count,
-        best_metric=best_metric,
-        run_history_str=run_history_str,
-    )
+    """Build the prompt for the Claude API agent."""
     iter_display = "∞" if max_iterations >= 9999 else str(max_iterations)
+    progress_pct = iteration / max_iterations if max_iterations < 9999 else 0
     is_final = (iteration == max_iterations and max_iterations < 9999)
 
-    return f"""You are an autonomous ML engineer running a systematic LoRA hyperparameter search.
+    if progress_pct < 0.4:
+        strategy = "EXPLORE: try configs that are different from what's been run. Vary lr, rank, modules freely."
+    elif progress_pct < 0.75:
+        strategy = "EXPLOIT: start from the best run so far and make one targeted change at a time."
+    else:
+        strategy = "REFINE: make small surgical changes (±lr 20%, ±1 epoch, different dropout) from the best config."
 
-## CRITICAL: Pick from the Config Table
-A diverse set of configurations was pre-planned to systematically cover the search space.
-Your job is to:
-1. REVIEW the config table below — it shows completed results and pending configs ranked by expected improvement.
-2. PICK a config_id from the pending list (the one most likely to improve on the best result).
-3. If the top-priority config looks promising based on the parameter analysis, USE IT.
-4. If you have strong evidence that a CUSTOM config (not in the table) would beat all pending ones, you may propose one — but you MUST justify it with data from the parameter analysis.
+    stagnation_note = ""
+    if stagnation_count >= AGENT_CONFIG["stagnation_threshold"]:
+        stagnation_note = (
+            f"\n⚠ STAGNATION: {stagnation_count} runs without improvement. "
+            "Pick something meaningfully different — different lr range, different modules, or different rank."
+        )
 
-## Task Brief (program.md)
+    return f"""You are an autonomous ML engineer running a LoRA hyperparameter search.
+
+## Task (program.md)
 {program_md}
 
-## Run History (raw data)
+## Run History
 {run_history_str}
 
-## Parameter Performance Analysis (surrogate model)
-{parameter_insights}
-
-## Pre-Planned Config Table
+## Config Table
 {config_table_str}
 
 ## Current State
-- Iteration: {iteration} / {iter_display}
-- Phase: {phase} — {phase_name}
+- Iteration {iteration} / {iter_display} — Strategy: {strategy}{stagnation_note}
 - Best {metric_name} so far: {best_metric:.6f}
-- Consecutive runs without improvement: {stagnation_count}
-{"- NOTE: FINAL ITERATION — summarise what was learned in your hypothesis." if is_final else ""}
-{f"- Last run per-class accuracy: {last_per_class}" if last_per_class else ""}
-{"- WARNING: If per-class accuracy shows 0/N for any class, the model is COLLAPSING to a single label. Focus on configs that achieve non-zero accuracy on ALL classes." if last_per_class and "0/" in last_per_class else ""}
+{f"- Per-class accuracy last run: {last_per_class}" if last_per_class else ""}
+{"- WARNING: model collapsing to one label (0/ in per-class). Change modules or lower lr." if last_per_class and "0/" in last_per_class else ""}
+{f"- Last run diagnosis: {last_diagnosis}" if last_diagnosis else ""}
+{"- FINAL ITERATION: summarise what was learned in your hypothesis." if is_final else ""}
 
-## Phase Instructions
-{phase_block}
+## Instructions
+1. Read the run history and config table above.
+2. Pick a config_id from the PENDING list — or propose a custom config if the table misses a clearly better region.
+3. If picking from table: use its exact parameters. If custom: set config_id to null.
+4. Don't repeat a config that's already been run.
 
-## Decision Protocol
-1. Look at the PENDING configs sorted by priority (Bayesian expected improvement).
-2. The #1 priority config combines parameter values that historically performed best.
-3. Pick a config_id OR propose a custom config. Either way, justify with data.
-4. NEVER ignore the parameter analysis. If lr=3e-4 is BEST, don't pick a config with lr=1e-5
-   unless the analysis shows a specific reason.
-5. If you pick from the table, set "config_id" in your response.
-6. If custom, set "config_id": null and explain why in the hypothesis.
-
-## Output Format — return ONLY this JSON, no other text:
+## Output — return ONLY this JSON:
 ```json
 {{
-    "config_id": <int from table or null for custom>,
-    "hypothesis": "Why this config: reference the parameter analysis data and what you expect",
+    "config_id": <int or null>,
+    "hypothesis": "<one sentence: what you expect and why>",
     "lora_config": {{
-        "r": <int, one of: 8, 16, 32, 64>,
-        "lora_alpha": <int, typically 2x r>,
-        "lora_dropout": <float, one of: 0.0, 0.05, 0.1>,
-        "target_modules": <list, e.g. ["q_proj","v_proj"] or ["q_proj","v_proj","k_proj","o_proj"]>,
+        "r": <8|16|32|64>,
+        "lora_alpha": <int, 2x r>,
+        "lora_dropout": <0.0|0.05|0.1>,
+        "target_modules": <["q_proj","v_proj"] or similar>,
         "task_type": "CAUSAL_LM",
         "bias": "none"
     }},
     "training_args": {{
-        "learning_rate": <float {CONSTRAINTS['min_learning_rate']}-{CONSTRAINTS['max_learning_rate']}>,
-        "num_train_epochs": <int {CONSTRAINTS['min_epochs']}-{CONSTRAINTS['max_epochs']}>,
+        "learning_rate": <{CONSTRAINTS['min_learning_rate']}–{CONSTRAINTS['max_learning_rate']}>,
+        "num_train_epochs": <{CONSTRAINTS['min_epochs']}–{CONSTRAINTS['max_epochs']}>,
         "lr_scheduler_type": "<cosine|linear|constant_with_warmup>",
-        "per_device_train_batch_size": <int, one of: 1, 2, 4>,
-        "gradient_accumulation_steps": <int, one of: 2, 4, 8>,
-        "warmup_ratio": <float, one of: 0.05, 0.1, 0.15, 0.2>,
+        "per_device_train_batch_size": <1|2|4>,
+        "gradient_accumulation_steps": <2|4|8>,
+        "warmup_ratio": <0.05|0.1|0.15|0.2>,
         "logging_steps": 10,
         "save_strategy": "no",
         "optim": "adamw_torch",
@@ -456,13 +340,17 @@ def _run_training(
         bufsize=1,                  # line-buffered
     )
 
+    def _sanitize_output(line: str) -> str:
+        """Strip absolute filesystem paths from subprocess output before display."""
+        return re.sub(r'/[/\w.\-]*/([^/\s]+\.py)', r'<path>/\1', line)
+
     captured_lines: list[str] = []
     for line in proc.stdout:
         line = line.rstrip("\n")
         captured_lines.append(line)
-        print(line)                 # always echo to agent_loop stdout
+        print(line)                 # always echo to agent_loop stdout (full paths ok here)
         if on_output:
-            on_output(line)
+            on_output(_sanitize_output(line))
 
     proc.wait()
     if proc.returncode != 0:
@@ -514,8 +402,76 @@ def _mutate_config(proposed: dict) -> dict:
     return proposed
 
 
+def _diagnose_failure(
+    mismatches: list[dict],
+    metric_value: float,
+    metric_name: str,
+    lora_config: dict,
+    training_args: dict,
+    task_type: str,
+) -> Optional[str]:
+    """Call the LLM to diagnose why a run underperformed.
+
+    Only called when metric_value is below 50% of expected range to avoid
+    burning tokens on successful or near-successful runs.
+    Returns a short diagnosis string, or None if the call fails.
+    """
+    if not mismatches:
+        return None
+
+    mismatch_lines = []
+    for mm in mismatches[:5]:
+        exp = mm.get("expected", "")[:80]
+        got = mm.get("predicted", "")[:80]
+        mismatch_lines.append(f"  expected: {exp!r}")
+        mismatch_lines.append(f"  got:      {got!r}")
+        mismatch_lines.append("")
+    mismatch_block = "\n".join(mismatch_lines).rstrip()
+
+    prompt = _DIAGNOSIS_PROMPT_TEMPLATE.format(
+        metric_name=metric_name,
+        metric_value=metric_value,
+        lora_r=lora_config.get("r", "?"),
+        lora_alpha=lora_config.get("lora_alpha", "?"),
+        lora_dropout=lora_config.get("lora_dropout", "?"),
+        target_modules=lora_config.get("target_modules", []),
+        learning_rate=training_args.get("learning_rate", "?"),
+        num_epochs=training_args.get("num_train_epochs", "?"),
+        scheduler=training_args.get("lr_scheduler_type", "?"),
+        batch_size=training_args.get("per_device_train_batch_size", "?"),
+        grad_acc=training_args.get("gradient_accumulation_steps", "?"),
+        task_type=task_type,
+        n_mismatches=len(mismatches),
+        mismatch_block=mismatch_block,
+    )
+
+    try:
+        diagnosis = llm_client.generate(
+            prompt=prompt,
+            stage=llm_client.STAGE_AGENT,
+            model_hint="smart",
+            max_tokens=256,
+            temperature=0.2,
+        )
+        return diagnosis.strip()[:500]
+    except Exception as e:
+        print(f"  [diagnosis] LLM call failed: {e}")
+        return None
+
+
+_ALLOWED_SCHEDULERS = {"cosine", "linear", "constant_with_warmup"}
+_ALLOWED_BIAS = {"none", "all", "lora_only"}
+_ALLOWED_OPTIM = {"adamw_torch", "adamw_hf", "adafactor"}
+_ALLOWED_TARGET_MODULES = {
+    frozenset(["q_proj", "v_proj"]),
+    frozenset(["q_proj", "v_proj", "k_proj"]),
+    frozenset(["q_proj", "v_proj", "o_proj"]),
+    frozenset(["q_proj", "v_proj", "k_proj", "o_proj"]),
+}
+
+
 def _validate_proposed_config(proposed: dict) -> list[str]:
-    """Validate that the proposed config respects constraints."""
+    """Validate that the proposed config respects constraints and allowlists."""
     errors = []
 
     lora = proposed.get("lora_config", {})
@@ -534,6 +490,23 @@ def _validate_proposed_config(proposed: dict) -> list[str]:
 
     if "hypothesis" not in proposed:
         errors.append("Missing hypothesis")
+
+    # String-typed fields written verbatim into Python source — must be allowlisted
+    sched = ta.get("lr_scheduler_type", "cosine")
+    if sched not in _ALLOWED_SCHEDULERS:
+        errors.append(f"lr_scheduler_type '{sched}' not in allowed set {_ALLOWED_SCHEDULERS}")
+
+    bias = lora.get("bias", "none")
+    if bias not in _ALLOWED_BIAS:
+        errors.append(f"lora bias '{bias}' not in allowed set {_ALLOWED_BIAS}")
+
+    optim = ta.get("optim", "adamw_torch")
+    if optim not in _ALLOWED_OPTIM:
+        errors.append(f"optim '{optim}' not in allowed set {_ALLOWED_OPTIM}")
+
+    mods = lora.get("target_modules", [])
+    if mods and frozenset(mods) not in _ALLOWED_TARGET_MODULES:
+        errors.append(f"target_modules {mods} not in allowed combinations")
 
     return errors
 
@@ -589,11 +562,8 @@ def run_agent_loop(
     except Exception as e:
         _status(f"Pre-download skipped ({e}) — will download in subprocess.")
 
-    # Read program.md
+    # Read program.md once — agents reads this to understand the task
     program_md = PROGRAM_MD_PATH.read_text(encoding="utf-8")
-
-    # Save original finetune.py for revert
-    original_finetune = _read_finetune_py()
 
     best_metric_value = 0.0
     best_run_id = None
@@ -602,6 +572,7 @@ def run_agent_loop(
     results = []
     tried_fingerprints: set[str] = set()  # dedup: prevent exact config repeats
     last_per_class: str = ""  # per-class accuracy from last iteration
+    last_diagnosis: Optional[str] = None  # failure diagnosis from last iteration
 
     eval_path = str(PROJECT_ROOT / "data" / session_id / "eval.jsonl")
 
@@ -615,7 +586,7 @@ def run_agent_loop(
                 f"{sum(1 for c in config_table if c['status'] == 'pending')} pending")
     else:
         _status(f"Generating pre-planned config table ({run_config.max_iterations} configs)...")
-        config_table = generate_config_table(run_config.max_iterations)
+        config_table = generate_config_table(run_config.max_iterations, task_type=run_config.task_type)
         config_table_path.parent.mkdir(parents=True, exist_ok=True)
         with open(config_table_path, "w") as f:
             json.dump(config_table, f, indent=2)
@@ -626,13 +597,11 @@ def run_agent_loop(
             json.dump(config_table, f, indent=2)
 
     for iteration in range(1, run_config.max_iterations + 1):
-        phase_n, phase_label = _compute_phase(iteration, run_config.max_iterations)
         iter_display = "∞" if run_config.max_iterations >= 9999 else str(run_config.max_iterations)
         pending_count = sum(1 for c in config_table if c["status"] == "pending")
         _status(f"{'=' * 60}")
         _status(
             f"ITERATION {iteration}/{iter_display}  |  "
-            f"Phase {phase_n}: {phase_label}  |  "
             f"best so far: {best_metric_value:.4f}  |  "
             f"stagnation: {stagnation_count}  |  "
             f"table: {pending_count} pending"
@@ -641,34 +610,14 @@ def run_agent_loop(
 
         picked_id = None  # track which table entry was selected
         try:
-            # Get run history for this session
+            # Get run history and format for LLM
             history = get_run_history(session_id=session_id)
             history_str = format_history_for_agent(history, run_config.metric_name)
+            config_table_str = format_config_table_for_agent(config_table, run_config.metric_name)
 
-            # Compute Bayesian-inspired parameter insights (surrogate model)
-            param_insights = compute_parameter_insights(history, run_config.metric_name)
-            if len(history) >= 3:
-                _status(f"[{iteration}] Parameter analysis computed from {len(history)} runs")
-
-            # Reprioritize the config table based on latest results
-            if len(history) >= 2:
-                config_table = reprioritize_config_table(
-                    config_table, history, run_config.metric_name
-                )
-                _save_config_table()
-
-            # Format config table for LLM
-            config_table_str = format_config_table_for_agent(
-                config_table, run_config.metric_name
-            )
-
-            # Build prompt for Claude
-            finetune_source = _read_finetune_py()
             prompt = _build_agent_prompt(
                 program_md=program_md,
-                finetune_source=finetune_source,
                 run_history_str=history_str,
-                parameter_insights=param_insights,
                 config_table_str=config_table_str,
                 best_metric=best_metric_value,
                 metric_name=run_config.metric_name,
@@ -676,6 +625,7 @@ def run_agent_loop(
                 max_iterations=run_config.max_iterations,
                 stagnation_count=stagnation_count,
                 last_per_class=last_per_class,
+                last_diagnosis=last_diagnosis,
             )
 
             # Call Claude API for next config
@@ -718,8 +668,7 @@ def run_agent_loop(
             hypothesis = proposed["hypothesis"]
             ta_p = proposed["training_args"]
             lc_p = proposed["lora_config"]
-            phase, phase_name = _compute_phase(iteration, run_config.max_iterations)
-            _status(f"[{iteration}] Phase {phase} ({phase_name}) | Hypothesis: {hypothesis}")
+            _status(f"[{iteration}] Hypothesis: {hypothesis}")
             _status(
                 f"[{iteration}] Config: lr={ta_p.get('learning_rate')} "
                 f"rank={lc_p.get('r')} alpha={lc_p.get('lora_alpha')} "
@@ -786,6 +735,23 @@ def run_agent_loop(
                     else:
                         _status(f"  expected: {exp[:100]}")
                         _status(f"  got:      {got[:100]}")
+
+            # Diagnose failure when metric is poor and we have mismatch data
+            iteration_diagnosis: Optional[str] = None
+            if mismatches and metric_value < 0.5:
+                _status(f"[{iteration}] Running failure diagnosis...")
+                iteration_diagnosis = _diagnose_failure(
+                    mismatches=mismatches,
+                    metric_value=metric_value,
+                    metric_name=run_config.metric_name,
+                    lora_config=proposed["lora_config"],
+                    training_args=proposed["training_args"],
+                    task_type=run_config.task_type,
+                )
+                if iteration_diagnosis:
+                    _status(f"[{iteration}] Diagnosis: {iteration_diagnosis}")
+                    last_diagnosis = iteration_diagnosis
+
             is_improvement = metric_value > best_metric_value
 
             if is_improvement:
@@ -820,6 +786,7 @@ def run_agent_loop(
                 session_id=session_id,
                 use_case=run_config.use_case,
                 base_model_id=run_config.hf_model_id,
+                diagnosis=iteration_diagnosis,
             )
 
             if is_improvement:
@@ -835,6 +802,7 @@ def run_agent_loop(
                 training_args=proposed["training_args"],
                 adapter_path=adapter_path,
                 run_id=run_id,
+                diagnosis=iteration_diagnosis,
             )
             results.append(iter_result)
 

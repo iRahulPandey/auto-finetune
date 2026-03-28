@@ -137,6 +137,15 @@ def _generate_claude(
     return response.content[0].text.strip()
 
 
+def _validate_ollama_url(url: str) -> str:
+    """Reject non-HTTP schemes to prevent SSRF via user-supplied Ollama URL."""
+    from urllib.parse import urlparse
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise ValueError(f"Ollama URL must use http or https scheme, got: {parsed.scheme!r}")
+    return url
+
+
 def _generate_ollama(
     prompt: str,
     cfg: StageConfig,
@@ -144,6 +153,7 @@ def _generate_ollama(
     temperature: float,
 ) -> str:
     """Call Ollama API (/api/generate endpoint)."""
+    _validate_ollama_url(cfg.ollama_url)
     url = cfg.ollama_url.rstrip("/") + "/api/generate"
 
     payload = {
@@ -168,6 +178,7 @@ def _generate_ollama(
 def list_ollama_models(ollama_url: str = "http://127.0.0.1:11434") -> list[str]:
     """Fetch available model names from an Ollama server."""
     try:
+        _validate_ollama_url(ollama_url)
         url = ollama_url.rstrip("/") + "/api/tags"
         resp = requests.get(url, timeout=5)
         resp.raise_for_status()
@@ -181,6 +192,7 @@ def list_ollama_models(ollama_url: str = "http://127.0.0.1:11434") -> list[str]:
 def check_ollama_server(ollama_url: str = "http://127.0.0.1:11434") -> bool:
     """Return True if the Ollama server is reachable."""
     try:
+        _validate_ollama_url(ollama_url)
         resp = requests.get(ollama_url.rstrip("/") + "/api/tags", timeout=3)
         return resp.status_code == 200
     except Exception:

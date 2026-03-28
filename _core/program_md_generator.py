@@ -10,6 +10,7 @@ from .config import (
     SEARCH_SPACE,
     CONSTRAINTS,
     TASK_TYPES,
+    LAYER_RATIONALE,
     PROGRAM_MD_PATH,
     RunConfig,
 )
@@ -54,7 +55,21 @@ Maximize {metric_name} on the frozen eval set for:
    (Only explore if learning rate changes aren't yielding improvements.)
 
 5. **Target modules**: {SEARCH_SPACE["target_modules"]}
-   (Only explore in the last 20% of iterations.)
+   Treat this as a first-class hyperparameter — explore freely from iteration 1.
+   Recommended starting point for {task_type}: {LAYER_RATIONALE[task_type]["recommended"]}
+   Rationale: {LAYER_RATIONALE[task_type]["rationale"]}
+   Escalate to {LAYER_RATIONALE[task_type]["high_capacity"]} when: {LAYER_RATIONALE[task_type]["escalate_when"]}
+
+## Layer Selection Reasoning
+
+| Layer set | Best for |
+|-----------|----------|
+| `["q_proj", "v_proj"]` | Classification — minimal budget, label routing |
+| `["q_proj", "v_proj", "o_proj"]` | Generation — output projection critical for fluency |
+| `["q_proj", "v_proj", "k_proj", "o_proj"]` | Extraction — all projections needed for field precision |
+
+**This task ({task_type}) → start with `{LAYER_RATIONALE[task_type]["recommended"]}`**
+If metric stagnates after 3 iterations, switch layer set before changing rank or lr.
 
 ## Constraints — DO NOT CHANGE THESE
 

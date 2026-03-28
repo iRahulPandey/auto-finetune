@@ -8,12 +8,10 @@ Tab 2 — Inference Lab: browse all completed runs, pick any combination of
 
 import json
 import os
-import subprocess
 import time
 from pathlib import Path
 from typing import Optional
 
-import requests
 import streamlit as st
 
 from _core.config import (
@@ -86,10 +84,6 @@ defaults = {
     "infer_expected": "",     # expected output from eval set (if applicable)
     "infer_batch_results": [],  # batch eval results
     "infer_generation_count": 0,  # incremented on every Generate click to bust widget key cache
-    # MLflow setup
-    "mlflow_configured": False,
-    "mlflow_uri": None,
-    "mlflow_server_pid": None,
     # Data augmentation (off by default — example datasets are pre-balanced)
     "enable_augmentation": False,
     # LLM provider per stage
@@ -104,105 +98,12 @@ for k, v in defaults.items():
         st.session_state[k] = v
 
 
-# ── MLflow setup gate ─────────────────────────────────────────────────────────
+# ── MLflow tracking URI ───────────────────────────────────────────────────────
+# Use MLFLOW_TRACKING_URI from .env if set, otherwise default to local mlruns.
+# To use a remote server: set MLFLOW_TRACKING_URI=http://your-server:5000 in .env
 
-def _start_mlflow_server(port: int = 5000) -> subprocess.Popen:
-    """Spawn a local MLflow server as a background process."""
-    backend = str(PROJECT_ROOT / "mlruns")
-    cmd = [
-        "mlflow", "server",
-        "--backend-store-uri", backend,
-        "--default-artifact-root", backend,
-        "--host", "127.0.0.1",
-        "--port", str(port),
-    ]
-    return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-
-
-def _wait_for_server(uri: str, timeout: int = 20) -> bool:
-    """Return True once the server responds at /health, or after timeout."""
-    deadline = time.time() + timeout
-    while time.time() < deadline:
-        try:
-            if requests.get(f"{uri}/health", timeout=2).status_code == 200:
-                return True
-        except Exception:
-            pass
-        time.sleep(1)
-    return False
-
-
-if not st.session_state.mlflow_configured:
-    st.title("auto-finetune")
-    st.write("Describe your task. Upload examples. The agent finds the best LoRA configuration — automatically.")
-    st.divider()
-    st.subheader("Experiment tracking")
-    st.write("Choose where to store training runs. You can change this by restarting the app.")
-
-    mode = st.radio(
-        "Tracking backend",
-        [
-            "Local file storage — no server needed (recommended)",
-            "Auto-start a local MLflow server (enables the MLflow web UI)",
-            "Connect to an existing MLflow server",
-        ],
-        index=0,
-        label_visibility="collapsed",
-    )
-
-    custom_uri = ""
-    if mode.startswith("Connect"):
-        custom_uri = st.text_input(
-            "Server URI",
-            value="http://127.0.0.1:5000",
-            placeholder="http://127.0.0.1:5000",
-        )
-
-    if st.button("Continue →", type="primary"):
-        if mode.startswith("Local file"):
-            uri = f"file://{PROJECT_ROOT / 'mlruns'}"
-            os.environ["MLFLOW_TRACKING_URI"] = uri
-            st.session_state.mlflow_uri = uri
-            st.session_state.mlflow_configured = True
-            st.rerun()
-
-        elif mode.startswith("Auto-start"):
-            with st.spinner("Starting MLflow server on http://127.0.0.1:5000 …"):
-                proc = _start_mlflow_server(5000)
-                ok = _wait_for_server("http://127.0.0.1:5000", timeout=20)
-            if ok:
-                uri = "http://127.0.0.1:5000"
-                os.environ["MLFLOW_TRACKING_URI"] = uri
-                st.session_state.mlflow_uri = uri
-                st.session_state.mlflow_server_pid = proc.pid
-                st.session_state.mlflow_configured = True
-                st.rerun()
-            else:
-                st.error(
-                    "MLflow server did not respond in time. "
-                    "Try **Local file storage** instead, or start the server "
-                    "manually with `mlflow server --port 5000` and use "
-                    "**Connect to an existing server**."
-                )
-
-        else:  # Connect to existing
-            uri = custom_uri.strip()
-            if not uri:
-                st.warning("Enter the server URI first.")
-            else:
-                os.environ["MLFLOW_TRACKING_URI"] = uri
-                st.session_state.mlflow_uri = uri
-                st.session_state.mlflow_configured = True
-                st.rerun()
-
-    with st.sidebar:
-        st.write("**auto-finetune**")
-        st.caption("Set up experiment tracking to get started.")
-
-    st.stop()
-
-# MLflow is configured — apply the chosen URI for this process
-os.environ["MLFLOW_TRACKING_URI"] = st.session_state.mlflow_uri
+_mlflow_uri = os.environ.get("MLFLOW_TRACKING_URI") or f"file://{PROJECT_ROOT / 'mlruns'}"
+os.environ["MLFLOW_TRACKING_URI"] = _mlflow_uri
 
 # ── Apply per-stage LLM config ────────────────────────────────────────────────
 
@@ -221,11 +122,10 @@ with st.sidebar:
     st.write("**auto-finetune**")
     st.divider()
 
-    uri_display = st.session_state.mlflow_uri
-    if uri_display.startswith("file://"):
+    if _mlflow_uri.startswith("file://"):
         st.caption("MLflow: local file storage")
     else:
-        st.caption(f"MLflow: [{uri_display}]({uri_display})")
+        st.caption(f"MLflow: [{_mlflow_uri}]({_mlflow_uri})")
 
     _badge_parts = []
     for sk, sl in [("data_prep", "Prep"), ("agent", "Agent"), ("evaluator", "Eval")]:
@@ -263,9 +163,15 @@ def _parse_examples(text: str) -> list[dict]:
             pass
     return out
 
+_MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
+
+
 def _parse_file(f) -> list[dict]:
     import csv, io
-    content = f.read().decode("utf-8")
+    raw = f.read()
+    if len(raw) > _MAX_UPLOAD_BYTES:
+        raise ValueError(f"File too large ({len(raw) // 1024} KB). Maximum is 10 MB.")
+    content = raw.decode("utf-8")
     name = f.name.lower()
     if name.endswith(".json"):
         data = json.loads(content)
@@ -309,7 +215,7 @@ EXAMPLE_DATASETS = [
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
 
-tab_train, tab_infer = st.tabs(["Finetune", "Inference Lab"])
+tab_train, tab_infer, tab_lora = st.tabs(["Finetune", "Inference Lab", "LoRA Card"])
 
 
 # ════════════════════════════════════════════════════════════════════════════════
@@ -960,42 +866,64 @@ with tab_infer:
             return msgs
 
         def _get_model(adapter_path: Optional[str]):
+            """Load base model once; subsequent adapters load only LoRA weights (~MB).
+
+            Uses PEFT's multi-adapter API so the GB base model is read from disk
+            exactly once per base_model_id, regardless of how many adapters are
+            selected for comparison.
+
+            Returns (model, tokenizer, active_adapter_name).
+            active_adapter_name is None for base model inference.
+            """
             import torch
             from transformers import AutoTokenizer, AutoModelForCausalLM
-            from peft import PeftModel
 
-            cache_key = adapter_path or "__base__"
-            if cache_key not in st.session_state.infer_models:
-                with st.spinner(f"Loading {'base' if not adapter_path else 'adapter'} model…"):
-                    tok = AutoTokenizer.from_pretrained(
-                        base_model_id, trust_remote_code=True
-                    )
+            # Keyed by base_model_id so switching experiments uses the right weights
+            shared_key = f"__shared_{base_model_id}__"
+            cache = st.session_state.infer_models
+
+            if shared_key not in cache:
+                with st.spinner("Loading base model…"):
+                    tok = AutoTokenizer.from_pretrained(base_model_id, trust_remote_code=True)
                     if tok.pad_token is None:
                         tok.pad_token = tok.eos_token
-
                     extra_kwargs = {"device_map": "auto"} if DEVICE == "cuda" else {}
                     mdl = AutoModelForCausalLM.from_pretrained(
-                        base_model_id, dtype=DTYPE,
-                        trust_remote_code=True, **extra_kwargs,
+                        base_model_id, dtype=DTYPE, trust_remote_code=True, **extra_kwargs,
                     )
                     if DEVICE == "mps":
                         mdl = mdl.to("mps")
-
-                    if adapter_path:
-                        mdl = PeftModel.from_pretrained(mdl, adapter_path)
-                        mdl = mdl.merge_and_unload()
-                        if DEVICE == "mps":
-                            mdl = mdl.to("mps")
-
                     mdl.eval()
-                    st.session_state.infer_models[cache_key] = (mdl, tok)
+                cache[shared_key] = {"model": mdl, "tok": tok, "adapters": {}}
 
-            return st.session_state.infer_models[cache_key]
+            entry = cache[shared_key]
 
-        def _generate(model, tokenizer, messages_: list[dict]) -> str:
+            if not adapter_path:
+                return entry["model"], entry["tok"], None
+
+            if adapter_path not in entry["adapters"]:
+                from peft import PeftModel
+                adapter_name = f"run_{len(entry['adapters'])}"
+                with st.spinner("Loading adapter weights…"):
+                    if not entry["adapters"]:
+                        # First adapter: wrap base model in PeftModel
+                        peft = PeftModel.from_pretrained(
+                            entry["model"], adapter_path, adapter_name=adapter_name,
+                        )
+                        peft.eval()
+                        entry["model"] = peft
+                    else:
+                        # Subsequent adapters: only LoRA weights loaded, no base reload
+                        entry["model"].load_adapter(adapter_path, adapter_name=adapter_name)
+                entry["adapters"][adapter_path] = adapter_name
+
+            adapter_name = entry["adapters"][adapter_path]
+            entry["model"].set_adapter(adapter_name)
+            return entry["model"], entry["tok"], adapter_name
+
+        def _generate(model, tokenizer, messages_: list[dict], active_adapter: Optional[str] = None) -> str:
             import torch
-            # Task-aware max_new_tokens: classification needs ~30,
-            # extraction/generation need 256 for full JSON/text output
+            from peft import PeftModel
             _is_cls = metric_name in ("accuracy", "f1_macro", "f1_weighted")
             _max_tok = 30 if _is_cls else 256
             prompt_text = tokenizer.apply_chat_template(
@@ -1003,17 +931,24 @@ with tab_infer:
             )
             inputs = tokenizer(prompt_text, return_tensors="pt")
             device_obj = next(model.parameters()).device
-            with torch.no_grad():
-                out = model.generate(
-                    **inputs.to(device_obj),
-                    max_new_tokens=_max_tok,
-                    do_sample=False,
-                    pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
-                )
-            return tokenizer.decode(
-                out[0][inputs["input_ids"].shape[1]:],
-                skip_special_tokens=True,
-            ).strip()
+
+            def _run() -> str:
+                with torch.no_grad():
+                    out = model.generate(
+                        **inputs.to(device_obj),
+                        max_new_tokens=_max_tok,
+                        do_sample=False,
+                        pad_token_id=tokenizer.pad_token_id or tokenizer.eos_token_id,
+                    )
+                return tokenizer.decode(
+                    out[0][inputs["input_ids"].shape[1]:], skip_special_tokens=True,
+                ).strip()
+
+            # Base model inference through a PeftModel: disable all LoRA layers
+            if isinstance(model, PeftModel) and active_adapter is None:
+                with model.disable_adapter():
+                    return _run()
+            return _run()
 
         def _clean_prediction(text: str) -> str:
             """Strip markdown code fences and whitespace from model output."""
@@ -1066,8 +1001,8 @@ with tab_infer:
             with st.spinner(f"Generating from {n_models} model{'s' if n_models != 1 else ''}…"):
                 messages = _build_messages(user_text)
                 for label, adapter_path in col_specs:
-                    model, tokenizer = _get_model(adapter_path)
-                    text = _generate(model, tokenizer, messages)
+                    model, tokenizer, active_adapter = _get_model(adapter_path)
+                    text = _generate(model, tokenizer, messages, active_adapter)
                     results_list.append((label, text))
 
             st.session_state.infer_results_list = results_list
@@ -1199,8 +1134,8 @@ with tab_infer:
                                 "Expected": ex["expected"],
                             }
                             for label, adapter_path in col_specs:
-                                model, tokenizer = _get_model(adapter_path)
-                                pred = _generate(model, tokenizer, messages)
+                                model, tokenizer, active_adapter = _get_model(adapter_path)
+                                pred = _generate(model, tokenizer, messages, active_adapter)
                                 # Smart comparison: JSON-aware with partial credit
                                 is_correct = _check_match(pred, ex["expected"])
                                 if is_correct:
@@ -1299,3 +1234,216 @@ with tab_infer:
                     torch.mps.empty_cache()
                 st.success("Cache cleared.")
                 st.rerun()
+
+
+# ════════════════════════════════════════════════════════════════════════════════
+# TAB 3 — LORA CARD
+# ════════════════════════════════════════════════════════════════════════════════
+
+with tab_lora:
+
+    st.title("LoRA Card")
+    st.write("Select any completed run to inspect its full configuration and system prompt.")
+
+    try:
+        _lora_experiments = _load_experiments()
+    except Exception:
+        _lora_experiments = []
+
+    if not _lora_experiments:
+        st.info("No experiments found yet. Run a training session first, then come back here.")
+        st.stop()
+
+    lora_col_sel, lora_col_card = st.columns([1, 2], gap="large")
+
+    with lora_col_sel:
+        st.subheader("Select run")
+
+        def _lora_exp_label(i: int) -> str:
+            e = _lora_experiments[i]
+            name = e["experiment_name"]
+            return f"{name[:40]} ({e['total_runs']} runs)"
+
+        lora_exp_idx = st.selectbox(
+            "Experiment",
+            range(len(_lora_experiments)),
+            format_func=_lora_exp_label,
+            key="lora_exp_idx",
+        )
+        lora_exp = _lora_experiments[lora_exp_idx]
+
+        lora_sessions = lora_exp["sessions"]
+        if len(lora_sessions) > 1:
+            _lora_sess_opts = ["All sessions"] + [
+                f"Session {s['session_id'][:8]} ({s['run_count']} runs)"
+                for s in lora_sessions
+            ]
+            lora_sess_sel = st.selectbox(
+                "Session",
+                _lora_sess_opts,
+                key="lora_sess_sel",
+            )
+            if lora_sess_sel == "All sessions":
+                lora_runs = lora_exp["all_runs"]
+                _lora_active_sess = None
+            else:
+                _si = _lora_sess_opts.index(lora_sess_sel) - 1
+                _lora_active_sess = lora_sessions[_si]
+                lora_runs = _lora_active_sess["runs"]
+        else:
+            _lora_active_sess = lora_sessions[0] if lora_sessions else None
+            lora_runs = lora_exp["all_runs"]
+
+        _lora_metric = lora_exp["metric_name"]
+        _lora_best_id = lora_exp["best_run_id"]
+
+        def _lora_run_label(r: dict) -> str:
+            m = r["metrics"].get(_lora_metric, 0.0)
+            star = " ★" if r["run_id"] == _lora_best_id else ""
+            return f"Iter {r['iteration']}  {_lora_metric}={m:.4f}{star}"
+
+        lora_runs_sorted = sorted(lora_runs, key=lambda r: r["iteration"])
+        # Default to best run
+        _default_run_idx = next(
+            (i for i, r in enumerate(lora_runs_sorted) if r["run_id"] == _lora_best_id),
+            0,
+        )
+        lora_run_idx = st.selectbox(
+            "Run",
+            range(len(lora_runs_sorted)),
+            format_func=lambda i: _lora_run_label(lora_runs_sorted[i]),
+            index=_default_run_idx,
+            key="lora_run_idx",
+        )
+        lora_run = lora_runs_sorted[lora_run_idx]
+
+    with lora_col_card:
+
+        import datetime as _dt
+
+        p = lora_run["params"]
+        m = lora_run["metrics"]
+        _lora_metric_val = m.get(_lora_metric, 0.0)
+        _is_best_run = lora_run["run_id"] == _lora_best_id
+        _ts = lora_run.get("timestamp", 0)
+        _ts_str = (
+            _dt.datetime.fromtimestamp(_ts).strftime("%Y-%m-%d %H:%M")
+            if _ts else "—"
+        )
+
+        # ── Header ─────────────────────────────────────────────────────────────
+        _star = " ★ Best run" if _is_best_run else ""
+        st.subheader(f"Iteration {lora_run['iteration']}{_star}")
+        st.caption(
+            f"Run ID: `{lora_run['run_id'][:12]}…`  ·  "
+            f"Session: `{lora_run['session_id'][:8]}…`  ·  "
+            f"Logged: {_ts_str}"
+        )
+
+        # ── Key metrics strip ──────────────────────────────────────────────────
+        _mc1, _mc2, _mc3, _mc4 = st.columns(4)
+        _mc1.metric(_lora_metric, f"{_lora_metric_val:.4f}")
+        _mc2.metric("Train loss", f"{m.get('train_loss', 0):.4f}")
+        _mc3.metric("Epochs", p.get("num_train_epochs", "—"))
+        _mc4.metric("LR", p.get("learning_rate", "—"))
+
+        st.divider()
+
+        # ── Task info ──────────────────────────────────────────────────────────
+        st.markdown("**Task**")
+        st.write(lora_run.get("use_case") or "—")
+        st.caption(f"Base model: `{lora_run.get('base_model_id', '—')}`")
+
+        st.divider()
+
+        # ── LoRA config ────────────────────────────────────────────────────────
+        st.markdown("**LoRA configuration**")
+        _lc1, _lc2, _lc3 = st.columns(3)
+        _lc1.metric("Rank (r)", p.get("lora_r", "—"))
+        _lc2.metric("Alpha", p.get("lora_alpha", "—"))
+        _lc3.metric("Dropout", p.get("lora_dropout", "—"))
+        st.caption(f"Target modules: `{p.get('target_modules', '—')}`")
+
+        st.divider()
+
+        # ── Training args ──────────────────────────────────────────────────────
+        st.markdown("**Training arguments**")
+        _ta1, _ta2, _ta3, _ta4 = st.columns(4)
+        _ta1.metric("Scheduler", p.get("lr_scheduler_type", "—"))
+        _ta2.metric("Batch size", p.get("batch_size", "—"))
+        _ta3.metric("Grad accum", p.get("gradient_accumulation_steps", "—"))
+        _ta4.metric("Warmup ratio", p.get("warmup_ratio", "—"))
+
+        st.divider()
+
+        # ── Hypothesis ─────────────────────────────────────────────────────────
+        st.markdown("**Hypothesis**")
+        st.write(lora_run.get("hypothesis") or "—")
+
+        # ── Failure diagnosis (only shown when present) ────────────────────────
+        _diag = lora_run.get("diagnosis", "")
+        if _diag:
+            st.divider()
+            st.markdown("**Failure diagnosis**")
+            st.warning(_diag)
+
+        st.divider()
+
+        # ── System prompt ──────────────────────────────────────────────────────
+        _lora_sp = ""
+        _sp_sid = lora_run.get("session_id", "")
+        if _sp_sid:
+            _sp_path = PROJECT_ROOT / "data" / _sp_sid / "system_prompt.txt"
+            if _sp_path.exists():
+                _lora_sp = _sp_path.read_text(encoding="utf-8").strip()
+
+        with st.expander("System prompt", expanded=False):
+            if _lora_sp:
+                st.text(_lora_sp)
+            else:
+                st.caption("System prompt not found on disk.")
+
+        # ── Adapter path ───────────────────────────────────────────────────────
+        _adapter = lora_run.get("adapter_path", "")
+        with st.expander("Adapter path", expanded=False):
+            if _adapter and Path(_adapter).exists():
+                st.code(_adapter)
+            elif _adapter:
+                st.caption(f"Path recorded but not found on disk: `{_adapter}`")
+            else:
+                st.caption("No adapter path recorded.")
+
+        # ── Export as JSON ─────────────────────────────────────────────────────
+        _export = {
+            "run_id": lora_run["run_id"],
+            "session_id": lora_run["session_id"],
+            "iteration": lora_run["iteration"],
+            "use_case": lora_run.get("use_case", ""),
+            "base_model_id": lora_run.get("base_model_id", ""),
+            "hypothesis": lora_run.get("hypothesis", ""),
+            "metrics": {_lora_metric: _lora_metric_val, "train_loss": m.get("train_loss", 0)},
+            "lora_config": {
+                "r": p.get("lora_r"),
+                "lora_alpha": p.get("lora_alpha"),
+                "lora_dropout": p.get("lora_dropout"),
+                "target_modules": p.get("target_modules"),
+            },
+            "training_args": {
+                "learning_rate": p.get("learning_rate"),
+                "num_train_epochs": p.get("num_train_epochs"),
+                "lr_scheduler_type": p.get("lr_scheduler_type"),
+                "per_device_train_batch_size": p.get("batch_size"),
+                "gradient_accumulation_steps": p.get("gradient_accumulation_steps"),
+                "warmup_ratio": p.get("warmup_ratio"),
+            },
+            "system_prompt": _lora_sp,
+            "adapter_path": _adapter,
+            "diagnosis": _diag,
+            "timestamp": _ts_str,
+        }
+        st.download_button(
+            label="Export as JSON",
+            data=json.dumps(_export, indent=2),
+            file_name=f"lora_card_iter{lora_run['iteration']}_{lora_run['run_id'][:8]}.json",
+            mime="application/json",
+        )

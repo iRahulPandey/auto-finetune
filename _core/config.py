@@ -117,6 +117,48 @@ TASK_TYPES = {
 }
 
 
+# ── Layer Selection Rationale ────────────────────────────────────────────────
+# Task-aware reasoning for which transformer projections to apply LoRA to.
+# Used by program_md_generator and the agent prompt so the LLM can reason
+# about WHY certain layers matter instead of searching them randomly.
+
+LAYER_RATIONALE: dict[str, dict] = {
+    "classification": {
+        "recommended": ["q_proj", "v_proj"],
+        "high_capacity": ["q_proj", "v_proj", "k_proj", "o_proj"],
+        "rationale": (
+            "Classification needs compact attention routing. q+v captures query-value "
+            "selection efficiently. o_proj helps if the model must suppress irrelevant "
+            "tokens. k_proj rarely helps classification and adds parameter cost without "
+            "benefit on small label sets."
+        ),
+        "escalate_when": "metric stagnates after 3+ iterations with q+v only",
+    },
+    "extraction": {
+        "recommended": ["q_proj", "v_proj", "k_proj", "o_proj"],
+        "high_capacity": ["q_proj", "v_proj", "k_proj", "o_proj"],
+        "rationale": (
+            "Extraction requires precise token matching. k_proj is critical because keys "
+            "determine what the model attends to for field boundaries. o_proj controls how "
+            "attended values project into output — essential for structured JSON fidelity. "
+            "Use all four projections from the start."
+        ),
+        "escalate_when": "N/A — start with full set",
+    },
+    "generation": {
+        "recommended": ["q_proj", "v_proj", "o_proj"],
+        "high_capacity": ["q_proj", "v_proj", "k_proj", "o_proj"],
+        "rationale": (
+            "Generation needs fluent output projection. o_proj is the most impactful "
+            "layer for controlling output style and coherence. k_proj adds diversity "
+            "in what the model keys on. Start with q+v+o; add k only if train_loss "
+            "plateaus above 0.5 after 3+ epochs."
+        ),
+        "escalate_when": "train_loss > 0.5 after 3+ epochs",
+    },
+}
+
+
 # ── Hyperparameter Search Space ──────────────────────────────────────────────
 
 SEARCH_SPACE = {
@@ -158,14 +200,7 @@ AGENT_CONFIG = {
     "claude_model": "claude-sonnet-4-20250514",
     "max_tokens": 4096,
     "temperature": 0.3,  # Low temp: decisions should follow the data, not be creative
-    "stagnation_threshold": 5,  # trigger escape after 5 consecutive no-improvement runs
-    # Phase boundaries (fraction of max_iterations)
-    "phase1_end_frac": 0.30,   # exploration  → 0-30%
-    "phase2_end_frac": 0.70,   # exploitation → 30-70%
-    # phase3: refinement        → 70-100%
-    # For unlimited runs (max_iterations=9999) use these fixed boundaries instead
-    "unlimited_phase1_end": 12,
-    "unlimited_phase2_end": 35,
+    "stagnation_threshold": 5,  # warn agent after 5 consecutive no-improvement runs
 }
 
 
@@ -187,7 +222,7 @@ class RunConfig:
     lora_rank: int = 16
     num_train_epochs: int = 2
     lr_scheduler_type: str = "cosine"
-    target_modules: list = field(default_factory=lambda: ["q_proj", "v_proj"])
+    target_modules: list = field(default_factory=list)  # set by __post_init__ from task_type
 
     def __post_init__(self):
         if not self.metric_name:
@@ -195,6 +230,10 @@ class RunConfig:
             self.metric_name = task_info["default_metric"]
         if self.target_threshold is None:
             self.target_threshold = 0.95 if self.task_type == "classification" else 0.85
+        if not self.target_modules:
+            self.target_modules = LAYER_RATIONALE.get(
+                self.task_type, LAYER_RATIONALE["classification"]
+            )["recommended"]
 
     @property
     def model_info(self) -> dict:

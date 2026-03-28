@@ -32,21 +32,21 @@ from _core.evaluator import evaluate_in_process
 # LoRA CONFIG — Agent edits this section between iterations
 # ═══════════════════════════════════════════════════════════════════════════
 
-HYPOTHESIS = "Trying a config with a learning rate of 0.0005, a LoRA rank of 8, and a target module combination of ['q_proj', 'v_proj', 'o_proj'] as it has the highest expected improvement according to the parameter analysis."
+HYPOTHESIS = "Starting with the smallest learning rate (1e-05) and rank 16 with q_proj+v_proj should provide stable learning for email urgency classification without overfitting."
 
 LORA_CONFIG = {
-    "r": 8,
-    "lora_alpha": 16,
-    "lora_dropout": 0.05,
-    "target_modules": ["q_proj", "v_proj", "o_proj"],
+    "r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.0,
+    "target_modules": ["q_proj", "v_proj"],
     "task_type": "CAUSAL_LM",
     "bias": "none",
 }
 
 TRAINING_ARGS = {
-    "learning_rate": 0.0005,
-    "num_train_epochs": 5,
-    "lr_scheduler_type": "linear",
+    "learning_rate": 1e-05,
+    "num_train_epochs": 3,
+    "lr_scheduler_type": "cosine",
     "per_device_train_batch_size": 2,
     "gradient_accumulation_steps": 4,
     "warmup_ratio": 0.1,
