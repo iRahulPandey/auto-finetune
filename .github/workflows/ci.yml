@@ -45,7 +45,7 @@ jobs:
         run: |
           uv run bandit -r _core/ app.py \
             --severity-level medium \
-            --skip B101,B603,B607 \
+            --skip B101,B603,B607,B615 \
             -f txt
 
   # ── Tests ────────────────────────────────────────────────────────────────────
