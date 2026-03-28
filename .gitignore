@@ -8,6 +8,7 @@ mlruns/
 program.md
 
 # Python / uv
+.coverage
 __pycache__/
 *.pyc
 *.pyo

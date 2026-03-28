@@ -1,5 +1,7 @@
 # auto-finetune
 
+[![CI](https://github.com/iRahulPandey/auto-finetune/actions/workflows/ci.yml/badge.svg)](https://github.com/iRahulPandey/auto-finetune/actions/workflows/ci.yml)
+
 You have input/output examples. You want a small model that does exactly that task. You don't want to think about learning rates.
 
 This project automates that. You describe your task in plain English, upload examples, and an LLM agent searches for the best LoRA hyperparameters by training, evaluating, and iterating — all tracked in MLflow. The best adapter is saved when it's done.
@@ -145,7 +147,7 @@ auto-finetune/
 Requires Python 3.10+ and [uv](https://docs.astral.sh/uv/).
 
 ```bash
-git clone https://github.com/user/auto-finetune.git
+git clone https://github.com/iRahulPandey/auto-finetune.git
 cd auto-finetune
 
 cp .env.example .env
@@ -244,6 +246,21 @@ When a run scores below 0.5, the agent calls the LLM a second time with a sample
 - Apple Silicon (MPS) or NVIDIA GPU (CUDA). CPU works but is slow for anything above 0.5B.
 - ~4 GB disk space for adapters per session
 - Anthropic API key, or Ollama for fully local mode
+
+---
+
+## Development
+
+```bash
+uv sync --extra dev        # install dev tools (pytest, ruff, bandit)
+
+uv run pytest tests/ -v    # run unit tests
+uv run ruff check .        # lint
+uv run ruff format .       # format
+uv run bandit -r _core/ app.py --severity-level medium --skip B101,B603,B607,B615 -f txt
+```
+
+CI runs automatically on every push and PR to `main`: lint (ruff), security (bandit), and tests (pytest with coverage). All three must pass before merging.
 
 ---
 

@@ -315,13 +315,26 @@ def split_train_eval(
     return train_set, eval_set
 
 
+_SESSION_ID_RE = re.compile(r"^[a-f0-9]{8,64}$")
+
+
+def _validate_session_id(session_id: str) -> None:
+    """Raise ValueError if session_id is not a safe hex string."""
+    if not _SESSION_ID_RE.match(session_id):
+        raise ValueError(f"Invalid session_id: {session_id!r}")
+
+
 def save_datasets(
     train_set: list[dict],
     eval_set: list[dict],
     session_id: str,
 ) -> tuple[Path, Path]:
     """Save train and eval sets as JSONL files."""
+    _validate_session_id(session_id)
     session_dir = DATA_DIR / session_id
+    # Confirm resolved path stays within DATA_DIR (defence-in-depth)
+    if not session_dir.resolve().is_relative_to(DATA_DIR.resolve()):
+        raise ValueError(f"session_id escapes data directory: {session_id!r}")
     session_dir.mkdir(parents=True, exist_ok=True)
 
     train_path = session_dir / "train.jsonl"

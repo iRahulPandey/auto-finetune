@@ -28,6 +28,7 @@ from .config import (
     PROJECT_ROOT,
     RunConfig,
 )
+from .data_prep import _validate_session_id
 from .mlflow_utils import (
     format_config_table_for_agent,
     format_history_for_agent,
@@ -312,6 +313,7 @@ def _run_training(
     on_output(line) is called for every stdout line so the UI can show
     live progress (model download, epoch loss, etc.).
     """
+    _validate_session_id(session_id)
     config_path = PROJECT_ROOT / "data" / session_id / "run_config.json"
     config_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -545,6 +547,7 @@ def run_agent_loop(
     Returns:
         dict with: best_metric, best_run_id, total_iterations, history
     """
+    _validate_session_id(session_id)
 
     def _status(msg: str) -> None:
         print(msg)
