@@ -1,6 +1,26 @@
 # auto-finetune
 
+<div align="center">
+
 [![CI](https://github.com/iRahulPandey/auto-finetune/actions/workflows/ci.yml/badge.svg)](https://github.com/iRahulPandey/auto-finetune/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)](https://www.python.org/)
+[![Status: Alpha](https://img.shields.io/badge/Status-Alpha-orange.svg)](https://github.com/iRahulPandey/auto-finetune)
+[![Powered by Claude](https://img.shields.io/badge/Powered%20by-Claude%20API-blueviolet?logo=anthropic&logoColor=white)](https://www.anthropic.com/)
+[![MLflow](https://img.shields.io/badge/Tracked%20with-MLflow-0194E2?logo=mlflow&logoColor=white)](https://mlflow.org/)
+
+[![Stars](https://img.shields.io/github/stars/iRahulPandey/auto-finetune?style=social)](https://github.com/iRahulPandey/auto-finetune/stargazers)
+[![Forks](https://img.shields.io/github/forks/iRahulPandey/auto-finetune?style=social)](https://github.com/iRahulPandey/auto-finetune/network/members)
+[![Issues](https://img.shields.io/github/issues/iRahulPandey/auto-finetune)](https://github.com/iRahulPandey/auto-finetune/issues)
+[![Last Commit](https://img.shields.io/github/last-commit/iRahulPandey/auto-finetune)](https://github.com/iRahulPandey/auto-finetune/commits/main)
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Rahul%20Pandey-0A66C2?logo=linkedin&logoColor=white)](https://www.linkedin.com/in/rahulpandey1901/)
+[![YouTube](https://img.shields.io/badge/YouTube-iPandeyRahul-FF0000?logo=youtube&logoColor=white)](https://www.youtube.com/@iPandeyRahul)
+[![X](https://img.shields.io/badge/X-iPandeyRahul-000000?logo=x&logoColor=white)](https://x.com/iPandeyRahul)
+
+</div>
+
+---
 
 You have input/output examples. You want a small model that does exactly that task. You don't want to think about learning rates.
 
@@ -27,7 +47,6 @@ Everything else follows from that: the agent reads the generated `program.md`, e
 **autoresearch** searches over arbitrary Python code. The agent can write new experiments from scratch, test novel algorithms, discover new approaches. The search space is unbounded. Great for research. Overkill (and unsafe) for "I just need this model to extract invoice fields."
 
 **auto-finetune** sits between them. The search space is fixed and small (learning rate, LoRA rank, target modules, epochs, scheduler). The base model is fixed. The evaluation metric is fixed. The agent can't write new code — it can only change numbers in two dictionaries in `finetune.py`. This constraint is the point. It makes the loop safe, fast, and auditable. You can read every change the agent made.
-
 
 ---
 
@@ -267,3 +286,15 @@ CI runs automatically on every push and PR to `main`: lint (ruff), security (ban
 ## License
 
 MIT
+
+---
+
+<div align="center">
+
+Built by [Rahul Pandey](https://www.linkedin.com/in/rahulpandey1901/) &nbsp;·&nbsp;
+[YouTube](https://www.youtube.com/@iPandeyRahul) &nbsp;·&nbsp;
+[X / Twitter](https://x.com/iPandeyRahul)
+
+If you find this useful, consider giving it a ⭐
+
+</div>
