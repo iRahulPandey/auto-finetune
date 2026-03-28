@@ -16,29 +16,29 @@ import json
 import re
 import subprocess
 import sys
-from typing import Optional, Callable
 from dataclasses import dataclass
+from typing import Callable, Optional
 
 from . import llm_client
-
 from .config import (
-    RunConfig,
+    ADAPTERS_DIR,
     AGENT_CONFIG,
     CONSTRAINTS,
     PROGRAM_MD_PATH,
-    ADAPTERS_DIR,
     PROJECT_ROOT,
+    RunConfig,
 )
 from .mlflow_utils import (
-    init_mlflow,
-    log_run,
-    get_run_history,
-    save_best_adapter,
-    register_best_model,
+    format_config_table_for_agent,
     format_history_for_agent,
     generate_config_table,
-    format_config_table_for_agent,
+    get_run_history,
+    init_mlflow,
+    log_run,
+    register_best_model,
+    save_best_adapter,
 )
+
 # evaluate() no longer called here — finetune.py runs eval in-process
 # to avoid loading the model twice per iteration
 
@@ -64,6 +64,7 @@ Do NOT say "try more experiments". Give a concrete hypothesis about what went wr
 @dataclass
 class IterationResult:
     """Result of a single iteration."""
+
     iteration: int
     hypothesis: str
     metric_value: float
@@ -97,25 +98,25 @@ def _extract_config_from_finetune(source: str) -> dict:
         config["hypothesis"] = match.group(1)
 
     # Extract LORA_CONFIG dict
-    match = re.search(r'LORA_CONFIG\s*=\s*(\{[^}]+\})', source, re.DOTALL)
+    match = re.search(r"LORA_CONFIG\s*=\s*(\{[^}]+\})", source, re.DOTALL)
     if match:
         raw = match.group(1)
-        raw = re.sub(r'#.*', '', raw)  # remove comments
+        raw = re.sub(r"#.*", "", raw)  # remove comments
         raw = raw.replace("'", '"')
-        raw = re.sub(r',\s*}', '}', raw)  # trailing commas
+        raw = re.sub(r",\s*}", "}", raw)  # trailing commas
         try:
             config["lora_config"] = json.loads(raw)
         except json.JSONDecodeError:
             pass
 
     # Extract TRAINING_ARGS dict
-    match = re.search(r'TRAINING_ARGS\s*=\s*(\{[^}]+\})', source, re.DOTALL)
+    match = re.search(r"TRAINING_ARGS\s*=\s*(\{[^}]+\})", source, re.DOTALL)
     if match:
         raw = match.group(1)
-        raw = re.sub(r'#.*', '', raw)
+        raw = re.sub(r"#.*", "", raw)
         raw = raw.replace("'", '"')
         raw = raw.replace("True", "true").replace("False", "false")
-        raw = re.sub(r',\s*}', '}', raw)
+        raw = re.sub(r",\s*}", "}", raw)
         try:
             config["training_args"] = json.loads(raw)
         except json.JSONDecodeError:
@@ -139,7 +140,7 @@ def _build_agent_prompt(
     """Build the prompt for the Claude API agent."""
     iter_display = "∞" if max_iterations >= 9999 else str(max_iterations)
     progress_pct = iteration / max_iterations if max_iterations < 9999 else 0
-    is_final = (iteration == max_iterations and max_iterations < 9999)
+    is_final = iteration == max_iterations and max_iterations < 9999
 
     if progress_pct < 0.4:
         strategy = "EXPLORE: try configs that are different from what's been run. Vary lr, rank, modules freely."
@@ -194,8 +195,8 @@ def _build_agent_prompt(
         "bias": "none"
     }},
     "training_args": {{
-        "learning_rate": <{CONSTRAINTS['min_learning_rate']}–{CONSTRAINTS['max_learning_rate']}>,
-        "num_train_epochs": <{CONSTRAINTS['min_epochs']}–{CONSTRAINTS['max_epochs']}>,
+        "learning_rate": <{CONSTRAINTS["min_learning_rate"]}–{CONSTRAINTS["max_learning_rate"]}>,
+        "num_train_epochs": <{CONSTRAINTS["min_epochs"]}–{CONSTRAINTS["max_epochs"]}>,
         "lr_scheduler_type": "<cosine|linear|constant_with_warmup>",
         "per_device_train_batch_size": <1|2|4>,
         "gradient_accumulation_steps": <2|4|8>,
@@ -224,13 +225,13 @@ def _call_agent_llm(prompt: str) -> dict:
     )
 
     # Extract JSON from response (handle markdown code blocks)
-    json_match = re.search(r'```(?:json)?\s*(\{.*?\})\s*```', raw, re.DOTALL)
+    json_match = re.search(r"```(?:json)?\s*(\{.*?\})\s*```", raw, re.DOTALL)
     if json_match:
         raw = json_match.group(1)
 
     # Try to find raw JSON object
     if not raw.startswith("{"):
-        json_match = re.search(r'\{.*\}', raw, re.DOTALL)
+        json_match = re.search(r"\{.*\}", raw, re.DOTALL)
         if json_match:
             raw = json_match.group(0)
 
@@ -255,15 +256,15 @@ def _apply_config_to_finetune(proposed: dict) -> str:
     # Update LORA_CONFIG
     lora = proposed["lora_config"]
     lora_str = f"""LORA_CONFIG = {{
-    "r": {lora['r']},
-    "lora_alpha": {lora['lora_alpha']},
-    "lora_dropout": {lora['lora_dropout']},
-    "target_modules": {json.dumps(lora['target_modules'])},
+    "r": {lora["r"]},
+    "lora_alpha": {lora["lora_alpha"]},
+    "lora_dropout": {lora["lora_dropout"]},
+    "target_modules": {json.dumps(lora["target_modules"])},
     "task_type": "CAUSAL_LM",
-    "bias": "{lora.get('bias', 'none')}",
+    "bias": "{lora.get("bias", "none")}",
 }}"""
     source = re.sub(
-        r'LORA_CONFIG\s*=\s*\{[^}]+\}',
+        r"LORA_CONFIG\s*=\s*\{[^}]+\}",
         lora_str,
         source,
         flags=re.DOTALL,
@@ -272,20 +273,20 @@ def _apply_config_to_finetune(proposed: dict) -> str:
     # Update TRAINING_ARGS — use every parameter Claude proposed, no silent overrides
     ta = proposed["training_args"]
     ta_str = f"""TRAINING_ARGS = {{
-    "learning_rate": {ta['learning_rate']},
-    "num_train_epochs": {ta['num_train_epochs']},
-    "lr_scheduler_type": "{ta['lr_scheduler_type']}",
-    "per_device_train_batch_size": {ta.get('per_device_train_batch_size', 4)},
-    "gradient_accumulation_steps": {ta.get('gradient_accumulation_steps', 4)},
-    "warmup_ratio": {ta.get('warmup_ratio', 0.1)},
-    "logging_steps": {ta.get('logging_steps', 10)},
+    "learning_rate": {ta["learning_rate"]},
+    "num_train_epochs": {ta["num_train_epochs"]},
+    "lr_scheduler_type": "{ta["lr_scheduler_type"]}",
+    "per_device_train_batch_size": {ta.get("per_device_train_batch_size", 4)},
+    "gradient_accumulation_steps": {ta.get("gradient_accumulation_steps", 4)},
+    "warmup_ratio": {ta.get("warmup_ratio", 0.1)},
+    "logging_steps": {ta.get("logging_steps", 10)},
     "save_strategy": "no",
-    "optim": "{ta.get('optim', 'adamw_torch')}",
+    "optim": "{ta.get("optim", "adamw_torch")}",
     "remove_unused_columns": False,
     "report_to": "none",
 }}"""
     source = re.sub(
-        r'TRAINING_ARGS\s*=\s*\{[^}]+\}',
+        r"TRAINING_ARGS\s*=\s*\{[^}]+\}",
         ta_str,
         source,
         flags=re.DOTALL,
@@ -324,9 +325,12 @@ def _run_training(
     output_dir = ADAPTERS_DIR / "runs" / session_id / f"iter_{iteration:03d}"
 
     cmd = [
-        sys.executable, str(PROJECT_ROOT / "finetune.py"),
-        "--config", str(config_path),
-        "--output-dir", str(output_dir),
+        sys.executable,
+        str(PROJECT_ROOT / "finetune.py"),
+        "--config",
+        str(config_path),
+        "--output-dir",
+        str(output_dir),
     ]
     if eval_path and metric_name:
         cmd.extend(["--eval-path", eval_path, "--metric-name", metric_name])
@@ -334,21 +338,21 @@ def _run_training(
     proc = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,   # merge stderr so on_output sees everything
+        stderr=subprocess.STDOUT,  # merge stderr so on_output sees everything
         text=True,
         cwd=str(PROJECT_ROOT),
-        bufsize=1,                  # line-buffered
+        bufsize=1,  # line-buffered
     )
 
     def _sanitize_output(line: str) -> str:
         """Strip absolute filesystem paths from subprocess output before display."""
-        return re.sub(r'/[/\w.\-]*/([^/\s]+\.py)', r'<path>/\1', line)
+        return re.sub(r"/[/\w.\-]*/([^/\s]+\.py)", r"<path>/\1", line)
 
     captured_lines: list[str] = []
     for line in proc.stdout:
         line = line.rstrip("\n")
         captured_lines.append(line)
-        print(line)                 # always echo to agent_loop stdout (full paths ok here)
+        print(line)  # always echo to agent_loop stdout (full paths ok here)
         if on_output:
             on_output(_sanitize_output(line))
 
@@ -383,19 +387,29 @@ def _config_fingerprint(proposed: dict) -> str:
 def _mutate_config(proposed: dict) -> dict:
     """Apply a random small mutation to avoid exact config repetition."""
     import random
+
     proposed = json.loads(json.dumps(proposed))  # deep copy
 
     # Pick a random parameter to mutate
     mutations = [
-        lambda p: p["training_args"].__setitem__("warmup_ratio",
-            random.choice([v for v in [0.05, 0.1, 0.15, 0.2]
-                           if v != p["training_args"].get("warmup_ratio")])),
-        lambda p: p["lora_config"].__setitem__("lora_dropout",
-            random.choice([v for v in [0.0, 0.05, 0.1]
-                           if v != p["lora_config"].get("lora_dropout")])),
-        lambda p: p["training_args"].__setitem__("gradient_accumulation_steps",
-            random.choice([v for v in [2, 4, 8]
-                           if v != p["training_args"].get("gradient_accumulation_steps")])),
+        lambda p: p["training_args"].__setitem__(
+            "warmup_ratio",
+            random.choice(
+                [v for v in [0.05, 0.1, 0.15, 0.2] if v != p["training_args"].get("warmup_ratio")]
+            ),
+        ),
+        lambda p: p["lora_config"].__setitem__(
+            "lora_dropout",
+            random.choice(
+                [v for v in [0.0, 0.05, 0.1] if v != p["lora_config"].get("lora_dropout")]
+            ),
+        ),
+        lambda p: p["training_args"].__setitem__(
+            "gradient_accumulation_steps",
+            random.choice(
+                [v for v in [2, 4, 8] if v != p["training_args"].get("gradient_accumulation_steps")]
+            ),
+        ),
     ]
     random.choice(mutations)(proposed)
     proposed["hypothesis"] += " [auto-mutated to avoid exact repeat]"
@@ -531,6 +545,7 @@ def run_agent_loop(
     Returns:
         dict with: best_metric, best_run_id, total_iterations, history
     """
+
     def _status(msg: str) -> None:
         print(msg)
         if on_status:
@@ -541,7 +556,9 @@ def run_agent_loop(
 
     # ── Free any leftover GPU/MPS memory from previous sessions ──────────
     import gc
+
     import torch
+
     gc.collect()
     if torch.backends.mps.is_available():
         torch.mps.empty_cache()
@@ -555,10 +572,12 @@ def run_agent_loop(
     _status("Pre-downloading model weights (one-time)...")
     try:
         from huggingface_hub import snapshot_download
+
         snapshot_download(run_config.hf_model_id, local_files_only=False)
         import os as _os
+
         _os.environ["HF_HUB_OFFLINE"] = "1"
-        _status(f"Model cached locally. Subprocess iterations will skip network calls.")
+        _status("Model cached locally. Subprocess iterations will skip network calls.")
     except Exception as e:
         _status(f"Pre-download skipped ({e}) — will download in subprocess.")
 
@@ -582,11 +601,15 @@ def run_agent_loop(
         _status("Loading existing config table...")
         with open(config_table_path) as f:
             config_table = json.load(f)
-        _status(f"Config table loaded: {sum(1 for c in config_table if c['status'] == 'completed')} done, "
-                f"{sum(1 for c in config_table if c['status'] == 'pending')} pending")
+        _status(
+            f"Config table loaded: {sum(1 for c in config_table if c['status'] == 'completed')} done, "
+            f"{sum(1 for c in config_table if c['status'] == 'pending')} pending"
+        )
     else:
         _status(f"Generating pre-planned config table ({run_config.max_iterations} configs)...")
-        config_table = generate_config_table(run_config.max_iterations, task_type=run_config.task_type)
+        config_table = generate_config_table(
+            run_config.max_iterations, task_type=run_config.task_type
+        )
         config_table_path.parent.mkdir(parents=True, exist_ok=True)
         with open(config_table_path, "w") as f:
             json.dump(config_table, f, indent=2)
@@ -629,7 +652,9 @@ def run_agent_loop(
             )
 
             # Call Claude API for next config
-            _status(f"[{iteration}/{run_config.max_iterations}] Asking Claude to pick from config table...")
+            _status(
+                f"[{iteration}/{run_config.max_iterations}] Asking Claude to pick from config table..."
+            )
             proposed = _call_agent_llm(prompt)
 
             # If LLM picked a config_id, mark it in the table
@@ -641,7 +666,9 @@ def run_agent_loop(
                         _status(f"[{iteration}] Picked config #{picked_id} from table")
                         break
                 else:
-                    _status(f"[{iteration}] config_id #{picked_id} not found or already done — using as custom")
+                    _status(
+                        f"[{iteration}] config_id #{picked_id} not found or already done — using as custom"
+                    )
                     picked_id = None
 
             # Validate
@@ -686,7 +713,9 @@ def run_agent_loop(
             # Run training + eval in one subprocess (model loaded ONCE, not twice)
             _status(f"[{iteration}] Starting training + eval subprocess...")
             train_result = _run_training(
-                run_config, session_id, iteration,
+                run_config,
+                session_id,
+                iteration,
                 on_output=on_training_output,
                 eval_path=eval_path,
                 metric_name=run_config.metric_name,
@@ -728,9 +757,9 @@ def run_agent_loop(
                     )
                     if diff_pos > 40:
                         _status(f"  diverges at char {diff_pos}:")
-                        _status(f"    expected: ...{exp[max(0,diff_pos-15):diff_pos+40]}")
-                        _status(f"    got:      ...{got[max(0,diff_pos-15):diff_pos+40]}")
-                    elif len(got) < len(exp) and got == exp[:len(got)]:
+                        _status(f"    expected: ...{exp[max(0, diff_pos - 15) : diff_pos + 40]}")
+                        _status(f"    got:      ...{got[max(0, diff_pos - 15) : diff_pos + 40]}")
+                    elif len(got) < len(exp) and got == exp[: len(got)]:
                         _status(f"  truncated at {len(got)} chars (expected {len(exp)})")
                     else:
                         _status(f"  expected: {exp[:100]}")
@@ -819,7 +848,9 @@ def run_agent_loop(
 
             # Early stopping check
             if run_config.target_threshold and metric_value > run_config.target_threshold:
-                print(f"\nTARGET REACHED! {run_config.metric_name} = {metric_value:.6f} > {run_config.target_threshold}")
+                print(
+                    f"\nTARGET REACHED! {run_config.metric_name} = {metric_value:.6f} > {run_config.target_threshold}"
+                )
                 break
 
         except Exception as e:

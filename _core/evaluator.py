@@ -18,8 +18,8 @@ from collections import Counter
 from pathlib import Path
 
 import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM
 from peft import PeftModel
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from . import llm_client
 
@@ -67,6 +67,7 @@ def _generate_prediction(
     inputs = tokenizer(prompt_text, return_tensors="pt").to(model.device)
 
     import warnings
+
     with torch.no_grad(), warnings.catch_warnings():
         # Suppress "generation flags are not valid" for top_p/top_k in greedy mode
         warnings.filterwarnings("ignore", message="The following generation flags")
@@ -78,7 +79,7 @@ def _generate_prediction(
         )
 
     # Decode only the new tokens
-    generated_ids = output_ids[0][inputs["input_ids"].shape[1]:]
+    generated_ids = output_ids[0][inputs["input_ids"].shape[1] :]
     prediction = tokenizer.decode(generated_ids, skip_special_tokens=True).strip()
 
     # Post-process: extract just the first line (label) — the model sometimes
@@ -89,6 +90,7 @@ def _generate_prediction(
 
 
 # ── Metric Implementations ───────────────────────────────────────────────────
+
 
 def _normalize_text(text: str) -> str:
     """Lowercase, strip whitespace, remove punctuation."""
@@ -118,7 +120,7 @@ def _labels_match(prediction: str, reference: str) -> bool:
     """
     # Try JSON comparison first — handles extraction tasks where
     # prediction and reference are both JSON but differ in whitespace/key order
-    if (reference.strip().startswith("{") or reference.strip().startswith("[")):
+    if reference.strip().startswith("{") or reference.strip().startswith("["):
         if _json_match(prediction, reference):
             return True
 
@@ -130,8 +132,8 @@ def _labels_match(prediction: str, reference: str) -> bool:
         return True
 
     # Extract label codes (e.g. "LLM06" from "LLM06:sensitive-information-disclosure")
-    pred_code = re.match(r'(llm\d{2})', pred_norm)
-    ref_code = re.match(r'(llm\d{2})', ref_norm)
+    pred_code = re.match(r"(llm\d{2})", pred_norm)
+    ref_code = re.match(r"(llm\d{2})", ref_norm)
 
     if pred_code and ref_code:
         return pred_code.group(1) == ref_code.group(1)
@@ -158,12 +160,14 @@ def _judge_batch(
     all_verdicts: list[bool] = []
 
     for start in range(0, len(predictions), batch_size):
-        batch_preds = predictions[start:start + batch_size]
-        batch_refs = references[start:start + batch_size]
+        batch_preds = predictions[start : start + batch_size]
+        batch_refs = references[start : start + batch_size]
 
         pairs = []
         for i, (pred, ref) in enumerate(zip(batch_preds, batch_refs)):
-            pairs.append(f"  {i}: prediction={json.dumps(pred[:200])} | expected={json.dumps(ref[:200])}")
+            pairs.append(
+                f"  {i}: prediction={json.dumps(pred[:200])} | expected={json.dumps(ref[:200])}"
+            )
         pairs_str = "\n".join(pairs)
 
         prompt = f"""You are evaluating a fine-tuned model's outputs. For each pair below, decide if the prediction is semantically correct — i.e. it conveys the same answer/label/meaning as the expected output.
@@ -185,7 +189,7 @@ Return ONLY a JSON array of booleans, one per pair. Example for 3 pairs: [true, 
             )
 
             # Extract JSON array from response
-            match = re.search(r'\[.*\]', raw, re.DOTALL)
+            match = re.search(r"\[.*\]", raw, re.DOTALL)
             if match:
                 verdicts = json.loads(match.group(0))
                 if len(verdicts) == len(batch_preds):
@@ -195,15 +199,13 @@ Return ONLY a JSON array of booleans, one per pair. Example for 3 pairs: [true, 
             # If parsing failed, fall back for this batch
             print(f"  Judge parse error for batch starting at {start}, using exact match fallback")
             all_verdicts.extend(
-                _normalize_text(p) == _normalize_text(r)
-                for p, r in zip(batch_preds, batch_refs)
+                _normalize_text(p) == _normalize_text(r) for p, r in zip(batch_preds, batch_refs)
             )
 
         except Exception as e:
             print(f"  Judge API error: {e} — using exact match fallback for batch {start}")
             all_verdicts.extend(
-                _normalize_text(p) == _normalize_text(r)
-                for p, r in zip(batch_preds, batch_refs)
+                _normalize_text(p) == _normalize_text(r) for p, r in zip(batch_preds, batch_refs)
             )
 
     return all_verdicts
@@ -222,10 +224,7 @@ def compute_accuracy(predictions: list[str], references: list[str]) -> float:
         return 0.0
 
     # Fast path: strict label match (handles partial codes like "LLM06" vs full labels)
-    strict_correct = sum(
-        1 for p, r in zip(predictions, references)
-        if _labels_match(p, r)
-    )
+    strict_correct = sum(1 for p, r in zip(predictions, references) if _labels_match(p, r))
     strict_acc = strict_correct / len(predictions)
 
     # If strict match is already high, no need for the judge
@@ -261,15 +260,18 @@ def compute_f1_macro(predictions: list[str], references: list[str]) -> float:
     f1_scores = []
     for label in labels:
         tp = sum(
-            1 for p, r in zip(predictions, references)
+            1
+            for p, r in zip(predictions, references)
             if _normalize_text(p) == label and _normalize_text(r) == label
         )
         fp = sum(
-            1 for p, r in zip(predictions, references)
+            1
+            for p, r in zip(predictions, references)
             if _normalize_text(p) == label and _normalize_text(r) != label
         )
         fn = sum(
-            1 for p, r in zip(predictions, references)
+            1
+            for p, r in zip(predictions, references)
             if _normalize_text(p) != label and _normalize_text(r) == label
         )
         precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
@@ -292,15 +294,18 @@ def compute_f1_weighted(predictions: list[str], references: list[str]) -> float:
     for label in labels:
         support = sum(1 for r in references if _normalize_text(r) == label)
         tp = sum(
-            1 for p, r in zip(predictions, references)
+            1
+            for p, r in zip(predictions, references)
             if _normalize_text(p) == label and _normalize_text(r) == label
         )
         fp = sum(
-            1 for p, r in zip(predictions, references)
+            1
+            for p, r in zip(predictions, references)
             if _normalize_text(p) == label and _normalize_text(r) != label
         )
         fn = sum(
-            1 for p, r in zip(predictions, references)
+            1
+            for p, r in zip(predictions, references)
             if _normalize_text(p) != label and _normalize_text(r) == label
         )
         precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
@@ -402,10 +407,10 @@ def compute_bleu(predictions: list[str], references: list[str]) -> float:
         precisions = []
         for n in range(1, 5):
             pred_ngrams = Counter(
-                tuple(pred_tokens[i:i + n]) for i in range(len(pred_tokens) - n + 1)
+                tuple(pred_tokens[i : i + n]) for i in range(len(pred_tokens) - n + 1)
             )
             ref_ngrams = Counter(
-                tuple(ref_tokens[i:i + n]) for i in range(len(ref_tokens) - n + 1)
+                tuple(ref_tokens[i : i + n]) for i in range(len(ref_tokens) - n + 1)
             )
             clipped = sum(min(count, ref_ngrams[ng]) for ng, count in pred_ngrams.items())
             total = sum(pred_ngrams.values())
@@ -499,8 +504,7 @@ def compute_json_field_accuracy(predictions: list[str], references: list[str]) -
     accuracy = matching_fields / total_fields if total_fields > 0 else 0.0
 
     # Log diagnostic
-    print(f"  JSON field accuracy: {matching_fields:.0f}/{total_fields} fields "
-          f"({accuracy:.4f})")
+    print(f"  JSON field accuracy: {matching_fields:.0f}/{total_fields} fields ({accuracy:.4f})")
 
     return accuracy
 
@@ -520,6 +524,7 @@ METRIC_FUNCTIONS = {
 
 
 # ── Main Evaluation Entry Point ──────────────────────────────────────────────
+
 
 def _load_model_for_eval(base_model_id: str, adapter_path: str | None):
     """Load model with correct device placement for CUDA/MPS/CPU."""
@@ -574,7 +579,9 @@ def evaluate_in_process(
                    mismatches (list of dicts showing where prediction != reference)
     """
     if metric_name not in METRIC_FUNCTIONS:
-        raise ValueError(f"Unknown metric: {metric_name}. Available: {list(METRIC_FUNCTIONS.keys())}")
+        raise ValueError(
+            f"Unknown metric: {metric_name}. Available: {list(METRIC_FUNCTIONS.keys())}"
+        )
 
     eval_examples = _load_eval_set(eval_path)
     if not eval_examples:
@@ -604,6 +611,7 @@ def evaluate_in_process(
 
     # Per-class accuracy breakdown (critical for diagnosing which classes fail)
     from collections import Counter
+
     class_correct: dict[str, int] = Counter()
     class_total: dict[str, int] = Counter()
     for p, r in zip(predictions, references):
@@ -653,7 +661,9 @@ def evaluate(
         dict with: metric_name, metric_value, predictions, references, num_examples
     """
     if metric_name not in METRIC_FUNCTIONS:
-        raise ValueError(f"Unknown metric: {metric_name}. Available: {list(METRIC_FUNCTIONS.keys())}")
+        raise ValueError(
+            f"Unknown metric: {metric_name}. Available: {list(METRIC_FUNCTIONS.keys())}"
+        )
 
     # Load eval set
     eval_examples = _load_eval_set(eval_path)

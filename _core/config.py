@@ -5,14 +5,14 @@ All constants, search spaces, model definitions, and paths live here.
 Nothing else in the codebase should hardcode these values.
 """
 
-from pathlib import Path
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Optional
 
 import torch
 
-
 # ── Device Detection ─────────────────────────────────────────────────────────
+
 
 def get_device() -> str:
     """Detect best available device: cuda > mps > cpu."""
@@ -206,6 +206,7 @@ AGENT_CONFIG = {
 
 # ── Default Run Config ───────────────────────────────────────────────────────
 
+
 @dataclass
 class RunConfig:
     """Runtime configuration for a single fine-tuning session."""
@@ -254,7 +255,11 @@ class RunConfig:
             errors.append(f"Unknown model: {self.model_key}")
         if self.task_type not in TASK_TYPES:
             errors.append(f"Unknown task type: {self.task_type}")
-        if not (CONSTRAINTS["min_learning_rate"] <= self.learning_rate <= CONSTRAINTS["max_learning_rate"]):
+        if not (
+            CONSTRAINTS["min_learning_rate"]
+            <= self.learning_rate
+            <= CONSTRAINTS["max_learning_rate"]
+        ):
             errors.append(f"learning_rate {self.learning_rate} out of range")
         if self.lora_rank > CONSTRAINTS["max_lora_rank"]:
             errors.append(f"lora_rank {self.lora_rank} exceeds max {CONSTRAINTS['max_lora_rank']}")

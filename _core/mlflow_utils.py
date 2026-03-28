@@ -19,7 +19,7 @@ from typing import Optional
 import mlflow
 from mlflow.tracking import MlflowClient
 
-from .config import MLFLOW_TRACKING_URI, BEST_ADAPTER_DIR
+from .config import BEST_ADAPTER_DIR, MLFLOW_TRACKING_URI
 
 
 def _slugify(text: str, max_len: int = 50) -> str:
@@ -91,7 +91,6 @@ def log_run(
     lr = training_args.get("learning_rate", 0)
     rank = lora_config.get("r", 0)
     with mlflow.start_run(run_name=_run_name(iteration, lr, rank)) as run:
-
         # ── Tags (searchable, shown in run list) ──────────────────────────────
         mlflow.set_tag("session_id", session_id)
         mlflow.set_tag("iteration", str(iteration))
@@ -110,12 +109,15 @@ def log_run(
         mlflow.log_param("lora_alpha", lora_config.get("lora_alpha"))
         mlflow.log_param("lora_dropout", lora_config.get("lora_dropout"))
         import json as _json
+
         mlflow.log_param("target_modules", _json.dumps(lora_config.get("target_modules", [])))
         mlflow.log_param("learning_rate", training_args.get("learning_rate"))
         mlflow.log_param("num_train_epochs", training_args.get("num_train_epochs"))
         mlflow.log_param("lr_scheduler_type", training_args.get("lr_scheduler_type"))
         mlflow.log_param("batch_size", training_args.get("per_device_train_batch_size"))
-        mlflow.log_param("gradient_accumulation_steps", training_args.get("gradient_accumulation_steps"))
+        mlflow.log_param(
+            "gradient_accumulation_steps", training_args.get("gradient_accumulation_steps")
+        )
         mlflow.log_param("warmup_ratio", training_args.get("warmup_ratio"))
 
         # ── Metrics ───────────────────────────────────────────────────────────
@@ -135,7 +137,8 @@ def _all_experiment_ids(client: MlflowClient) -> list[str]:
     """Return IDs of all user-created experiments (excludes MLflow's Default)."""
     experiments = client.search_experiments()
     return [
-        e.experiment_id for e in experiments
+        e.experiment_id
+        for e in experiments
         if e.name != "Default" and e.lifecycle_stage == "active"
     ]
 
@@ -235,22 +238,22 @@ def get_all_experiments() -> list[dict]:
             if not base_model_id:
                 base_model_id = s["base_model_id"]
 
-        sorted_sessions = sorted(
-            sessions.values(), key=lambda s: s["timestamp"], reverse=True
-        )
+        sorted_sessions = sorted(sessions.values(), key=lambda s: s["timestamp"], reverse=True)
 
-        result.append({
-            "experiment_id": exp.experiment_id,
-            "experiment_name": exp.name,
-            "sessions": sorted_sessions,
-            "total_runs": len(all_runs),
-            "total_sessions": len(sessions),
-            "best_metric": best_metric,
-            "best_run_id": best_run_id,
-            "metric_name": metric_name,
-            "base_model_id": base_model_id,
-            "all_runs": sorted(parsed_runs, key=lambda r: r.get("iteration", 0)),
-        })
+        result.append(
+            {
+                "experiment_id": exp.experiment_id,
+                "experiment_name": exp.name,
+                "sessions": sorted_sessions,
+                "total_runs": len(all_runs),
+                "total_sessions": len(sessions),
+                "best_metric": best_metric,
+                "best_run_id": best_run_id,
+                "metric_name": metric_name,
+                "base_model_id": base_model_id,
+                "all_runs": sorted(parsed_runs, key=lambda r: r.get("iteration", 0)),
+            }
+        )
 
     # Sort experiments by most recent activity
     result.sort(
@@ -274,6 +277,11 @@ def get_run_history(
 
     max_results=0 (default) means fetch ALL runs using pagination.
     """
+    # Validate session_id before interpolating into MLflow filter DSL.
+    # session_id is a 12-char hex prefix of SHA-256; reject anything else.
+    if session_id and not re.match(r"^[a-f0-9]{8,64}$", session_id):
+        raise ValueError(f"Invalid session_id format: {session_id!r}")
+
     _ensure_tracking()
     client = MlflowClient()
 
@@ -286,11 +294,6 @@ def get_run_history(
         exp_ids = _all_experiment_ids(client)
         if not exp_ids:
             return []
-
-    # Validate session_id before interpolating into MLflow filter DSL.
-    # session_id is a 12-char hex prefix of SHA-256; reject anything else.
-    if session_id and not re.match(r'^[a-f0-9]{8,64}$', session_id):
-        raise ValueError(f"Invalid session_id format: {session_id!r}")
     filter_str = f"tags.session_id = '{session_id}'" if session_id else ""
 
     # Paginate through all results to avoid the 200-run cap
@@ -319,22 +322,24 @@ def get_run_history(
     history = []
     for run in all_runs:
         tags = run.data.tags
-        history.append({
-            "run_id": run.info.run_id,
-            "run_name": run.info.run_name,
-            "iteration": int(tags.get("iteration", 0)),
-            "hypothesis": tags.get("hypothesis", ""),
-            "is_improvement": tags.get("is_improvement", "False") == "True",
-            "adapter_path": tags.get("adapter_path", ""),
-            "metric_name": tags.get("metric_name", ""),
-            "use_case": tags.get("use_case", ""),
-            "base_model_id": tags.get("base_model_id", ""),
-            "session_id": tags.get("session_id", ""),
-            "timestamp": int(tags.get("timestamp", 0)),
-            "diagnosis": tags.get("failure_diagnosis", ""),
-            "metrics": dict(run.data.metrics),
-            "params": dict(run.data.params),
-        })
+        history.append(
+            {
+                "run_id": run.info.run_id,
+                "run_name": run.info.run_name,
+                "iteration": int(tags.get("iteration", 0)),
+                "hypothesis": tags.get("hypothesis", ""),
+                "is_improvement": tags.get("is_improvement", "False") == "True",
+                "adapter_path": tags.get("adapter_path", ""),
+                "metric_name": tags.get("metric_name", ""),
+                "use_case": tags.get("use_case", ""),
+                "base_model_id": tags.get("base_model_id", ""),
+                "session_id": tags.get("session_id", ""),
+                "timestamp": int(tags.get("timestamp", 0)),
+                "diagnosis": tags.get("failure_diagnosis", ""),
+                "metrics": dict(run.data.metrics),
+                "params": dict(run.data.params),
+            }
+        )
 
     return sorted(history, key=lambda r: (r["session_id"], r["iteration"]))
 
@@ -435,7 +440,8 @@ def generate_config_table(max_iterations: int, task_type: str = "classification"
     more often — the LLM still picks freely from the table each iteration.
     """
     import random
-    from .config import SEARCH_SPACE, LAYER_RATIONALE
+
+    from .config import LAYER_RATIONALE, SEARCH_SPACE
 
     lrs = SEARCH_SPACE["learning_rate"]
     ranks = SEARCH_SPACE["lora_rank"]
@@ -452,12 +458,19 @@ def generate_config_table(max_iterations: int, task_type: str = "classification"
     random.seed(42)
 
     def _key(c: dict) -> str:
-        return "|".join([
-            str(c["learning_rate"]), str(c["r"]), str(c["num_train_epochs"]),
-            str(c["lr_scheduler_type"]), str(sorted(c["target_modules"])),
-            str(c["per_device_train_batch_size"]), str(c["gradient_accumulation_steps"]),
-            str(c["warmup_ratio"]), str(c["lora_dropout"]),
-        ])
+        return "|".join(
+            [
+                str(c["learning_rate"]),
+                str(c["r"]),
+                str(c["num_train_epochs"]),
+                str(c["lr_scheduler_type"]),
+                str(sorted(c["target_modules"])),
+                str(c["per_device_train_batch_size"]),
+                str(c["gradient_accumulation_steps"]),
+                str(c["warmup_ratio"]),
+                str(c["lora_dropout"]),
+            ]
+        )
 
     seen: set[str] = set()
     table: list[dict] = []
@@ -485,33 +498,35 @@ def generate_config_table(max_iterations: int, task_type: str = "classification"
 
     result = []
     for i, cfg in enumerate(table):
-        result.append({
-            "config_id": i + 1,
-            "status": "pending",
-            "result_metric": None,
-            "result_loss": None,
-            "lora_config": {
-                "r": cfg["r"],
-                "lora_alpha": cfg["lora_alpha"],
-                "lora_dropout": cfg["lora_dropout"],
-                "target_modules": cfg["target_modules"],
-                "task_type": "CAUSAL_LM",
-                "bias": "none",
-            },
-            "training_args": {
-                "learning_rate": cfg["learning_rate"],
-                "num_train_epochs": cfg["num_train_epochs"],
-                "lr_scheduler_type": cfg["lr_scheduler_type"],
-                "per_device_train_batch_size": cfg["per_device_train_batch_size"],
-                "gradient_accumulation_steps": cfg["gradient_accumulation_steps"],
-                "warmup_ratio": cfg["warmup_ratio"],
-                "logging_steps": 10,
-                "save_strategy": "no",
-                "optim": "adamw_torch",
-                "remove_unused_columns": False,
-                "report_to": "none",
-            },
-        })
+        result.append(
+            {
+                "config_id": i + 1,
+                "status": "pending",
+                "result_metric": None,
+                "result_loss": None,
+                "lora_config": {
+                    "r": cfg["r"],
+                    "lora_alpha": cfg["lora_alpha"],
+                    "lora_dropout": cfg["lora_dropout"],
+                    "target_modules": cfg["target_modules"],
+                    "task_type": "CAUSAL_LM",
+                    "bias": "none",
+                },
+                "training_args": {
+                    "learning_rate": cfg["learning_rate"],
+                    "num_train_epochs": cfg["num_train_epochs"],
+                    "lr_scheduler_type": cfg["lr_scheduler_type"],
+                    "per_device_train_batch_size": cfg["per_device_train_batch_size"],
+                    "gradient_accumulation_steps": cfg["gradient_accumulation_steps"],
+                    "warmup_ratio": cfg["warmup_ratio"],
+                    "logging_steps": 10,
+                    "save_strategy": "no",
+                    "optim": "adamw_torch",
+                    "remove_unused_columns": False,
+                    "report_to": "none",
+                },
+            }
+        )
     return result
 
 
@@ -524,7 +539,10 @@ def format_config_table_for_agent(config_table: list[dict], metric_name: str) ->
     )
     pending = [c for c in config_table if c["status"] == "pending"]
 
-    lines: list[str] = [f"=== CONFIG TABLE: {len(completed)} done, {len(pending)} remaining ===", ""]
+    lines: list[str] = [
+        f"=== CONFIG TABLE: {len(completed)} done, {len(pending)} remaining ===",
+        "",
+    ]
 
     if completed:
         lines.append(f"--- COMPLETED (best {metric_name} first) ---")
@@ -575,12 +593,13 @@ def format_history_for_agent(history: list[dict], metric_name: str) -> str:
         if isinstance(mods, str) and mods.startswith("["):
             try:
                 import json as _json
+
                 # New runs store JSON; old runs store Python repr with single quotes
                 _normalized = mods.replace("'", '"')
                 mods = "+".join(_json.loads(_normalized))
             except Exception:
                 # Fall back to extracting known projection names via regex
-                mods = "+".join(re.findall(r'q_proj|v_proj|k_proj|o_proj', mods)) or mods
+                mods = "+".join(re.findall(r"q_proj|v_proj|k_proj|o_proj", mods)) or mods
         return (
             f"  iter={run['iteration']:>3} "
             f"{metric_name}={m.get(metric_name, 0.0):.4f} "
@@ -648,12 +667,13 @@ def format_history_for_agent(history: list[dict], metric_name: str) -> str:
         if isinstance(mods, str) and mods.startswith("["):
             try:
                 import json as _json
+
                 # New runs store JSON; old runs store Python repr with single quotes
                 _normalized = mods.replace("'", '"')
                 mods = "+".join(_json.loads(_normalized))
             except Exception:
                 # Fall back to extracting known projection names via regex
-                mods = "+".join(re.findall(r'q_proj|v_proj|k_proj|o_proj', mods)) or mods
+                mods = "+".join(re.findall(r"q_proj|v_proj|k_proj|o_proj", mods)) or mods
         lines.append(
             f"  {run['iteration']:>4} | "
             f"{m.get(metric_name, 0.0):>8.4f} | "

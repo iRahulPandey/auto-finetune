@@ -10,23 +10,22 @@ Usage:
 The config.json is written by agent_loop.py before each run.
 """
 
+import argparse
 import json
 import sys
-import argparse
 from pathlib import Path
 
 import torch
 from datasets import load_dataset
+from peft import LoraConfig, TaskType, get_peft_model
 from transformers import (
-    AutoTokenizer,
     AutoModelForCausalLM,
+    AutoTokenizer,
 )
-from peft import LoraConfig, get_peft_model, TaskType
-from trl import SFTTrainer, SFTConfig
+from trl import SFTConfig, SFTTrainer
 
 from _core.config import DEVICE, DTYPE, DTYPE_STR
 from _core.evaluator import evaluate_in_process
-
 
 # ═══════════════════════════════════════════════════════════════════════════
 # LoRA CONFIG — Agent edits this section between iterations
@@ -161,6 +160,7 @@ def run_finetune(
 
     # Flush any stale memory at subprocess start
     import gc
+
     gc.collect()
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
@@ -227,6 +227,7 @@ def run_finetune(
 
     # Save adapter (suppress benign PEFT vocab-check warning for Qwen models)
     import warnings
+
     adapter_path = output_path / "adapter"
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", message="Could not find a config file")
@@ -248,8 +249,10 @@ def run_finetune(
         # extraction/generation outputs can be 200+ tokens (JSON, commit messages)
         _task_type = kwargs.get("task_type", "classification")
         _max_new_tokens = 30 if _task_type == "classification" else 256
-        print(f"\nEvaluating ({metric_name}) with model already in memory... "
-              f"(task={_task_type}, max_new_tokens={_max_new_tokens})")
+        print(
+            f"\nEvaluating ({metric_name}) with model already in memory... "
+            f"(task={_task_type}, max_new_tokens={_max_new_tokens})"
+        )
         eval_result = evaluate_in_process(
             model=model,
             tokenizer=tokenizer,
@@ -264,7 +267,7 @@ def run_finetune(
         result["per_class_accuracy"] = eval_result.get("per_class_accuracy", {})
         print(f"Eval {metric_name}: {eval_result['metric_value']:.4f}")
         if eval_result.get("mismatches"):
-            print(f"Sample mismatches (first 3):")
+            print("Sample mismatches (first 3):")
             for mm in eval_result["mismatches"][:3]:
                 print(f"  expected: {mm['expected'][:80]}")
                 print(f"  got:      {mm['predicted'][:80]}")
@@ -283,9 +286,15 @@ def run_finetune(
 def main():
     parser = argparse.ArgumentParser(description="auto-finetune training run")
     parser.add_argument("--config", type=str, required=True, help="Path to run config JSON")
-    parser.add_argument("--output-dir", type=str, default="./adapters/current", help="Output directory")
-    parser.add_argument("--eval-path", type=str, default=None, help="Path to eval.jsonl for in-process eval")
-    parser.add_argument("--metric-name", type=str, default=None, help="Metric to compute during eval")
+    parser.add_argument(
+        "--output-dir", type=str, default="./adapters/current", help="Output directory"
+    )
+    parser.add_argument(
+        "--eval-path", type=str, default=None, help="Path to eval.jsonl for in-process eval"
+    )
+    parser.add_argument(
+        "--metric-name", type=str, default=None, help="Metric to compute during eval"
+    )
     args = parser.parse_args()
 
     run_config = load_run_config(args.config)

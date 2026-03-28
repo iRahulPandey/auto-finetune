@@ -17,8 +17,40 @@ dependencies = [
     "requests>=2.31.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=5.0.0",
+    "pytest-mock>=3.14.0",
+    "ruff>=0.4.0",
+    "bandit>=1.7.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+ignore = [
+    "E501",   # line too long — handled by formatter
+    "F401",   # unused imports — too noisy for this codebase style
+    "E741",   # ambiguous variable name (e.g. 'l') — not a real issue here
+    "E402",   # module-level import not at top — app.py imports after _load_dotenv intentionally
+    "F841",   # unused variable — test_e2e.py has some dead assignments
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+
+[tool.coverage.run]
+source = ["_core"]
+omit = ["_core/evaluator.py"]  # model loading functions skipped in unit tests
+
 [tool.uv]
 # After cloning:
 #   cp .env.example .env        # add your ANTHROPIC_API_KEY
-#   uv sync                     # install all deps
+#   uv sync --extra dev         # install all deps including dev tools
 #   streamlit run app.py        # launch the app
