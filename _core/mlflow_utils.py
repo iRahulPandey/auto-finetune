@@ -274,6 +274,11 @@ def get_run_history(
 
     max_results=0 (default) means fetch ALL runs using pagination.
     """
+    # Validate session_id before interpolating into MLflow filter DSL.
+    # session_id is a 12-char hex prefix of SHA-256; reject anything else.
+    if session_id and not re.match(r"^[a-f0-9]{8,64}$", session_id):
+        raise ValueError(f"Invalid session_id format: {session_id!r}")
+
     _ensure_tracking()
     client = MlflowClient()
 
@@ -286,11 +291,6 @@ def get_run_history(
         exp_ids = _all_experiment_ids(client)
         if not exp_ids:
             return []
-
-    # Validate session_id before interpolating into MLflow filter DSL.
-    # session_id is a 12-char hex prefix of SHA-256; reject anything else.
-    if session_id and not re.match(r'^[a-f0-9]{8,64}$', session_id):
-        raise ValueError(f"Invalid session_id format: {session_id!r}")
     filter_str = f"tags.session_id = '{session_id}'" if session_id else ""
 
     # Paginate through all results to avoid the 200-run cap
