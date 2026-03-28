@@ -109,7 +109,8 @@ def log_run(
         mlflow.log_param("lora_r", lora_config.get("r"))
         mlflow.log_param("lora_alpha", lora_config.get("lora_alpha"))
         mlflow.log_param("lora_dropout", lora_config.get("lora_dropout"))
-        mlflow.log_param("target_modules", str(lora_config.get("target_modules")))
+        import json as _json
+        mlflow.log_param("target_modules", _json.dumps(lora_config.get("target_modules", [])))
         mlflow.log_param("learning_rate", training_args.get("learning_rate"))
         mlflow.log_param("num_train_epochs", training_args.get("num_train_epochs"))
         mlflow.log_param("lr_scheduler_type", training_args.get("lr_scheduler_type"))
@@ -189,6 +190,7 @@ def get_all_experiments() -> list[dict]:
                 "base_model_id": tags.get("base_model_id", ""),
                 "session_id": tags.get("session_id", ""),
                 "timestamp": int(tags.get("timestamp", 0)),
+                "diagnosis": tags.get("failure_diagnosis", ""),
                 "metrics": dict(run.data.metrics),
                 "params": dict(run.data.params),
             }
@@ -285,6 +287,10 @@ def get_run_history(
         if not exp_ids:
             return []
 
+    # Validate session_id before interpolating into MLflow filter DSL.
+    # session_id is a 12-char hex prefix of SHA-256; reject anything else.
+    if session_id and not re.match(r'^[a-f0-9]{8,64}$', session_id):
+        raise ValueError(f"Invalid session_id format: {session_id!r}")
     filter_str = f"tags.session_id = '{session_id}'" if session_id else ""
 
     # Paginate through all results to avoid the 200-run cap
@@ -568,10 +574,13 @@ def format_history_for_agent(history: list[dict], metric_name: str) -> str:
         mods = p.get("target_modules", "?")
         if isinstance(mods, str) and mods.startswith("["):
             try:
-                import ast
-                mods = "+".join(ast.literal_eval(mods))
+                import json as _json
+                # New runs store JSON; old runs store Python repr with single quotes
+                _normalized = mods.replace("'", '"')
+                mods = "+".join(_json.loads(_normalized))
             except Exception:
-                pass
+                # Fall back to extracting known projection names via regex
+                mods = "+".join(re.findall(r'q_proj|v_proj|k_proj|o_proj', mods)) or mods
         return (
             f"  iter={run['iteration']:>3} "
             f"{metric_name}={m.get(metric_name, 0.0):.4f} "
@@ -638,10 +647,13 @@ def format_history_for_agent(history: list[dict], metric_name: str) -> str:
         mods = p.get("target_modules", "?")
         if isinstance(mods, str) and mods.startswith("["):
             try:
-                import ast
-                mods = "+".join(ast.literal_eval(mods))
+                import json as _json
+                # New runs store JSON; old runs store Python repr with single quotes
+                _normalized = mods.replace("'", '"')
+                mods = "+".join(_json.loads(_normalized))
             except Exception:
-                pass
+                # Fall back to extracting known projection names via regex
+                mods = "+".join(re.findall(r'q_proj|v_proj|k_proj|o_proj', mods)) or mods
         lines.append(
             f"  {run['iteration']:>4} | "
             f"{m.get(metric_name, 0.0):>8.4f} | "

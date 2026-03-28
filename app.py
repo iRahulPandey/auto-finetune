@@ -163,9 +163,15 @@ def _parse_examples(text: str) -> list[dict]:
             pass
     return out
 
+_MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
+
+
 def _parse_file(f) -> list[dict]:
     import csv, io
-    content = f.read().decode("utf-8")
+    raw = f.read()
+    if len(raw) > _MAX_UPLOAD_BYTES:
+        raise ValueError(f"File too large ({len(raw) // 1024} KB). Maximum is 10 MB.")
+    content = raw.decode("utf-8")
     name = f.name.lower()
     if name.endswith(".json"):
         data = json.loads(content)
@@ -209,7 +215,7 @@ EXAMPLE_DATASETS = [
 
 # ── Tabs ──────────────────────────────────────────────────────────────────────
 
-tab_train, tab_infer = st.tabs(["Finetune", "Inference Lab"])
+tab_train, tab_infer, tab_lora = st.tabs(["Finetune", "Inference Lab", "LoRA Card"])
 
 
 # ════════════════════════════════════════════════════════════════════════════════
@@ -1228,3 +1234,216 @@ with tab_infer:
                     torch.mps.empty_cache()
                 st.success("Cache cleared.")
                 st.rerun()
+
+
+# ════════════════════════════════════════════════════════════════════════════════
+# TAB 3 — LORA CARD
+# ════════════════════════════════════════════════════════════════════════════════
+
+with tab_lora:
+
+    st.title("LoRA Card")
+    st.write("Select any completed run to inspect its full configuration and system prompt.")
+
+    try:
+        _lora_experiments = _load_experiments()
+    except Exception:
+        _lora_experiments = []
+
+    if not _lora_experiments:
+        st.info("No experiments found yet. Run a training session first, then come back here.")
+        st.stop()
+
+    lora_col_sel, lora_col_card = st.columns([1, 2], gap="large")
+
+    with lora_col_sel:
+        st.subheader("Select run")
+
+        def _lora_exp_label(i: int) -> str:
+            e = _lora_experiments[i]
+            name = e["experiment_name"]
+            return f"{name[:40]} ({e['total_runs']} runs)"
+
+        lora_exp_idx = st.selectbox(
+            "Experiment",
+            range(len(_lora_experiments)),
+            format_func=_lora_exp_label,
+            key="lora_exp_idx",
+        )
+        lora_exp = _lora_experiments[lora_exp_idx]
+
+        lora_sessions = lora_exp["sessions"]
+        if len(lora_sessions) > 1:
+            _lora_sess_opts = ["All sessions"] + [
+                f"Session {s['session_id'][:8]} ({s['run_count']} runs)"
+                for s in lora_sessions
+            ]
+            lora_sess_sel = st.selectbox(
+                "Session",
+                _lora_sess_opts,
+                key="lora_sess_sel",
+            )
+            if lora_sess_sel == "All sessions":
+                lora_runs = lora_exp["all_runs"]
+                _lora_active_sess = None
+            else:
+                _si = _lora_sess_opts.index(lora_sess_sel) - 1
+                _lora_active_sess = lora_sessions[_si]
+                lora_runs = _lora_active_sess["runs"]
+        else:
+            _lora_active_sess = lora_sessions[0] if lora_sessions else None
+            lora_runs = lora_exp["all_runs"]
+
+        _lora_metric = lora_exp["metric_name"]
+        _lora_best_id = lora_exp["best_run_id"]
+
+        def _lora_run_label(r: dict) -> str:
+            m = r["metrics"].get(_lora_metric, 0.0)
+            star = " ★" if r["run_id"] == _lora_best_id else ""
+            return f"Iter {r['iteration']}  {_lora_metric}={m:.4f}{star}"
+
+        lora_runs_sorted = sorted(lora_runs, key=lambda r: r["iteration"])
+        # Default to best run
+        _default_run_idx = next(
+            (i for i, r in enumerate(lora_runs_sorted) if r["run_id"] == _lora_best_id),
+            0,
+        )
+        lora_run_idx = st.selectbox(
+            "Run",
+            range(len(lora_runs_sorted)),
+            format_func=lambda i: _lora_run_label(lora_runs_sorted[i]),
+            index=_default_run_idx,
+            key="lora_run_idx",
+        )
+        lora_run = lora_runs_sorted[lora_run_idx]
+
+    with lora_col_card:
+
+        import datetime as _dt
+
+        p = lora_run["params"]
+        m = lora_run["metrics"]
+        _lora_metric_val = m.get(_lora_metric, 0.0)
+        _is_best_run = lora_run["run_id"] == _lora_best_id
+        _ts = lora_run.get("timestamp", 0)
+        _ts_str = (
+            _dt.datetime.fromtimestamp(_ts).strftime("%Y-%m-%d %H:%M")
+            if _ts else "—"
+        )
+
+        # ── Header ─────────────────────────────────────────────────────────────
+        _star = " ★ Best run" if _is_best_run else ""
+        st.subheader(f"Iteration {lora_run['iteration']}{_star}")
+        st.caption(
+            f"Run ID: `{lora_run['run_id'][:12]}…`  ·  "
+            f"Session: `{lora_run['session_id'][:8]}…`  ·  "
+            f"Logged: {_ts_str}"
+        )
+
+        # ── Key metrics strip ──────────────────────────────────────────────────
+        _mc1, _mc2, _mc3, _mc4 = st.columns(4)
+        _mc1.metric(_lora_metric, f"{_lora_metric_val:.4f}")
+        _mc2.metric("Train loss", f"{m.get('train_loss', 0):.4f}")
+        _mc3.metric("Epochs", p.get("num_train_epochs", "—"))
+        _mc4.metric("LR", p.get("learning_rate", "—"))
+
+        st.divider()
+
+        # ── Task info ──────────────────────────────────────────────────────────
+        st.markdown("**Task**")
+        st.write(lora_run.get("use_case") or "—")
+        st.caption(f"Base model: `{lora_run.get('base_model_id', '—')}`")
+
+        st.divider()
+
+        # ── LoRA config ────────────────────────────────────────────────────────
+        st.markdown("**LoRA configuration**")
+        _lc1, _lc2, _lc3 = st.columns(3)
+        _lc1.metric("Rank (r)", p.get("lora_r", "—"))
+        _lc2.metric("Alpha", p.get("lora_alpha", "—"))
+        _lc3.metric("Dropout", p.get("lora_dropout", "—"))
+        st.caption(f"Target modules: `{p.get('target_modules', '—')}`")
+
+        st.divider()
+
+        # ── Training args ──────────────────────────────────────────────────────
+        st.markdown("**Training arguments**")
+        _ta1, _ta2, _ta3, _ta4 = st.columns(4)
+        _ta1.metric("Scheduler", p.get("lr_scheduler_type", "—"))
+        _ta2.metric("Batch size", p.get("batch_size", "—"))
+        _ta3.metric("Grad accum", p.get("gradient_accumulation_steps", "—"))
+        _ta4.metric("Warmup ratio", p.get("warmup_ratio", "—"))
+
+        st.divider()
+
+        # ── Hypothesis ─────────────────────────────────────────────────────────
+        st.markdown("**Hypothesis**")
+        st.write(lora_run.get("hypothesis") or "—")
+
+        # ── Failure diagnosis (only shown when present) ────────────────────────
+        _diag = lora_run.get("diagnosis", "")
+        if _diag:
+            st.divider()
+            st.markdown("**Failure diagnosis**")
+            st.warning(_diag)
+
+        st.divider()
+
+        # ── System prompt ──────────────────────────────────────────────────────
+        _lora_sp = ""
+        _sp_sid = lora_run.get("session_id", "")
+        if _sp_sid:
+            _sp_path = PROJECT_ROOT / "data" / _sp_sid / "system_prompt.txt"
+            if _sp_path.exists():
+                _lora_sp = _sp_path.read_text(encoding="utf-8").strip()
+
+        with st.expander("System prompt", expanded=False):
+            if _lora_sp:
+                st.text(_lora_sp)
+            else:
+                st.caption("System prompt not found on disk.")
+
+        # ── Adapter path ───────────────────────────────────────────────────────
+        _adapter = lora_run.get("adapter_path", "")
+        with st.expander("Adapter path", expanded=False):
+            if _adapter and Path(_adapter).exists():
+                st.code(_adapter)
+            elif _adapter:
+                st.caption(f"Path recorded but not found on disk: `{_adapter}`")
+            else:
+                st.caption("No adapter path recorded.")
+
+        # ── Export as JSON ─────────────────────────────────────────────────────
+        _export = {
+            "run_id": lora_run["run_id"],
+            "session_id": lora_run["session_id"],
+            "iteration": lora_run["iteration"],
+            "use_case": lora_run.get("use_case", ""),
+            "base_model_id": lora_run.get("base_model_id", ""),
+            "hypothesis": lora_run.get("hypothesis", ""),
+            "metrics": {_lora_metric: _lora_metric_val, "train_loss": m.get("train_loss", 0)},
+            "lora_config": {
+                "r": p.get("lora_r"),
+                "lora_alpha": p.get("lora_alpha"),
+                "lora_dropout": p.get("lora_dropout"),
+                "target_modules": p.get("target_modules"),
+            },
+            "training_args": {
+                "learning_rate": p.get("learning_rate"),
+                "num_train_epochs": p.get("num_train_epochs"),
+                "lr_scheduler_type": p.get("lr_scheduler_type"),
+                "per_device_train_batch_size": p.get("batch_size"),
+                "gradient_accumulation_steps": p.get("gradient_accumulation_steps"),
+                "warmup_ratio": p.get("warmup_ratio"),
+            },
+            "system_prompt": _lora_sp,
+            "adapter_path": _adapter,
+            "diagnosis": _diag,
+            "timestamp": _ts_str,
+        }
+        st.download_button(
+            label="Export as JSON",
+            data=json.dumps(_export, indent=2),
+            file_name=f"lora_card_iter{lora_run['iteration']}_{lora_run['run_id'][:8]}.json",
+            mime="application/json",
+        )
