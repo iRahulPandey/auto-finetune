@@ -44,7 +44,7 @@ Everything else follows from that: the agent reads the generated `program.md`, e
 
 **AutoML** (AutoSklearn, TPOT, H2O) is designed for tabular data. It searches over fixed pipelines — feature encoders, classifiers, ensembles — using classical HPO algorithms like Bayesian optimization or evolutionary search. It doesn't touch neural networks, doesn't understand task semantics, and can't reason about *why* something failed.
 
-**autoresearch** searches over arbitrary Python code. The agent can write new experiments from scratch, test novel algorithms, discover new approaches. The search space is unbounded. Great for research. Overkill (and unsafe) for "I just need this model to extract invoice fields."
+**autoresearch** searches over arbitrary Python code. The agent can write new experiments from scratch, test novel algorithms, discover new approaches. The search space is unbounded. Great for research. Overkill for "I just need this model to extract invoice fields."
 
 **auto-finetune** sits between them. The search space is fixed and small (learning rate, LoRA rank, target modules, epochs, scheduler). The base model is fixed. The evaluation metric is fixed. The agent can't write new code — it can only change numbers in two dictionaries in `finetune.py`. This constraint is the point. It makes the loop safe, fast, and auditable. You can read every change the agent made.
 
