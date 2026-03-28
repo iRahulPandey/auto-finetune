@@ -2,7 +2,7 @@
 tests/test_model_card.py — Unit tests for HuggingFace model card generation.
 """
 
-from app import _build_model_card
+from _core.hf_utils import build_model_card
 
 
 def _sample_params() -> dict:
@@ -21,7 +21,7 @@ def _sample_params() -> dict:
 
 
 def test_model_card_contains_frontmatter():
-    card = _build_model_card(
+    card = build_model_card(
         repo_id="user/test-model",
         base_model="Qwen/Qwen2.5-0.5B-Instruct",
         use_case="Classify emails",
@@ -39,7 +39,7 @@ def test_model_card_contains_frontmatter():
 
 
 def test_model_card_contains_usage_code():
-    card = _build_model_card(
+    card = build_model_card(
         repo_id="user/test-model",
         base_model="Qwen/Qwen2.5-0.5B-Instruct",
         use_case="Classify emails",
@@ -58,7 +58,7 @@ def test_model_card_contains_usage_code():
 
 
 def test_model_card_contains_metrics():
-    card = _build_model_card(
+    card = build_model_card(
         repo_id="user/test-model",
         base_model="Qwen/Qwen2.5-0.5B-Instruct",
         use_case="Classify emails",
@@ -76,7 +76,7 @@ def test_model_card_contains_metrics():
 
 
 def test_model_card_contains_lora_config():
-    card = _build_model_card(
+    card = build_model_card(
         repo_id="user/test-model",
         base_model="Qwen/Qwen2.5-0.5B-Instruct",
         use_case="Extract fields",
@@ -94,7 +94,7 @@ def test_model_card_contains_lora_config():
 
 
 def test_model_card_contains_training_args():
-    card = _build_model_card(
+    card = build_model_card(
         repo_id="user/test-model",
         base_model="Qwen/Qwen2.5-0.5B-Instruct",
         use_case="Summarize text",
@@ -112,7 +112,7 @@ def test_model_card_contains_training_args():
 
 
 def test_model_card_includes_system_prompt_when_present():
-    card = _build_model_card(
+    card = build_model_card(
         repo_id="user/test-model",
         base_model="Qwen/Qwen2.5-0.5B-Instruct",
         use_case="Classify emails",
@@ -129,7 +129,7 @@ def test_model_card_includes_system_prompt_when_present():
 
 
 def test_model_card_no_system_prompt():
-    card = _build_model_card(
+    card = build_model_card(
         repo_id="user/test-model",
         base_model="Qwen/Qwen2.5-0.5B-Instruct",
         use_case="Classify emails",
@@ -146,7 +146,7 @@ def test_model_card_no_system_prompt():
 
 
 def test_model_card_contains_hypothesis():
-    card = _build_model_card(
+    card = build_model_card(
         repo_id="user/test-model",
         base_model="Qwen/Qwen2.5-0.5B-Instruct",
         use_case="Classify",
