@@ -174,6 +174,126 @@ def _parse_examples(text: str) -> list[dict]:
 _MAX_UPLOAD_BYTES = 10 * 1024 * 1024  # 10 MB
 
 
+def _build_model_card(
+    repo_id: str,
+    base_model: str,
+    use_case: str,
+    metric_name: str,
+    metric_value: float,
+    lora_params: dict,
+    training_params: dict,
+    system_prompt: str,
+    hypothesis: str,
+    iteration: int,
+) -> str:
+    """Generate a HuggingFace model card (README.md) for a pushed LoRA adapter."""
+    _target_mods = lora_params.get("target_modules", '["q_proj", "v_proj"]')
+    _repo_short = repo_id.split("/")[-1]
+    _dash = "\u2014"
+
+    _lora_r = lora_params.get("lora_r", _dash)
+    _lora_a = lora_params.get("lora_alpha", _dash)
+    _lora_d = lora_params.get("lora_dropout", _dash)
+    _lr = training_params.get("learning_rate", _dash)
+    _ep = training_params.get("num_train_epochs", _dash)
+    _sched = training_params.get("lr_scheduler_type", _dash)
+    _bs = training_params.get("batch_size", _dash)
+    _ga = training_params.get("gradient_accumulation_steps", _dash)
+    _wr = training_params.get("warmup_ratio", _dash)
+
+    if system_prompt:
+        _sp_block = f'# System prompt used during training\nsystem_prompt = """{system_prompt}"""\n'
+        _msg_line = '    {"role": "system", "content": system_prompt},\n'
+    else:
+        _sp_block = "# No system prompt recorded\nsystem_prompt = None\n"
+        _msg_line = ""
+
+    _hyp = hypothesis or "No hypothesis recorded."
+
+    card = f"""---
+library_name: peft
+base_model: {base_model}
+tags:
+  - lora
+  - auto-finetune
+  - fine-tuned
+license: mit
+---
+
+# {_repo_short}
+
+A LoRA adapter fine-tuned with [auto-finetune](https://github.com/iRahulPandey/auto-finetune) \
+{_dash} autonomous LoRA hyperparameter search powered by an LLM agent.
+
+## Task
+
+{use_case}
+
+## Results
+
+| Metric | Value |
+|--------|-------|
+| **{metric_name}** | **{metric_value:.4f}** |
+| Iteration | {iteration} |
+
+## LoRA Configuration
+
+| Parameter | Value |
+|-----------|-------|
+| Rank (r) | {_lora_r} |
+| Alpha | {_lora_a} |
+| Dropout | {_lora_d} |
+| Target modules | {_target_mods} |
+
+## Training Arguments
+
+| Parameter | Value |
+|-----------|-------|
+| Learning rate | {_lr} |
+| Epochs | {_ep} |
+| Scheduler | {_sched} |
+| Batch size | {_bs} |
+| Gradient accumulation | {_ga} |
+| Warmup ratio | {_wr} |
+
+## Usage
+
+```python
+from transformers import AutoTokenizer, AutoModelForCausalLM
+from peft import PeftModel
+
+base_model_id = "{base_model}"
+
+tokenizer = AutoTokenizer.from_pretrained(base_model_id)
+model = AutoModelForCausalLM.from_pretrained(base_model_id)
+model = PeftModel.from_pretrained(model, "{repo_id}")
+
+{_sp_block}
+# Run inference
+messages = [
+{_msg_line}    {{"role": "user", "content": "YOUR INPUT HERE"}},
+]
+
+inputs = tokenizer.apply_chat_template(messages, return_tensors="pt", add_generation_prompt=True)
+outputs = model.generate(inputs, max_new_tokens=256)
+print(tokenizer.decode(outputs[0][inputs.shape[-1]:], skip_special_tokens=True))
+```
+
+## Agent Hypothesis
+
+> {_hyp}
+
+## Training Details
+
+This adapter was trained autonomously by an LLM agent that iteratively searched over LoRA hyperparameters.
+The agent reads a generated `program.md`, proposes configurations, trains, evaluates on a frozen eval set,
+and iterates until the target metric is reached or max iterations are exhausted.
+
+Built with [auto-finetune](https://github.com/iRahulPandey/auto-finetune).
+"""
+    return card
+
+
 def _parse_file(f) -> list[dict]:
     import csv
     import io
@@ -1485,3 +1605,100 @@ with tab_lora:
             file_name=f"lora_card_iter{lora_run['iteration']}_{lora_run['run_id'][:8]}.json",
             mime="application/json",
         )
+
+        # ── Push to HuggingFace Hub ──────────────────────────────────────────
+        st.divider()
+        st.markdown("**Push to HuggingFace Hub**")
+
+        _hf_adapter = lora_run.get("adapter_path", "")
+        _hf_adapter_exists = bool(_hf_adapter) and Path(_hf_adapter).exists()
+
+        if not _hf_adapter_exists:
+            st.warning(
+                "Adapter files not found on disk. Train a model first or check the adapter path."
+            )
+        else:
+            _hf_base_model = lora_run.get("base_model_id", "unknown-model")
+            _hf_use_case = lora_run.get("use_case", "fine-tuned model")
+            _hf_exp_slug = lora_exp["experiment_name"][:30].rstrip("-")
+            _hf_model_short = _hf_base_model.split("/")[-1]
+            _hf_default_name = (
+                f"{_hf_exp_slug}-{_hf_model_short}-lora-iter{lora_run['iteration']}"
+            )
+
+            # Reset repo name when the selected run changes
+            _hf_run_key = f"{lora_run['run_id']}_{lora_run['iteration']}"
+            if st.session_state.get("_hf_prev_run") != _hf_run_key:
+                st.session_state["_hf_prev_run"] = _hf_run_key
+                st.session_state["hf_repo_name"] = _hf_default_name
+                st.rerun()
+
+            _hf_repo_name = st.text_input(
+                "Repository name",
+                help="Will be created under your HuggingFace account (e.g. username/repo-name)",
+                key="hf_repo_name",
+            )
+            _hf_private = st.checkbox("Private repository", value=True, key="hf_private")
+
+            if st.button("Push to Hub", key="hf_push_btn", type="primary"):
+                try:
+                    from huggingface_hub import HfApi
+
+                    _hf_token = os.environ.get("HF_TOKEN") or HfApi().token
+                    if not _hf_token:
+                        st.error(
+                            "HuggingFace token not found. Set `HF_TOKEN` in your `.env` file "
+                            "or run `huggingface-cli login` first."
+                        )
+                        st.stop()
+
+                    api = HfApi(token=_hf_token)
+                    _hf_user = api.whoami()["name"]
+                    _hf_repo_id = (
+                        _hf_repo_name if "/" in _hf_repo_name else f"{_hf_user}/{_hf_repo_name}"
+                    )
+
+                    with st.spinner(f"Pushing adapter to `{_hf_repo_id}`..."):
+                        # Create or get repo
+                        api.create_repo(
+                            repo_id=_hf_repo_id,
+                            private=_hf_private,
+                            exist_ok=True,
+                        )
+
+                        # Upload adapter files
+                        api.upload_folder(
+                            folder_path=_hf_adapter,
+                            repo_id=_hf_repo_id,
+                            commit_message=(
+                                f"Upload LoRA adapter — iter {lora_run['iteration']} "
+                                f"({_lora_metric}={_lora_metric_val:.4f})"
+                            ),
+                        )
+
+                        # Build and upload model card
+                        _hf_model_card = _build_model_card(
+                            repo_id=_hf_repo_id,
+                            base_model=_hf_base_model,
+                            use_case=_hf_use_case,
+                            metric_name=_lora_metric,
+                            metric_value=_lora_metric_val,
+                            lora_params=p,
+                            training_params=p,
+                            system_prompt=_lora_sp,
+                            hypothesis=lora_run.get("hypothesis", ""),
+                            iteration=lora_run["iteration"],
+                        )
+                        api.upload_file(
+                            path_or_fileobj=_hf_model_card.encode("utf-8"),
+                            path_in_repo="README.md",
+                            repo_id=_hf_repo_id,
+                            commit_message="Add model card",
+                        )
+
+                    st.success(
+                        f"Adapter pushed to [{_hf_repo_id}](https://huggingface.co/{_hf_repo_id})"
+                    )
+
+                except Exception as e:
+                    st.error(f"Failed to push to HuggingFace Hub: {e}")
