@@ -16,7 +16,6 @@ _core/agent_loop.py   → Autonomous search loop (reads program.md, edits finetu
 _core/evaluator.py    → Frozen eval metrics (agent NEVER modifies this)
 _core/mlflow_utils.py → MLflow experiment tracking, model registry
 _core/program_md_generator.py → Auto-generates program.md from RunConfig
-test_e2e.py           → End-to-end stage validation
 ```
 
 ## Critical rules
@@ -104,12 +103,6 @@ torch, transformers, peft, trl, accelerate, mlflow, anthropic, streamlit, pandas
 cp .env.example .env    # add ANTHROPIC_API_KEY
 uv sync
 streamlit run app.py
-```
-
-## Testing
-
-```bash
-uv run python test_e2e.py
 ```
 
 Validates each stage independently: data prep → program.md generation → finetune dry-run → evaluator → MLflow logging.
